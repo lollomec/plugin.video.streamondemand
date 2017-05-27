@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------
 # streamondemand.- XBMC Plugin
-# Canal para videotecadiclasse
+# videotecadiclasse
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
@@ -10,6 +10,7 @@ import urlparse
 from core import config
 from core import logger
 from core import scrapertools
+from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
@@ -21,75 +22,18 @@ __language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
-host = "http://videotecadiclasse2013.blogspot.it"
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
-
+host = "http://fetchrss.com"
 
 def isGeneric():
     return True
 
-
 def mainlist(item):
-    logger.info("streamondemand.istreaming mainlist")
+    logger.info("streamondemand.videotecadiclasse mainlist")
     itemlist = [Item(channel=__channel__,
-                     title="[COLOR azure]Ultimi Film Inseriti[/COLOR]",
+                     title="[COLOR azure]Aggiornamenti Film[/COLOR]",
                      action="peliculas",
-                     url=host,
-                     thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
-                Item(channel=__channel__,
-                     title="[COLOR azure]Post Per Anno[/COLOR]",
-                     action="anno",
-                     url=host,
-                     thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
-                Item(channel=__channel__,
-                     title="[COLOR yellow]Cerca...[/COLOR]",
-                     action="search",
-                     extra="movie",
-                     thumbnail="http://dc467.4shared.com/img/fEbJqOum/s7/13feaf0c8c0/Search")]
-
-    return itemlist
-
-def search(item, texto):
-    logger.info("streamondemand.videodiclasse " + item.url + " search " + texto)
-    item.url = "https://www.googleapis.com/customsearch/v1element?key=AIzaSyCVAXiUzRYsML1Pv6RwSG1gunmMikTzQqY&rsz=small&num=4&hl=it&prettyPrint=false&source=gsc&gss=.com&sig=0c3990ce7a056ed50667fe0c3873c9b6&cref=http%3A%2F%2Fvideotecadiclasse2013.blogspot.com%2Fcse_blog.xml&q=" + texto + "&googlehost=www.google.com&callback=google.search.Search.apiary19507"
-    try:
-        if item.extra == "movie":
-            return peliculas_src(item)
-    # Se captura la excepción, para no interrumpir al buscador global si un canal falla
-    except:
-        import sys
-        for line in sys.exc_info():
-            logger.error("%s" % line)
-        return []
-
-def anno(item):
-    itemlist = []
-
-    # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
-    bloque = scrapertools.get_match(data, '<h2>Archivio blog</h2>(.*?)<a href="http://www.shinystat.com/it" target="_top">')
-
-    # Extrae las entradas (carpetas)
-    patron = '<a class=\'post-count-link\' href=\'(.*?)\'>\s*(.*?)\s*</a>\s*<span class=\'post-count\' dir=\'ltr\'>'
-    matches = re.compile(patron, re.DOTALL).findall(bloque)
-
-    for scrapedurl, scrapedtitle in matches:
-        scrapedurl = scrapedurl.replace("&amp;", "&")
-        scrapedurl = scrapedurl.replace("results=50", "results=10")
-        if scrapedtitle.startswith("2"):
-            scrapedtitle = "[COLOR yellow]" + scrapedtitle + "[/COLOR]"
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
-        itemlist.append(
-            Item(channel=__channel__,
-                 action="peliculas",
-                 title=scrapedtitle,
-                 url=scrapedurl,
-                 thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png",
-                 folder=True))
+                     url="http://fetchrss.com/generator/generate?url=https://www.facebook.com%2FVideotecaDiClasse%2F&provider=facebook",
+                     thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png")]
 
     return itemlist
 
@@ -98,19 +42,47 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
-    bloque = scrapertools.get_match(data, '<div class="date-outer">(.*?)<div class=\'blog-pager\' id=\'blog-pager\'>')
+    data = scrapertools.cache_page(item.url)
 
     # Extrae las entradas (carpetas)
-    patron = '<h3 class=\'post-title entry-title\' itemprop=\'name\'>\s*<a href=\'(.*?)\'>(.*?)</a>'
-    matches = re.compile(patron, re.DOTALL).findall(bloque)
+    patron = 'This is an example of your RSS feed. Please verify that it contains all you need<br>\s*<iframe src="([^"]+)"><\/iframe>'
+    matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl, scrapedtitle in matches:
+    for scrapedurl in matches:
+        scrapedthumbnail = "http://www.timeninjablog.com/wp-content/uploads/2015/12/RSS.jpg"
+        scrapedtitle = "Genera RSS"
+        scrapedurl = host + scrapedurl
+        itemlist.append( Item(channel=__channel__,
+                              action="peliculas_rss",
+                              fulltitle=scrapedtitle,
+                              show=scrapedtitle,
+                              title=scrapedtitle,
+                              url=scrapedurl,
+                              thumbnail=scrapedthumbnail,
+                              folder=True))
+    return itemlist
+
+def peliculas_rss(item):
+    logger.info("streamondemand.videotecadiclass peliculas_rss")
+    itemlist = []
+
+    # Descarga la pagina
+    data = scrapertools.cache_page(item.url)
+
+    # Extrae las entradas (carpetas)
+    patron = '<div class="fetch-rss-content ">\s*(.*?)<\/div>\s*<a\s*href="([^"]+)"'
+    matches = re.compile(patron, re.DOTALL).findall(data)
+
+    for scrapedtitle, scrapedurl in matches:
         scrapedthumbnail = ""
         scrapedplot = ""
-        scrapedtitle = scrapedtitle.replace("streaming", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+        scrapedurl = scrapertools.get_header_from_response(scrapedurl, header_to_get="Location")
+        txt = "streaming"
+        if txt not in scrapedtitle: continue
+        old = "blogspot"
+        if old in scrapedtitle: continue
+        scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
+        scrapedtitle = scrapedtitle.split("(")[0]
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -123,78 +95,46 @@ def peliculas(item):
                  plot=scrapedplot,
                  folder=True), tipo='movie'))
 
-    # Extrae el paginador
-    patronvideos = '<a class=\'blog-pager-older-link\' href=\'(.*?)\''
-    matches = re.compile(patronvideos, re.DOTALL).findall(data)
-
-    if len(matches) > 0:
-        scrapedurl = host + scrapedurl
-        scrapedurl = urlparse.urljoin(item.url, matches[0])
-        itemlist.append(
-            Item(channel=__channel__,
-                 action="HomePage",
-                 title="[COLOR yellow]Torna Home[/COLOR]",
-                 folder=True)),
-        itemlist.append(
-            Item(channel=__channel__,
-                 action="peliculas",
-                 title="[COLOR orange]Successivo >>[/COLOR]",
-                 url=scrapedurl,
-                 thumbnail="http://2.bp.blogspot.com/-fE9tzwmjaeQ/UcM2apxDtjI/AAAAAAAAeeg/WKSGM2TADLM/s1600/pager+old.png",
-                 folder=True))
-
     return itemlist
 
-def peliculas_src(item):
-    logger.info("streamondemand.videotecadiclasse peliculas")
+def findvideos(item):
+    logger.info("[videotecadiclasse.py] findvideos")
     itemlist = []
 
-    # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = scrapertools.cache_page(item.url)
 
-    # Extrae las entradas (carpetas)
-    patron = '"ogUrl":"(.*?)","ogTitle":"(.*?)",'
+    patron = '<a href="https://l[^=]+=([^"]+)"'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl, scrapedtitle in matches:
-        scrapedthumbnail = ""
-        scrapedplot = ""
-        scrapedtitle = scrapedtitle.replace("streaming", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
-        itemlist.append(infoSod(
-            Item(channel=__channel__,
-                 action="findvideos",
-                 fulltitle=scrapedtitle,
-                 show=scrapedtitle,
-                 title="[COLOR azure]" + scrapedtitle + "[/COLOR]",
-                 url=scrapedurl,
-                 thumbnail=scrapedthumbnail,
-                 plot=scrapedplot,
-                 folder=True), tipo='movie'))
-
-    # Extrae el paginador
-    patronvideos = '<a class=\'blog-pager-older-link\' href=\'(.*?)\''
-    matches = re.compile(patronvideos, re.DOTALL).findall(data)
-
-    if len(matches) > 0:
-        scrapedurl = host + scrapedurl
-        scrapedurl = urlparse.urljoin(item.url, matches[0])
+    for scrapedurl in matches:
+        scrapedurl = scrapedurl.replace ("&amp;", "&")
+        scrapedurl = scrapedurl.replace ("%2F", "/")
+        scrapedurl = scrapedurl.replace ("%3A", ":")
+        link1 = "momentsapp"
+        if link1 in scrapedurl: continue
+        link2 = "instagram"
+        if link2 in scrapedurl: continue
         itemlist.append(
             Item(channel=__channel__,
-                 action="HomePage",
-                 title="[COLOR yellow]Torna Home[/COLOR]",
-                 folder=True)),
-        itemlist.append(
-            Item(channel=__channel__,
-                 action="peliculas_src",
-                 title="[COLOR orange]Successivo >>[/COLOR]",
+                 action="play",
+                 title=item.title,
+                 fulltitle=item.fulltitle,
                  url=scrapedurl,
-                 thumbnail="http://2.bp.blogspot.com/-fE9tzwmjaeQ/UcM2apxDtjI/AAAAAAAAeeg/WKSGM2TADLM/s1600/pager+old.png",
-                 folder=True))
-
+                 thumbnail=item.thumbnail))
     return itemlist
 
-def HomePage(item):
-    import xbmc
-    xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
+def play(item):
+    logger.info("[videotecadiclasse.py] play")
+    data = scrapertools.cache_page(item.url)
+    
+    itemlist = servertools.find_video_items(data=data)
+
+    for videoitem in itemlist:
+        videoitem.title = item.show
+        videoitem.fulltitle = item.fulltitle
+        videoitem.show = item.show
+        videoitem.thumbnail = item.thumbnail
+        videoitem.channel = __channel__
+    
+    return itemlist
+

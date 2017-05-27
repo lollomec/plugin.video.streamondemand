@@ -1,3 +1,24 @@
+v5.5.4
+- main menu update
+- removed dead channels
+- new channels
+
+v5.5.3
+- mitigated thread in search
+- update on menu
+- new channels
+- new servers
+- small general fixes
+
+v5.5.2
+- update channels and servers process
+- new channels
+- small general fixes
+
+v5.5.1
+- global search, update channels/server fix... perhaps :-)
+- minor release
+
 v5.5.0
 - gobal merge fix
 - library, download, tvdb optimization

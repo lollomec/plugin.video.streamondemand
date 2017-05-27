@@ -16,7 +16,7 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "cinemalibero"
-__category__ = "F,S"
+__category__ = "F,S,A"
 __type__ = "generic"
 __title__ = "Cinemalibero (IT)"
 __language__ = "IT"
@@ -54,8 +54,8 @@ def mainlist(item):
                      thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
                 Item(channel=__channel__,
                      title="[COLOR azure]Anime[/COLOR]",
-                     extra="movie",
-                     action="peliculas",
+                     extra="serie",
+                     action="peliculas_tv",
                      url="%s/category/anime/" % host,
                      thumbnail="http://xbmc-repo-ackbarr.googlecode.com/svn/trunk/dev/skin.cirrus%20extended%20v2/extras/moviegenres/A-Z.png"),
                 Item(channel=__channel__,
@@ -77,6 +77,28 @@ def mainlist(item):
 
     return itemlist
 
+
+def newest(categoria):
+    logger.info("[cinemalibero.py] newest" + categoria)
+    itemlist = []
+    item = Item()
+    try:
+        if categoria == "peliculas":
+            item.url = "http://www.cinemalibero.tv/category/film/"
+            item.action = "peliculas"
+            itemlist = peliculas(item)
+
+            if itemlist[-1].action == "peliculas":
+                itemlist.pop()
+
+    # Se captura la excepción, para no interrumpir al canal novedades si un canal falla
+    except:
+        import sys
+        for line in sys.exc_info():
+            logger.error("{0}".format(line))
+        return []
+
+    return itemlist
 
 # disabled on global search
 
@@ -231,7 +253,7 @@ def peliculas_tv(item):
 
 def episodios(item):
     def load_episodios(html, item, itemlist, lang_title):
-        patron = '((?:.*?<a href="[^"]+"[^b]+blank[^>]+>[^<]+<\/a><(?:b|\/)[^>]+>)+)'
+        patron = '((?:.*?<a[^h]+href="[^"]+"[^>]+>[^<]+<\/a>)+)'
         matches = re.compile(patron).findall(html)
         for data in matches:
             # Estrazione

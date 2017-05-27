@@ -21,7 +21,7 @@ __language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
-host = "http://www.dreamsub.it"
+host = "https://www.dreamsub.it"
 
 headers = [
     ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
@@ -32,7 +32,6 @@ headers = [
 def isGeneric():
     return True
 
-
 def mainlist(item):
     logger.info("streamondemand.dreamsub mainlist")
     itemlist = [Item(channel=__channel__,
@@ -42,16 +41,59 @@ def mainlist(item):
                      url="%s/serie-tv" % host,
                      thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
                 Item(channel=__channel__,
+                     title="[COLOR azure]Ultimi episodi Serie TV[/COLOR]",
+                     action="ultimiep",
+                     extra='serie',
+                     url=host,
+                     thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
+                Item(channel=__channel__,
                      title="[COLOR azure]Anime / Cartoni[/COLOR]",
                      action="serietv",
                      extra='serie',
                      url="%s/anime" % host,
                      thumbnail="http://orig09.deviantart.net/df5a/f/2014/169/2/a/fist_of_the_north_star_folder_icon_by_minacsky_saya-d7mq8c8.png"),
                 Item(channel=__channel__,
+                     title="[COLOR azure]Ultimi episodi Anime[/COLOR]",
+                     action="ultimiep",
+                     extra='anime',
+                     url=host,
+                     thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
+                Item(channel=__channel__,
                      title="[COLOR yellow]Cerca...[/COLOR]",
                      action="search",
                      extra='serie',
                      thumbnail="http://dc467.4shared.com/img/fEbJqOum/s7/13feaf0c8c0/Search")]
+
+    return itemlist
+
+def newest(categoria):
+    logger.info("streamondemand.altadefinizione01 newest" + categoria)
+    itemlist = []
+    item = Item()
+    try:
+        if categoria == "series":
+            item.url = "https://www.dreamsub.it"
+            item.action = "ultimiep"
+            item.extra = "serie"
+            itemlist = ultimiep(item)
+
+            if itemlist[-1].action == "ultimiep":
+                itemlist.pop()
+        
+        if categoria == "anime":
+            item.url = "https://www.dreamsub.it"
+            item.action = "ultimiep"
+            item.extra = "anime"
+            itemlist = ultimiep(item)
+
+            if itemlist[-1].action == "ultimiep":
+                itemlist.pop()
+    # Se captura la excepción, para no interrumpir al canal novedades si un canal falla
+    except:
+        import sys
+        for line in sys.exc_info():
+            logger.error("{0}".format(line))
+        return []
 
     return itemlist
 
@@ -109,6 +151,39 @@ def serietv(item):
 
     return itemlist
 
+def ultimiep(item):
+    logger.info("streamondemand.dreamsub ultimiep")
+    itemlist = []
+
+    # Descarga la pagina
+    data = scrapertools.cache_page(item.url, headers=headers)
+    if 'anime' in item.extra:
+        bloque = scrapertools.get_match(data, '<ul class="last" id="recentAddedEpisodesAnimeDDM">(.*?)</ul>')
+    elif 'serie' in item.extra:
+        bloque = scrapertools.get_match(data, '<ul class="last" id="recentAddedEpisodesTVDDM">(.*?)</ul>')
+
+    # Extrae las entradas (carpetas)
+    patron = '<li><a href="([^"]+)"[^>]+>([^<]+)<br>'
+    matches = re.compile(patron, re.DOTALL).findall(bloque)
+
+    for scrapedurl, scrapedtitle in matches:
+        scrapedurl = host + scrapedurl
+        scrapedplot = ""
+        scrapedthumbnail = ""
+        if (DEBUG): logger.info(
+            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+        itemlist.append(infoSod(
+            Item(channel=__channel__,
+                 action="findvideos",
+                 fulltitle=(re.sub(r'\d+$', '', scrapedtitle) if 'anime' in item.extra else re.sub(r'\d+x\d+$', '', scrapedtitle)).strip(),
+                 show=scrapedtitle,
+                 title=scrapedtitle,
+                 url=scrapedurl,
+                 thumbnail=scrapedthumbnail,
+                 plot=scrapedplot,
+                 extra=item.extra,
+                 folder=True), tipo='tv'))
+    return itemlist
 
 def HomePage(item):
     import xbmc
@@ -141,23 +216,37 @@ def episodios(item):
 
     for scrapedurl, title1, title2, title3  in matches:
         scrapedurl = host + scrapedurl
-        scrapedplot = ""
-        scrapedthumbnail = ""
         scrapedtitle = title1 + " " + title2 + title3
         scrapedtitle = scrapedtitle.replace("Download", "")
         scrapedtitle = scrapedtitle.replace("Streaming", "")
         scrapedtitle = scrapedtitle.replace("& ", "")
 
-        itemlist.append(infoSod(
+        itemlist.append(
             Item(channel=__channel__,
                  action="findvideos",
                  fulltitle=scrapedtitle,
-                 show=scrapedtitle,
+                 show=item.show,
                  title="[COLOR azure]" + scrapedtitle + "[/COLOR]",
                  url=scrapedurl,
-                 thumbnail=scrapedthumbnail,
-                 plot=scrapedplot,
-                 folder=True), tipo='tv'))
+                 thumbnail=item.thumbnail,
+                 plot=item.plot,
+                 folder=True))
+
+    if config.get_library_support() and len(itemlist) != 0:
+        itemlist.append(
+            Item(channel=__channel__,
+                 title="Aggiungi alla libreria",
+                 url=item.url,
+                 action="add_serie_to_library",
+                 extra="episodios",
+                 show=item.show))
+        itemlist.append(
+            Item(channel=__channel__,
+                 title="Scarica tutti gli episodi della serie",
+                 url=item.url,
+                 action="download_all_episodes",
+                 extra="episodios",
+                 show=item.show))
 
     return itemlist
 

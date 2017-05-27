@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ------------------------------------------------------------
 # streamondemand.- XBMC Plugin
-# Canale per http://film-stream.eu
+# Canale per http://film-stream.biz
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
@@ -23,7 +23,7 @@ __language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
-host = "http://film-stream.eu"
+host = "http://film-stream.biz"
 
 
 def isGeneric():
@@ -55,12 +55,12 @@ def mainlist(item):
                      action="peliculas_tv",
                      url="%s/category/serie-tv/" % host,
                      thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
-                #Item(channel=__channel__,
-                #     title="[COLOR azure]Aggiornamento Serie TV[/COLOR]",
-                #     extra="serie",
-                #     action="aggiornamenti",
-                #     url="%s/serietv/" % host,
-                #     thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
+                Item(channel=__channel__,
+                     title="[COLOR azure]Aggiornamento Serie TV ([COLOR red]Lento[/COLOR])[/COLOR]",
+                     extra="serie",
+                     action="aggiornamenti",
+                     url="%s/serietv/" % host,
+                     thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
                 Item(channel=__channel__,
                      title="[COLOR yellow]Cerca Serie TV...[/COLOR]",
                      action="search",
@@ -68,6 +68,29 @@ def mainlist(item):
                      thumbnail="http://dc467.4shared.com/img/fEbJqOum/s7/13feaf0c8c0/Search")]
     return itemlist
 
+
+def newest(categoria):
+    logger.info("streamondemand.filmstream newest" + categoria)
+    itemlist = []
+    item = Item()
+    try:
+        if categoria == "peliculas":
+            item.url = "http://film-stream.biz"
+            extra="movie"
+            item.action = "peliculas"
+            itemlist = peliculas(item)
+
+            if itemlist[-1].action == "peliculas":
+                itemlist.pop()
+
+    # Se captura la excepción, para no interrumpir al canal novedades si un canal falla
+    except:
+        import sys
+        for line in sys.exc_info():
+            logger.error("{0}".format(line))
+        return []
+
+    return itemlist
 
 def categorias(item):
     logger.info("streamondemand.filmstream categorias")
@@ -125,7 +148,7 @@ def aggiornamenti(item):
     Day_List = []
     starts = []
     # Descarga la pagina
-    data = scrapertools.cache_page("http://film-stream.cc/serietv/")
+    data = scrapertools.cache_page("%s/serietv/" % host)
 
     # Extrae las entradas (carpetas)
 
@@ -156,7 +179,7 @@ def aggiornamenti(item):
                  title="[COLOR yellow]" + ToDay + "[/COLOR]",
                  folder=True)),
 
-        patron = '<p>[^<]{,10} <a href="http://film-stream.cc/[^<]+'
+        patron = '<p>[^<]{,10} <a href="%s/[^<]+' % host
         matches = re.compile(patron, re.IGNORECASE).finditer(html)
         lista = list(matches)
 
@@ -332,7 +355,7 @@ def episodios(item):
                          fulltitle=scrapedtitle + " (" + lang_title + ")" + ' - ' + item.show,
                          show=item.show))
 
-    logger.info("[filmsenzalimiti.py] episodios")
+    logger.info("streamondemand.filmstream episodios")
 
     itemlist = []
 

@@ -33,7 +33,6 @@ headers = [
 def isGeneric():
     return True
 
-
 def mainlist(item):
     logger.info("streamondemand.cinemasubito mainlist")
     itemlist = [Item(channel=__channel__,
@@ -72,6 +71,28 @@ def mainlist(item):
 
     return itemlist
 
+
+def newest(categoria):
+    logger.info("streamondemand.cinemasubito newest" + categoria)
+    itemlist = []
+    item = Item()
+    try:
+        if categoria == "peliculas":
+            item.url = "https://www.cinemasubito.link/film-streaming.html"
+            item.action = "peliculas"
+            itemlist = peliculas(item)
+
+            if itemlist[-1].action == "peliculas":
+                itemlist.pop()
+
+    # Se captura la excepción, para no interrumpir al canal novedades si un canal falla
+    except:
+        import sys
+        for line in sys.exc_info():
+            logger.error("{0}".format(line))
+        return []
+
+    return itemlist
 
 def categorias(item):
     itemlist = []

@@ -55,6 +55,11 @@ def mainlist(item):
                      url="%s/serie/" % host,
                      thumbnail="http://www.ilmioprofessionista.it/wp-content/uploads/2015/04/TVSeries3.png"),
                 Item(channel=__channel__,
+                     title="[COLOR azure]Nuovi Episodi Serie TV[/COLOR]",
+                     action="nuoviep",
+                     url="%s/aggiornamenti-serie/" % host,
+                     thumbnail="http://www.ilmioprofessionista.it/wp-content/uploads/2015/04/TVSeries3.png"),
+                Item(channel=__channel__,
                      title="[COLOR azure]Anime[/COLOR]",
                      action="serie",
                      url="%s/anime/" % host,
@@ -67,6 +72,27 @@ def mainlist(item):
 
     return itemlist
 
+
+def newest(categoria):
+    logger.info("streamondemand.ilgeniodellostreaming newest" + categoria)
+    itemlist = []
+    item = Item()
+    try:
+        if categoria == "peliculas":
+            item.url = "http://ilgeniodellostreaming.cc/film/"
+            item.action = "peliculas"
+            itemlist = peliculas(item)
+
+            if itemlist[-1].action == "peliculas":
+                itemlist.pop()
+    # Se captura la excepción, para no interrumpir al canal novedades si un canal falla
+    except:
+        import sys
+        for line in sys.exc_info():
+            logger.error("{0}".format(line))
+        return []
+
+    return itemlist
 
 def categorias(item):
     logger.info("streamondemand.ilgeniodellostreaming categorias")
@@ -193,6 +219,39 @@ def peliculas(item):
 
     return itemlist
 
+def nuoviep(item):
+    logger.info("streamondemand.ilgeniodellostreaming nuoviep")
+    itemlist = []
+
+    # Descarga la pagina
+    data = scrapertools.anti_cloudflare(item.url, headers)
+    blocco = scrapertools.get_match(data, r'<div class="items" style="margin-bottom:0px!important">(.*?)<div class="items" style="margin-bottom:0px!important">')
+
+    # Extrae las entradas (carpetas)
+    patron = r'<div class="poster"><img src="([^"]+)" alt="([^"]+)">[^>]+><a href="([^"]+)">'
+    matches = re.compile(patron, re.DOTALL).findall(blocco)
+
+    for scrapedthumbnail, scrapedtitle, scrapedurl in matches:
+        scrapedplot = ""
+        scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
+        if DEBUG: logger.info(
+            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+        itemlist.append(
+            Item(channel=__channel__,
+                 action="episodios",
+                 fulltitle=scrapedtitle,
+                 show=scrapedtitle,
+                 title="[COLOR azure]" + scrapedtitle + "[/COLOR]",
+                 url=scrapedurl,
+                 thumbnail=scrapedthumbnail,
+                 plot=scrapedplot,
+                 folder=True))
+    if len(itemlist) == 0:
+        itemlist.append(
+            Item(channel=__channel__,
+                 title="[COLOR red]Nessun nuovo episodio per oggi[/COLOR]"))
+    return itemlist
+
 def serie(item):
     logger.info("streamondemand.ilgeniodellostreaming peliculas")
     itemlist = []
@@ -288,7 +347,6 @@ def episodios(item):
                  show=item.show))
 
     return itemlist
-
 
 def findvideos(item):
     logger.info("[streaminglove.py] play")

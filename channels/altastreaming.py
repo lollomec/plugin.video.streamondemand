@@ -22,17 +22,16 @@ __language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
-host = "http://www.altastreaming.me/"
+host = "http://altastreaming.cool"
 
 headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:52.0) Gecko/20100101 Firefox/52.0'],
+    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'],
     ['Accept-Encoding', 'gzip, deflate'],
     ['Referer', host]
 ]
 
 def isGeneric():
     return True
-
 
 def mainlist(item):
     logger.info("streamondemand.altastreaming mainlist")
@@ -107,6 +106,28 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+def newest(categoria):
+    logger.info("streamondemand.altadefinizione01 newest" + categoria)
+    itemlist = []
+    item = Item()
+    try:
+        if categoria == "peliculas":
+            item.url = "http://altastreaming.tv"
+            item.action = "peliculas"
+            itemlist = peliculas(item)
+
+            if itemlist[-1].action == "peliculas":
+                itemlist.pop()
+
+    # Se captura la excepción, para no interrumpir al canal novedades si un canal falla
+    except:
+        import sys
+        for line in sys.exc_info():
+            logger.error("{0}".format(line))
+        return []
+
+    return itemlist
+
 def peliculas(item):
     logger.info("streamondemand.altastreaming peliculas")
     itemlist = []
@@ -115,7 +136,7 @@ def peliculas(item):
     data = scrapertools.anti_cloudflare(item.url, headers)
 
     # Extrae las entradas (carpetas)
-    patron = '<h3 class="fl-title"> <a href="([^"]+)"  title="([^"]+)">'
+    patron = '<h3 class="fl-title"> <a href="([^"]+)"[^t]+title="([^"]+)">'
     matches = re.compile(patron, re.DOTALL).finditer(data)
 
     for match in matches:
@@ -167,7 +188,7 @@ def peliculas_tv(item):
     bloque = scrapertools.get_match(data, '<div class="container margin-block">(.*?)<footer class="footer">')
 
     # Extrae las entradas (carpetas)
-    patron = '<h3 class="fl-title"> <a href="([^"]+)"  title="([^"]+)">'
+    patron = '<h3 class="fl-title"> <a href="([^"]+)"[^t]+title="([^"]+)">'
     matches = re.compile(patron, re.DOTALL).finditer(bloque)
 
     for match in matches:
@@ -288,4 +309,3 @@ def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
 
-#channel disabled

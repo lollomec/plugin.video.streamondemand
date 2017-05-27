@@ -3,12 +3,14 @@
 # streamondemand - XBMC Plugin
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
+import Queue
 import glob
 import os
 import re
+import threading
 import time
 import urllib
-from multiprocessing.pool import ThreadPool
+from threading import Thread
 
 from core import channeltools
 from core import config
@@ -22,6 +24,7 @@ logger.info("streamondemand.channels.buscador init")
 DEBUG = config.get_setting("debug")
 
 TIMEOUT_TOTAL = 75
+MAX_THREADS = 16
 
 
 def mainlist(item, preferred_thumbnail="squares"):
@@ -147,7 +150,7 @@ def search(item, tecleado):
     return do_search(item)
 
 
-def channel_search(channel_parameters, category, tecleado):
+def channel_search(queue, channel_parameters, category, tecleado):
     try:
         search_results = []
 
@@ -172,7 +175,7 @@ def channel_search(channel_parameters, category, tecleado):
                     res_item.title = "[COLOR azure]" + res_item.title + "[/COLOR][COLOR orange] su [/COLOR][COLOR green]" + channel_parameters["title"] + "[/COLOR]"
                     search_results.append(res_item)
 
-        return search_results
+        queue.put(search_results)
 
     except:
         logger.error("No se puede buscar en: " + channel_parameters["title"])
@@ -205,8 +208,10 @@ def do_search(item):
     channel_files = sorted(glob.glob(channels_path))
 
     number_of_channels = 0
-    search_results = []
-    pool = ThreadPool(processes=10)
+    completed_channels = 0
+    search_results = Queue.Queue()
+
+    start_time = int(time.time())
 
     for infile in channel_files:
 
@@ -241,33 +246,50 @@ def do_search(item):
         if include_in_global_search.lower() != "true":
             continue
 
-        search_results.append(pool.apply_async(channel_search, (channel_parameters, category, tecleado,)))
+        t = Thread(target=channel_search, args=[search_results, channel_parameters, category, tecleado])
+        t.setDaemon(True)
+        t.start()
         number_of_channels += 1
 
-    start_time = int(time.time())
+        while threading.active_count() >= MAX_THREADS:
+            delta_time = int(time.time()) - start_time
+            if len(itemlist) <= 0:
+                timeout = None  # No result so far,lets the thread to continue working until a result is returned
+            elif delta_time >= TIMEOUT_TOTAL:
+                progreso.close()
+                itemlist = sorted(itemlist, key=lambda item: item.fulltitle)
+                return itemlist
+            else:
+                timeout = TIMEOUT_TOTAL - delta_time  # Still time to gather other results
 
-    completed_channels = 0
+            progreso.update(completed_channels * 100 / number_of_channels)
+
+            try:
+                itemlist.extend(search_results.get(timeout=timeout))
+                completed_channels += 1
+            except:
+                progreso.close()
+                itemlist = sorted(itemlist, key=lambda item: item.fulltitle)
+                return itemlist
+
     while completed_channels < number_of_channels:
 
         delta_time = int(time.time()) - start_time
         if len(itemlist) <= 0:
             timeout = None  # No result so far,lets the thread to continue working until a result is returned
         elif delta_time >= TIMEOUT_TOTAL:
-            timeout = 0  # At least a result matching the searched title has been found, lets stop the search
+            break  # At least a result matching the searched title has been found, lets stop the search
         else:
             timeout = TIMEOUT_TOTAL - delta_time  # Still time to gather other results
 
         progreso.update(completed_channels * 100 / number_of_channels)
 
         try:
-            itemlist.extend(search_results[completed_channels].get(timeout=timeout))
+            itemlist.extend(search_results.get(timeout=timeout))
+            completed_channels += 1
         except:
             # Expired timeout raise an exception
-            pass
-
-        completed_channels += 1
-
-    pool.terminate()
+            break
 
     progreso.close()
 
