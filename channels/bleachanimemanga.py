@@ -156,13 +156,17 @@ def episodi(item):
 def findvideos(item):
     logger.info("[BleachAnimeManga.py]==> findvideos")
 
+    if 'animehdita' in item.url:
+        item.url = scrapertools.find_single_match(item.url, r'<a href="([^"]+)"[^>]+>')
+        item.url = scrapertools.cache_page(item.url, headers=headers)
     itemlist = servertools.find_video_items(data=item.url)
 
     for videoitem in itemlist:
-        videoitem.title = "".join([item.title, color(videoitem.title, "orange")])
+        server = re.sub(r'[-\[\]\s]+', '', videoitem.title)
+        videoitem.title = "".join(["[%s] " % color(server, 'orange'), item.title])
         videoitem.fulltitle = item.fulltitle
         videoitem.show = item.show
-        videoitem.thumbnail = videoitem.thumbnail
+        videoitem.thumbnail = item.thumbnail
         videoitem.channel = __channel__
     return itemlist
 
