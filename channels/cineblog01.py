@@ -14,6 +14,9 @@ from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
+import logging
+import os
+
 __channel__ = "cineblog01"
 __category__ = "F,S"
 __type__ = "generic"
@@ -29,7 +32,6 @@ headers = [
 ]
 
 DEBUG = config.get_setting("debug")
-
 
 def isGeneric():
     return True
@@ -301,7 +303,7 @@ def listserie(item):
             "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
-                 action="episodios",
+                 action="season_serietv",
                  fulltitle=scrapedtitle,
                  show=scrapedtitle,
                  title="[COLOR azure]" + scrapedtitle + "[/COLOR]",
@@ -330,12 +332,53 @@ def listserie(item):
 
     return itemlist
 
+def season_serietv(item):
+    def load_season_serietv(html, item, itemlist, season_title):
+        if len(html) > 0 and len(season_title) > 0:
+            itemlist.append(
+                Item(channel=__channel__,
+                    action="episodios",
+                    title="[COLOR azure]%s[/COLOR]" % season_title,
+                    contentType="episode",
+                    url=html,
+                    extra='serie',
+                    show=item.show))
+        
+    itemlist = []
+
+    # Descarga la página
+    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = scrapertools.decodeHtmlentities(data)
+    data = scrapertools.get_match(data, '<td bgcolor="#ECEAE1">(.*?)</table>')
+
+    starts = []
+    season_titles = []
+    patron = r"Stagione.*?ITA"
+    matches = re.compile(patron, re.IGNORECASE).finditer(data)
+    for match in matches:
+        if match.group()!= '':
+            season_titles.append(match.group())
+            starts.append(match.end())
+
+    i = 1
+    len_season_titles = len(season_titles)
+
+    while i <= len_season_titles:
+        inizio = starts[i - 1]
+        fine = starts[i] if i < len_season_titles else -1
+
+        html = data[inizio:fine]
+        season_title = season_titles[i - 1]
+        load_season_serietv(html, item, itemlist, season_title)
+        i += 1
+
+    return itemlist
 
 def episodios(item):
     itemlist = []
 
     if item.extra == 'serie':
-        itemlist.extend(episodios_serie(item))
+        itemlist.extend(episodios_serie_new(item))
 
     if config.get_library_support() and len(itemlist) != 0:
         itemlist.append(
@@ -356,11 +399,11 @@ def episodios(item):
     return itemlist
 
 
-def episodios_serie(item):
+def episodios_serie_new(item):
     def load_episodios(html, item, itemlist, lang_title):
         # for data in scrapertools.decodeHtmlentities(html).splitlines():
-        patron = '((?:.*?<a href=".*?"[^=]+="_blank">.*?<\/a>)+)'
-        matches = re.compile(patron).findall(html)
+        patron = '((?:.*?<a href=".*?"[^=]+="_blank"[^>]+>.*?<\/a>)+)'
+        matches = re.compile(patron).findall(html)        
         for data in matches:
             # Extrae las entradas
             scrapedtitle = data.split('<a ')[0]
@@ -381,50 +424,16 @@ def episodios_serie(item):
     logger.info("[cineblog01.py] episodios")
 
     itemlist = []
+    
+    lang_title = item.title
+    if lang_title.upper().find('SUB') >0:
+        lang_title = 'SUB ITA' 
+    else:
+        lang_title = 'ITA'
 
-    # Descarga la página
-    data = scrapertools.anti_cloudflare(item.url, headers)
-    data = scrapertools.decodeHtmlentities(data)
-    data = scrapertools.get_match(data, '<td bgcolor="#ECEAE1">(.*?)</table>')
-
-    lang_titles = []
-    starts = []
-    patron = r"Stagione.*?ITA"
-    matches = re.compile(patron, re.IGNORECASE).finditer(data)
-    for match in matches:
-        season_title = match.group()
-        if season_title != '':
-            lang_titles.append('SUB ITA' if 'SUB' in season_title.upper() else 'ITA')
-            starts.append(match.end())
-
-    i = 1
-    len_lang_titles = len(lang_titles)
-
-    while i <= len_lang_titles:
-        inizio = starts[i - 1]
-        fine = starts[i] if i < len_lang_titles else -1
-
-        html = data[inizio:fine]
-        lang_title = lang_titles[i - 1]
-
-        load_episodios(html, item, itemlist, lang_title)
-
-        i += 1
-
-    if len(itemlist) == 0:
-        patron = r'<div class="sp-head(?: unfolded)?" title="Expand">([^<]+)</div>\s*<div class="sp-body(?: folded)?">(.*?)<div class="spdiv">\[collapse\]</div>'
-        matches = re.compile(patron, re.DOTALL).findall(data)
-        for lang_title, match in matches:
-            lang_title = 'SUB ITA' if 'SUB' in lang_title.upper() else 'ITA'
-            load_episodios(match, item, itemlist, lang_title)
-
-        if len(itemlist) == 0:
-            patron = '<strong>([^<]+)</strong></p>\s*(?:<p>&nbsp;</p>\s*)+(.*?)<p>&nbsp;</p>'
-            matches = re.compile(patron, re.DOTALL).findall(data)
-            for lang_title, match in matches:
-                lang_title = 'SUB ITA' if 'SUB' in lang_title.upper() else 'ITA'
-                load_episodios(match, item, itemlist, lang_title)
-
+    html=item.url
+    load_episodios(html, item, itemlist, lang_title)
+    
     return itemlist
 
 
@@ -552,7 +561,7 @@ def findvid_serie(item):
     # Descarga la página
     data = item.url
 
-    patron = '<a href="([^"]+)"[^=]+="_blank">(.*?)</a>'
+    patron = '<a href="([^"]+)"[^=]+="_blank"[^>]+>(.*?)</a>'
     # Extrae las entradas
     matches = re.compile(patron, re.DOTALL).finditer(data)
     for match in matches:
@@ -578,6 +587,7 @@ def play(item):
         item.url = item.url.split('/goto/')[-1].decode('base64')
 
     item.url = item.url.replace('http://cineblog01.uno', 'http://k4pp4.pw')
+    #import web_pdb; web_pdb.set_trace()
 
     logger.debug("##############################################################")
     if "go.php" in item.url:
