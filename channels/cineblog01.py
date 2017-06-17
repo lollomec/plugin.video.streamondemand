@@ -25,6 +25,7 @@ __language__ = "IT"
 
 sito = "https://www.cb01.uno"
 
+
 headers = [
     ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
     ['Accept-Encoding', 'gzip, deflate'],
@@ -350,10 +351,15 @@ def season_serietv(item):
     data = scrapertools.anti_cloudflare(item.url, headers)
     data = scrapertools.decodeHtmlentities(data)
     data = scrapertools.get_match(data, '<td bgcolor="#ECEAE1">(.*?)</table>')
+    
+#   for x in range(0, len(scrapedtitle)-1):
+#        logger.debug('%x: %s - %s',x,ord(scrapedtitle[x]),chr(ord(scrapedtitle[x])))
+    blkseparator=chr(32)+chr(226)+chr(128)+chr(147)+chr(32)
+    data = data.replace(blkseparator,' - ')
 
     starts = []
     season_titles = []
-    patron = r"Stagione.*?ITA"
+    patron = r"Stagion[i|e].*"
     matches = re.compile(patron, re.IGNORECASE).finditer(data)
     for match in matches:
         if match.group()!= '':
@@ -410,6 +416,8 @@ def episodios_serie_new(item):
             scrapedtitle = re.sub(r'<[^>]*>', '', scrapedtitle).strip()
             if scrapedtitle != 'Categorie':
                 scrapedtitle = scrapedtitle.replace('&#215;', 'x')
+                if scrapedtitle.find(' - ')>0:
+                    scrapedtitle=scrapedtitle[0:scrapedtitle.find(' - ')]
                 itemlist.append(
                     Item(channel=__channel__,
                          action="findvideos",
@@ -554,28 +562,63 @@ def findvid_film(item):
 
 
 def findvid_serie(item):
+    def load_vid_series(html,item,itemlist,blktxt):
+        if len(blktxt)>2:
+            vtype=blktxt.strip()[:-1] + " - "
+        else:
+            vtype=''
+        patron = '<a href="([^"]+)"[^=]+="_blank"[^>]+>(.*?)</a>'
+        # Extrae las entradas
+        matches = re.compile(patron, re.DOTALL).finditer(html)
+        for match in matches:
+            scrapedurl = match.group(1)
+            scrapedtitle = match.group(2)
+            title = item.title + " [COLOR blue][" + vtype + scrapedtitle +"][/COLOR]"
+            itemlist.append(
+                Item(channel=__channel__,
+                     action="play",
+                     title=title,
+                     url=scrapedurl,
+                     fulltitle=item.fulltitle,
+                     show=item.show,
+                     folder=False))
+    
+    
     logger.info("[cineblog01.py] findvid_serie")
 
     itemlist = []
+    lnkblk = []
+    lnkblkp = []
 
-    # Descarga la página
     data = item.url
 
-    patron = '<a href="([^"]+)"[^=]+="_blank"[^>]+>(.*?)</a>'
-    # Extrae las entradas
+    # First blocks of links
+    if data[0:data.find('<a')].find(':')>0:
+        lnkblk.append(data[data.find(' - ')+3:data[0:data.find('<a')].find(':')+1])
+        lnkblkp.append(data.find(' - ')+3)
+    else:
+        lnkblk.append(' ')
+        lnkblkp.append(data.find('<a'))
+
+    # Find new blocks of links
+    patron = '<a\s[^>]+>[^<]+</a>([^<]+)'
     matches = re.compile(patron, re.DOTALL).finditer(data)
     for match in matches:
-        scrapedurl = match.group(1)
-        scrapedtitle = match.group(2)
-        title = item.title + " [COLOR blue][" + scrapedtitle + "][/COLOR]"
-        itemlist.append(
-            Item(channel=__channel__,
-                 action="play",
-                 title=title,
-                 url=scrapedurl,
-                 fulltitle=item.fulltitle,
-                 show=item.show,
-                 folder=False))
+        sep = match.group(1)
+        if sep != ' - ':
+            lnkblk.append(sep)
+    
+    i=0
+    if len(lnkblk)>1:
+        for lb in lnkblk[1:]:
+            lnkblkp.append(data.find(lb,lnkblkp[i]+len(lnkblk[i])))
+            i=i+1
+
+    for i in range(0,len(lnkblk)):
+        if i==len(lnkblk)-1:
+            load_vid_series(data[lnkblkp[i]:],item,itemlist,lnkblk[i])
+        else:
+            load_vid_series(data[lnkblkp[i]:lnkblkp[i+1]],item,itemlist,lnkblk[i])
 
     return itemlist
 
