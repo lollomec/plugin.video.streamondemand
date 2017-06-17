@@ -262,7 +262,7 @@ def episodios(item):
     elenco = []
     data = scrapertools.anti_cloudflare(item.url, headers)
 
-    patron = '<li id[^<]+<[^<]+<.*?class="serie-title">(.*?)</span>[^>]+>[^<]+<.*?megadrive-(.*?)".*?data-link="([^"]+)">Megadrive</a>'
+    patron = '<li id=[^=]+="Stai guardando:([^"]+)"[^>]+>\s*<div.*?\/div>\s*<div class="col">[^d]+d=[^=]+="([^"]+)">Megadrive<\/a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
 
