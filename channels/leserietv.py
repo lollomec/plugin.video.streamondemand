@@ -73,7 +73,7 @@ def mainlist(item):
                      fanart=FilmFanart),
                 Item(channel=__channel__,
                      action="info",
-                     title="[COLOR lime][I]Info canale[/I][/COLOR] [COLOR yellow]27/11/2016[/COLOR]",
+                     title="[COLOR lime][I]Info canale[/I][/COLOR] [COLOR yellow]18/06/2017[/COLOR]",
                      thumbnail="http://www.mimediacenter.info/wp-content/uploads/2016/01/newlogo-final.png")]
 
     return itemlist
@@ -262,12 +262,11 @@ def episodios(item):
     elenco = []
     data = scrapertools.anti_cloudflare(item.url, headers)
 
-    patron = '<li id=[^=]+="Stai guardando:([^"]+)"[^>]+>\s*<div.*?\/div>\s*<div class="col">[^d]+d=[^=]+="([^"]+)">Megadrive<\/a>'
+    patron = '<li id[^<]+<[^<]+<.*?class="serie-title">(.*?)</span>[^>]+>[^<]+<.*?megadrive-(.*?)".*?data-link="([^"]+)">Megadrive</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
 
     for scrapedlongtitle,scrapedtitle, scrapedurl in matches:
-        xbmc.log("qua" + scrapedurl)
         scrapedtitle = scrapedtitle.split('_')[0]+"x"+scrapedtitle.split('_')[1].zfill(2)
 
         elenco.append([scrapedtitle,scrapedlongtitle,scrapedurl])
@@ -298,6 +297,9 @@ def episodios(item):
 #------------------------------------------------------------------
 def findvideos(item):
     itemlist=[]
+
+    item.url=item.url.replace(".tv", ".co")
+
     data = scrapertools.anti_cloudflare(item.url, headers)
 
     elemento = scrapertools.find_single_match(data, 'file: "(.*?)",')
@@ -319,7 +321,7 @@ def info(item):
 
     dialog = xbmcgui.Dialog()
     linea1='[COLOR yellow]Servizi ripristinati:[/COLOR]'
-    linea2='Aggiungi a libreria. '
+    linea2='Link non funzionanti'
     linea3='\n[COLOR orange]www.mimediacenter.info[/COLOR] - [I]pelisalacarta (For Italian users)[/I]'
 
     result=dialog.ok('Le serie TV Info',linea1,linea2,linea3)
