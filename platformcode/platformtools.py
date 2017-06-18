@@ -520,7 +520,7 @@ def play_video(item, strm=False):
         xlistitem.setProperty('inputstream.adaptive.manifest_type', 'mpd')
 
     # se lanza el reproductor
-    # set_player(item, xlistitem, mediaurl, view, strm)
+    set_player(item, xlistitem, mediaurl, view, strm)
 
     # si es un archivo de la biblioteca enviar a marcar como visto
     if strm or item.strm_path:
@@ -734,8 +734,8 @@ def get_dialogo_opciones(item, default_action, strm):
             opciones.append(config.get_localized_string(30164))
         else:
             # "Descargar"
-            opcion = config.get_localized_string(30153)
-            opciones.append(opcion)
+            #opcion = config.get_localized_string(30153)
+            #opciones.append(opcion)
 
             if item.isFavourite:
                 # "Quitar de favoritos"
@@ -890,18 +890,17 @@ def get_video_seleccionado(item, seleccion, video_urls):
 
     return mediaurl, view, mpd
 
-'''
 def set_player(item, xlistitem, mediaurl, view, strm):
     logger.info("platformtools set_player")
     logger.debug("item:\n" + item.tostring('\n'))
 
     # Movido del conector "torrent" aqui
-    if item.server == "torrent":
-        play_torrent(item, xlistitem, mediaurl)
-        return
+    #if item.server == "torrent":
+    #    play_torrent(item, xlistitem, mediaurl)
+    #    return
 
     # Si es un fichero strm no hace falta el play
-    elif strm:
+    if strm:
         xbmcplugin.setResolvedUrl(int(sys.argv[1]), True, xlistitem)
         if item.subtitle != "":
             xbmc.sleep(2000)
@@ -958,7 +957,7 @@ def set_player(item, xlistitem, mediaurl, view, strm):
         xbmc.sleep(2000)
         xbmc.Player().setSubtitles(item.subtitle)
 
-
+'''
 def play_torrent(item, xlistitem, mediaurl):
     logger.info("platformtools play_torrent")
     # Opciones disponibles para Reproducir torrents
