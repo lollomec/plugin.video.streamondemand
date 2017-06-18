@@ -520,7 +520,7 @@ def play_video(item, strm=False):
         xlistitem.setProperty('inputstream.adaptive.manifest_type', 'mpd')
 
     # se lanza el reproductor
-    set_player(item, xlistitem, mediaurl, view, strm)
+    # set_player(item, xlistitem, mediaurl, view, strm)
 
     # si es un archivo de la biblioteca enviar a marcar como visto
     if strm or item.strm_path:
@@ -734,8 +734,8 @@ def get_dialogo_opciones(item, default_action, strm):
             opciones.append(config.get_localized_string(30164))
         else:
             # "Descargar"
-            #opcion = config.get_localized_string(30153)
-            #opciones.append(opcion)
+            opcion = config.get_localized_string(30153)
+            opciones.append(opcion)
 
             if item.isFavourite:
                 # "Quitar de favoritos"
@@ -890,7 +890,7 @@ def get_video_seleccionado(item, seleccion, video_urls):
 
     return mediaurl, view, mpd
 
-
+'''
 def set_player(item, xlistitem, mediaurl, view, strm):
     logger.info("platformtools set_player")
     logger.debug("item:\n" + item.tostring('\n'))
@@ -1103,3 +1103,4 @@ def play_torrent(item, xlistitem, mediaurl):
 
         # Y cerramos el progreso
         progreso.close()
+'''
