@@ -644,7 +644,8 @@ def play(item):
                 data = scrapertools.get_match(data, r'<a href="([^"]+)".*?class="btn-wrapper">.*?licca.*?</a>')
             except IndexError:
                 data = scrapertools.get_header_from_response(item.url, headers=headers, header_to_get="Location")
-        while 'vcrypt' in data:
+        if data.find('vcrypt')>0:
+            data = data.replace('https:','http:')      ### Temp Workaround to avoid https negotiation issues`
             data = scrapertools.get_header_from_response(data, headers=headers, header_to_get="Location")
         logger.debug("##### play go.php data ##\n%s\n##" % data)
     elif "/link/" in item.url:
