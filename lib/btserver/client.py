@@ -23,7 +23,6 @@
 # along with streamondemand 5.  If not, see <http://www.gnu.org/licenses/>.
 # ------------------------------------------------------------
 
-'''
 try:
     from python_libtorrent import get_libtorrent, get_platform
     lt = get_libtorrent()
@@ -525,9 +524,9 @@ class Client(object):
             
             
     def _check_meta(self):
-        """
+        '''
         Servicio encargado de comprobar si los metadatos se han descargado
-        """
+        '''
         if self.status.state>=3 and  self.status.state <= 5 and not self.has_meta:
 
             #Guardamos los metadatos
@@ -555,9 +554,9 @@ class Client(object):
             self.has_meta = True
 
     def priorize_start_file(self):
-        """
+        '''
         Servicio encargado de priorizar el principio y final de archivo cuando no hay conexion
-        """
+        '''
         if self.file and not self.file.cursor:
           num_start_pieces = self.buffer_size - self.last_pieces_priorize   #Cantidad de piezas a priorizar al inicio
           num_end_pieces = self.last_pieces_priorize                        #Canridad de piezas a priorizar al final
@@ -589,5 +588,4 @@ class Client(object):
         logger.info('%.2f%% de %.1fMB %s | %.1f kB/s | #%s %d%% | AutoClose: %s | S: %d(%d) P: %d(%d)) | TRK: %d DHT: %d PEX: %d LSD %d | DHT:%s (%d) | Trakers: %d' % \
                     (s.progress_file , s.file_size, s.str_state, s._download_rate, archivo, s.buffer, s.timeout , s.num_seeds,\
                      s.num_complete, s.num_peers, s.num_incomplete, s.trk_peers,s.dht_peers, s.pex_peers, s.lsd_peers, s.dht_state, s.dht_nodes, s.trackers))                   
-                     
-'''
+

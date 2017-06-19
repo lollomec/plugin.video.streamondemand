@@ -25,7 +25,6 @@
 # MCT - Mini Cliente Torrent para streamondemand
 #------------------------------------------------------------
 
-'''
 import os
 import re
 import shutil
@@ -733,4 +732,3 @@ def decode_adfly(data):
     decoded_url = base64.b64decode(left.encode() + right.encode())[2:].decode()
     return decoded_url
 
-'''

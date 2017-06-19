@@ -26,8 +26,6 @@
 # Guarda los .torrent generado
 # Guarda los .resume de cada torrent
 # ------------------------------------------------------------
-
-'''
 import os.path
 import re
 import base64
@@ -109,4 +107,3 @@ class Cache(object):
         else:
             raise ValueError('Not BT magnet link')
 
-'''
