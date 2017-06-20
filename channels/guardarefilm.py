@@ -21,7 +21,7 @@ __type__ = "generic"
 __title__ = "guardarefilm (IT)"
 __language__ = "IT"
 
-host = "http://www.guardarefilm.one"
+host = "http://www.guardarefilm.biz"
 
 headers = [
     ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
@@ -136,7 +136,12 @@ def categorias(item):
 
 def search(item, texto):
     logger.info("[guardarefilm.py] " + item.url + " search " + texto)
-    item.url = host + "/?do=search&subaction=search&story=" + texto
+    section = ""
+    if item.extra == "serie":
+        section = "0"
+    elif item.extra == "movie":
+        section = "1"
+    item.url = '%s?do=search_advanced&q=%s&section=%s&director=&actor=&year_from=&year_to=' % (host, texto, section)
     try:
         if item.extra == "movie":
             return peliculas(item)
@@ -301,11 +306,8 @@ def episodios(item):
     # Descarga la página
     data = scrapertools.cache_page(item.url)
 
-    patron = r'<li id="serie-[^"]+" data-title="Stai guardando: ([^"]+)">\s*' \
-             r'<span class="num">[^<]+</span>\s*' \
-             r'<span class="title">[^<]+</span>\s*' \
-             r'<span class="right">\s*' \
-             r'<a href="#" class="links-sd" id="sd-[^"]+" data-link="([^"]+)">[^<]+</a>'
+    patron = r'<li id="serie-[^"]+" data-title="Stai guardando: ([^"]+)">'
+    patron += r'[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>(.*?)</span>'
     matches = re.compile(patron, re.DOTALL).findall(data)
     for scrapedtitle, scrapedurl in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
@@ -326,13 +328,6 @@ def episodios(item):
                  title="Aggiungi alla libreria",
                  url=item.url,
                  action="add_serie_to_library",
-                 extra="episodios",
-                 show=item.show))
-        itemlist.append(
-            Item(channel=__channel__,
-                 title="Scarica tutti gli episodi della serie",
-                 url=item.url,
-                 action="download_all_episodes",
                  extra="episodios",
                  show=item.show))
 
