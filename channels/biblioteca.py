@@ -26,9 +26,9 @@ def mainlist(item):
     itemlist.append(Item(channel=item.channel, action="series", title="Serie",
                          category="Libreria serie",
                          thumbnail="http://media.tvalacarta.info/pelisalacarta/squares/thumb_biblioteca_series.png"))
-    itemlist.append(Item(channel=item.channel, action="elenco_file", title="Visualizza download terminati",
-                         category="Libreria",
-                         thumbnail="https://www.mirrorservice.org/sites/mirrors.xbmc.org/addons/isengard/service.nextup.notification/icon.png"))
+    #itemlist.append(Item(channel=item.channel, action="elenco_file", title="Visualizza download terminati",
+    #                     category="Libreria",
+    #                     thumbnail="https://www.mirrorservice.org/sites/mirrors.xbmc.org/addons/isengard/service.nextup.notification/icon.png"))
 
     return itemlist
 

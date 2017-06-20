@@ -12,7 +12,7 @@
 	<bannermenu></bannermenu>
 
 	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/channels/</update_url>
-    <version>15</version>
+    <version>16</version>
 
 	<changes>
 		<change>
@@ -133,8 +133,8 @@
 		<id>replace_VD</id>
 		<type>bool</type>
 		<label>   - Pop: Sostituire "View" con "[V]" e "Scarica" con "[D]"</label>
-		<enabled>true</enabled>
-		<visible>true</visible>
+		<enabled>false</enabled>
+		<visible>false</visible>
 		<default>false</default>
 	</settings>
 

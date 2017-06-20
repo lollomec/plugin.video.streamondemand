@@ -297,13 +297,6 @@ def episodios(item):
                  action="add_serie_to_library",
                  extra="episodios" + "###" + item.extra,
                  show=item.show))
-        itemlist.append(
-            Item(channel=__channel__,
-                 title="Scarica tutti gli episodi della serie",
-                 url=item.url,
-                 action="download_all_episodes",
-                 extra="episodios" + "###" + item.extra,
-                 show=item.show))
 
     return itemlist
 
