@@ -3,7 +3,7 @@
 # streamondemand.- XBMC Plugin
 # Canal para cineblog01
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
-# Version: 201706200700
+# Version: 201706200900
 # ------------------------------------------------------------
 import re
 import urlparse
@@ -57,7 +57,7 @@ def mainlist(item):
                      thumbnail="http://jcrent.com/apple%20tv%20final/HD.png"),
                 Item(channel=__channel__,
                      action="menuhd",
-                     title="[COLOR azure]Men˘ HD[/COLOR]",
+                     title="[COLOR azure]Men√π HD[/COLOR]",
                      url=sito,
                      extra="movie",
                      thumbnail="http://files.softicons.com/download/computer-icons/disks-icons-by-wil-nichols/png/256x256/Blu-Ray.png"),
@@ -100,7 +100,7 @@ def peliculas(item):
     if item.url == "":
         item.url = sito
 
-    # Descarga la p·gina
+    # Descarga la p√°gina
     data = scrapertools.anti_cloudflare(item.url, headers)
 
     # Extrae las entradas (carpetas)
@@ -263,7 +263,7 @@ def menuanyos(item):
     return itemlist
 
 
-# Al llamarse "search" la funciÛn, el launcher pide un texto a buscar y lo aÒade como par·metro
+# Al llamarse "search" la funci√≥n, el launcher pide un texto a buscar y lo a√±ade como par√°metro
 def search(item, texto):
     logger.info("[cineblog01.py] " + item.url + " search " + texto)
 
@@ -276,7 +276,7 @@ def search(item, texto):
             item.url = "https://www.cb01.uno/serietv/?s=" + texto
             return listserie(item)
 
-    # Se captura la excepciÛn, para no interrumpir al buscador global si un canal falla
+    # Se captura la excepci√≥n, para no interrumpir al buscador global si un canal falla
     except:
         import sys
         for line in sys.exc_info():
@@ -288,7 +288,7 @@ def listserie(item):
     logger.info("[cineblog01.py] listaserie")
     itemlist = []
 
-    # Descarga la p·gina
+    # Descarga la p√°gina
     data = scrapertools.anti_cloudflare(item.url, headers)
 
     # Extrae las entradas (carpetas)
@@ -348,7 +348,7 @@ def season_serietv(item):
         
     itemlist = []
 
-    # Descarga la p·gina
+    # Descarga la p√°gina
     data = scrapertools.anti_cloudflare(item.url, headers)
     data = scrapertools.decodeHtmlentities(data)
     data = scrapertools.get_match(data, '<td bgcolor="#ECEAE1">(.*?)</table>')
@@ -360,8 +360,8 @@ def season_serietv(item):
 
     starts = []
     season_titles = []
-    patron = r"Stagion[i|e].*"
-    matches = re.compile(patron, re.IGNORECASE).finditer(data)
+    patron = '^stagion[i|e].*$'
+    matches = re.compile(patron, re.MULTILINE|re.IGNORECASE).finditer(data)
     for match in matches:
         if match.group()!= '':
             season_titles.append(match.group())
@@ -459,7 +459,7 @@ def findvid_film(item):
 
     itemlist = []
 
-    # Descarga la p·gina
+    # Descarga la p√°gina
     data = scrapertools.anti_cloudflare(item.url, headers)
     data = scrapertools.decodeHtmlentities(data)
 
