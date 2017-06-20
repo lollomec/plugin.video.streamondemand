@@ -3,6 +3,7 @@
 # streamondemand.- XBMC Plugin
 # Canal para cineblog01
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
+# Version: 201706200700
 # ------------------------------------------------------------
 import re
 import urlparse
@@ -56,7 +57,7 @@ def mainlist(item):
                      thumbnail="http://jcrent.com/apple%20tv%20final/HD.png"),
                 Item(channel=__channel__,
                      action="menuhd",
-                     title="[COLOR azure]Men√π HD[/COLOR]",
+                     title="[COLOR azure]Men˘ HD[/COLOR]",
                      url=sito,
                      extra="movie",
                      thumbnail="http://files.softicons.com/download/computer-icons/disks-icons-by-wil-nichols/png/256x256/Blu-Ray.png"),
@@ -99,7 +100,7 @@ def peliculas(item):
     if item.url == "":
         item.url = sito
 
-    # Descarga la p√°gina
+    # Descarga la p·gina
     data = scrapertools.anti_cloudflare(item.url, headers)
 
     # Extrae las entradas (carpetas)
@@ -262,7 +263,7 @@ def menuanyos(item):
     return itemlist
 
 
-# Al llamarse "search" la funci√≥n, el launcher pide un texto a buscar y lo a√±ade como par√°metro
+# Al llamarse "search" la funciÛn, el launcher pide un texto a buscar y lo aÒade como par·metro
 def search(item, texto):
     logger.info("[cineblog01.py] " + item.url + " search " + texto)
 
@@ -275,7 +276,7 @@ def search(item, texto):
             item.url = "https://www.cb01.uno/serietv/?s=" + texto
             return listserie(item)
 
-    # Se captura la excepci√≥n, para no interrumpir al buscador global si un canal falla
+    # Se captura la excepciÛn, para no interrumpir al buscador global si un canal falla
     except:
         import sys
         for line in sys.exc_info():
@@ -287,7 +288,7 @@ def listserie(item):
     logger.info("[cineblog01.py] listaserie")
     itemlist = []
 
-    # Descarga la p√°gina
+    # Descarga la p·gina
     data = scrapertools.anti_cloudflare(item.url, headers)
 
     # Extrae las entradas (carpetas)
@@ -347,7 +348,7 @@ def season_serietv(item):
         
     itemlist = []
 
-    # Descarga la p√°gina
+    # Descarga la p·gina
     data = scrapertools.anti_cloudflare(item.url, headers)
     data = scrapertools.decodeHtmlentities(data)
     data = scrapertools.get_match(data, '<td bgcolor="#ECEAE1">(.*?)</table>')
@@ -458,7 +459,7 @@ def findvid_film(item):
 
     itemlist = []
 
-    # Descarga la p√°gina
+    # Descarga la p·gina
     data = scrapertools.anti_cloudflare(item.url, headers)
     data = scrapertools.decodeHtmlentities(data)
 
@@ -625,6 +626,7 @@ def findvid_serie(item):
 
 def play(item):
     logger.info("[cineblog01.py] play")
+    itemlist = []
 
     if '/goto/' in item.url:
         item.url = item.url.split('/goto/')[-1].decode('base64')
@@ -645,7 +647,7 @@ def play(item):
             except IndexError:
                 data = scrapertools.get_header_from_response(item.url, headers=headers, header_to_get="Location")
         if data.find('vcrypt')>0:
-            data = data.replace('https:','http:')      ### Temp Workaround to avoid https negotiation issues`
+            data = data.replace('https:','http:')  ### Temp workaround to avoid https negotiation issues
             data = scrapertools.get_header_from_response(data, headers=headers, header_to_get="Location")
         logger.debug("##### play go.php data ##\n%s\n##" % data)
     elif "/link/" in item.url:
@@ -660,7 +662,8 @@ def play(item):
             logger.debug("##### The content is yet unpacked ##\n%s\n##" % data)
 
         data = scrapertools.find_single_match(data, 'var link(?:\s)?=(?:\s)?"([^"]+)";')
-        while 'vcrypt' in data:
+        if data.find('vcrypt')>0:
+            data = data.replace('https:','http:')   ### Temp workaround to avoid https negotiation issues
             data = scrapertools.get_header_from_response(data, headers=headers, header_to_get="Location")
         logger.debug("##### play /link/ data ##\n%s\n##" % data)
     else:
@@ -668,14 +671,18 @@ def play(item):
         logger.debug("##### play else data ##\n%s\n##" % data)
     logger.debug("##############################################################")
 
-    itemlist = servertools.find_video_items(data=data)
+    try:
+        logger.info("Link data: %s" % data)
+        itemlist = servertools.find_video_items(data=data)
 
-    for videoitem in itemlist:
-        videoitem.title = item.show
-        videoitem.fulltitle = item.fulltitle
-        videoitem.show = item.show
-        videoitem.thumbnail = item.thumbnail
-        videoitem.channel = __channel__
+        for videoitem in itemlist:
+            videoitem.title = item.show
+            videoitem.fulltitle = item.fulltitle
+            videoitem.show = item.show
+            videoitem.thumbnail = item.thumbnail
+            videoitem.channel = __channel__
+    except AttributeError:
+        logger.error("vcrypt data doesn't contain expected URL")
 
     return itemlist
 
