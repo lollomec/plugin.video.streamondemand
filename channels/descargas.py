@@ -24,6 +24,7 @@
 # ------------------------------------------------------------
 # Gestor de descargas
 # ------------------------------------------------------------
+import multidownload
 import os
 import sys
 import re
