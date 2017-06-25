@@ -11,7 +11,7 @@
     <bannermenu>https://www.cineblog01.blog/templates/cineblog01/images/logo.png</bannermenu>
 
     <update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/channels/</update_url>
-    <version>2</version>
+    <version>3</version>
     <date>25/05/2017</date>
     <changes>Added newest</changes>
 
