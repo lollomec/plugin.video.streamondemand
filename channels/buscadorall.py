@@ -41,7 +41,7 @@ host = "http://www.ibs.it"
 
 DEBUG = config.get_setting("debug")
 
-TMDB_KEY = 'f7f51775877e0bb6703520952b3c7840'
+TMDB_KEY = '6889f6089877fd092454d00edb44a84d'
 
 TMDB_URL_BASE = 'http://api.themoviedb.org/3/'
 TMDB_IMAGES_BASEURL = 'http://image.tmdb.org/t/p/'
