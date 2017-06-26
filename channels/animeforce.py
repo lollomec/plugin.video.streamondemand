@@ -192,8 +192,10 @@ def ultimiep(item):
             cleantitle = re.sub(r'Episodio?\s*\d+\s*(?:\(\d+\)|)', '', scrapedtitle).strip()
             # Creazione URL
             episodio = scrapertools.find_single_match(scrapedtitle.lower(), r'episodio?\s*(\d+)')
-            scrapedurl = re.sub(r'episodio?-?\d+-?(?:\d+-|)[oav]*', '', scrapedurl)
-            extra = "<tr>\s*<td[^>]+><strong>Episodio %s[^<]*</strong></td>" % episodio
+            scrapedurl = re.sub(r'episodio?-?\d+-?(?:\d+-|)[oav]*', '', scrapedurl).replace('-fine', '')
+            if 'download' not in scrapedurl:
+                scrapedurl = scrapedurl.replace('-streaming', '-download-streaming')
+            extra = "<tr>\s*<td[^>]+><strong>Episodio %s(?:[^>]+>[^>]+>|[^<]*)</strong></td>" % episodio
             print "EPISODIO: " + episodio + "\nTITLE: " + scrapedtitle + "\nExtra: " + extra + "\nURL: " + scrapedurl
             itemlist.append(infoSod(
                 Item(channel=__channel__,
