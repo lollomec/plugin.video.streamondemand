@@ -3,6 +3,7 @@
 # streamondemand.- XBMC Plugin
 # Canal para cineblog01
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
+# Version: 201706200900
 # ------------------------------------------------------------
 import re
 import urlparse
@@ -359,8 +360,8 @@ def season_serietv(item):
 
     starts = []
     season_titles = []
-    patron = r"Stagion[i|e].*"
-    matches = re.compile(patron, re.IGNORECASE).finditer(data)
+    patron = '^stagion[i|e].*$'
+    matches = re.compile(patron, re.MULTILINE|re.IGNORECASE).finditer(data)
     for match in matches:
         if match.group()!= '':
             season_titles.append(match.group())
@@ -618,6 +619,7 @@ def findvid_serie(item):
 
 def play(item):
     logger.info("[cineblog01.py] play")
+    itemlist = []
 
     if '/goto/' in item.url:
         item.url = item.url.split('/goto/')[-1].decode('base64')
@@ -637,7 +639,8 @@ def play(item):
                 data = scrapertools.get_match(data, r'<a href="([^"]+)".*?class="btn-wrapper">.*?licca.*?</a>')
             except IndexError:
                 data = scrapertools.get_header_from_response(item.url, headers=headers, header_to_get="Location")
-        while 'vcrypt' in data:
+        if data.find('vcrypt')>0:
+            data = data.replace('https:','http:')  ### Temp workaround to avoid https negotiation issues
             data = scrapertools.get_header_from_response(data, headers=headers, header_to_get="Location")
         logger.debug("##### play go.php data ##\n%s\n##" % data)
     elif "/link/" in item.url:
@@ -652,7 +655,8 @@ def play(item):
             logger.debug("##### The content is yet unpacked ##\n%s\n##" % data)
 
         data = scrapertools.find_single_match(data, 'var link(?:\s)?=(?:\s)?"([^"]+)";')
-        while 'vcrypt' in data:
+        if data.find('vcrypt')>0:
+            data = data.replace('https:','http:')   ### Temp workaround to avoid https negotiation issues
             data = scrapertools.get_header_from_response(data, headers=headers, header_to_get="Location")
         logger.debug("##### play /link/ data ##\n%s\n##" % data)
     else:
@@ -660,14 +664,18 @@ def play(item):
         logger.debug("##### play else data ##\n%s\n##" % data)
     logger.debug("##############################################################")
 
-    itemlist = servertools.find_video_items(data=data)
+    try:
+        logger.info("Link data: %s" % data)
+        itemlist = servertools.find_video_items(data=data)
 
-    for videoitem in itemlist:
-        videoitem.title = item.show
-        videoitem.fulltitle = item.fulltitle
-        videoitem.show = item.show
-        videoitem.thumbnail = item.thumbnail
-        videoitem.channel = __channel__
+        for videoitem in itemlist:
+            videoitem.title = item.show
+            videoitem.fulltitle = item.fulltitle
+            videoitem.show = item.show
+            videoitem.thumbnail = item.thumbnail
+            videoitem.channel = __channel__
+    except AttributeError:
+        logger.error("vcrypt data doesn't contain expected URL")
 
     return itemlist
 

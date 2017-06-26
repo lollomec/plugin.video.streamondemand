@@ -8,6 +8,7 @@ import re
 
 import urlparse
 
+from core import httptools
 from core import config
 from core import logger
 from core import scrapertools
@@ -16,22 +17,12 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "piratestreaming"
-__category__ = "F,S,A"
-__type__ = "generic"
-__title__ = "piratestreaming"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://www.piratestreaming.black"
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
-    logger.info("[piratestreaming.py] mainlist")
+    logger.info()
     itemlist = [Item(channel=__channel__,
                      title="[COLOR azure]Aggiornamenti[/COLOR]",
                      action="peliculas",
@@ -68,11 +59,11 @@ def mainlist(item):
 
 
 def peliculas(item):
-    logger.info("streamondemand.piratestreaming peliculas")
+    logger.info()
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="featuredItem">.*?<a href="([^"]+)".*?<img src="([^"]+)".*?<a href=[^>]*>(.*?)</a>'
@@ -87,8 +78,6 @@ def peliculas(item):
             scrapedplot = scrapertools.htmlclean(da[0]).strip()
         except:
             scrapedplot = "Trama non disponibile"
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios" if item.extra == "serie" else "findvideos",
@@ -124,11 +113,11 @@ def peliculas(item):
 
 
 def peliculas_tv(item):
-    logger.info("streamondemand.piratestreaming peliculas")
+    logger.info()
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="featuredItem">.*?<a href="([^"]+)".*?<img src="([^"]+)".*?<a href=[^>]*>(.*?)</a>'
@@ -143,8 +132,6 @@ def peliculas_tv(item):
             scrapedplot = scrapertools.htmlclean(da[0]).strip()
         except:
             scrapedplot = "Trama non disponibile"
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios" if item.extra == "serie" else "findvideos",
@@ -185,7 +172,7 @@ def HomePage(item):
 
 def categorias(item):
     itemlist = []
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<a href="#">Film</a>[^<]+<ul>(.*?)</ul>'
     data = scrapertools.find_single_match(data, patron)
@@ -196,8 +183,6 @@ def categorias(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedplot = ""
         scrapedthumbnail = ""
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -213,7 +198,7 @@ def categorias(item):
 def categoryarchive(item):
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<b>0-9</b><hr />(.*?)<div class="clear"></div>'
     data = scrapertools.find_single_match(data, patron)
@@ -224,8 +209,6 @@ def categoryarchive(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedplot = ""
         scrapedthumbnail = ""
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="episodios",
@@ -241,7 +224,7 @@ def categoryarchive(item):
 
 
 def search(item, texto):
-    logger.info("[piratestreaming.py] search " + texto)
+    logger.info()
 
     item.url = host + "/cerca.php?all=" + texto
 
@@ -259,7 +242,7 @@ def cerca(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     if item.extra == "serie":
         data = data.split('Serie TV Complete')[1]
@@ -275,7 +258,6 @@ def cerca(item):
     for scrapedthumbnail, scrapedurl, scrapedtitle in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle.replace("</a>", ""))
-        if DEBUG: logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios" if item.extra == "serie" else "findvideos",
@@ -341,7 +323,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     start = data.find('<!--googleoff: all-->')
     end = data.find('<!--googleon: all-->', start)
@@ -383,19 +365,12 @@ def episodios(item):
                  action="add_serie_to_library",
                  extra="episodios",
                  show=item.show))
-        itemlist.append(
-            Item(channel=__channel__,
-                 title="Scarica tutti gli episodi della serie",
-                 url=item.url,
-                 action="download_all_episodes",
-                 extra="episodios",
-                 show=item.show))
 
     return itemlist
 
 
 def findvid_serie(item):
-    logger.info("[piratestreaming.py] findvideos")
+    logger.info()
 
     # Descarga la página
     data = item.extra
