@@ -26,7 +26,7 @@ __language__ = "IT"
 # riferimento alla gestione del log
 DEBUG = config.get_setting("debug")
 
-host = "http://filmhdstreaming.org"
+host = "http://hdcineblog01.com"
 
 # -----------------------------------------------------------------
 # Elenco inziale del canale
@@ -117,7 +117,7 @@ def elenco(item):
     itemlist = []
     data = scrapertools.cache_page(item.url)
 
-    patron = '_b2"><a href="([^"]+)" title="(.*?)"><img src="([^"]+)"'
+    patron = r'<a href="([^"]+)" title="([^"]+)"><img src="([^"]+)"[^>]+>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedtitle, scrapedthumbnail in matches:
@@ -140,11 +140,11 @@ def elenco(item):
                  folder=True), tipo='movie'))
 
     # Extrae el paginador
-    patronvideos = '<a class="page dark gradient" href="(.*?)">Avanti'
+    patronvideos = r'<a class="page dark gradient" href=["|\']+([^"]+)["|\']+>AVANTI'
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     if len(matches) > 0:
-        scrapedurl = urlparse.urljoin(item.url, matches[0])
+        scrapedurl = urlparse.urljoin(re.sub(r'\d+.html$', '', item.url), matches[0])
         itemlist.append(
             Item(channel=__channel__,
                  action="HomePage",
@@ -226,7 +226,7 @@ def search(item, texto):
 
     itemlist = []
 
-    item.url = "http://filmhdstreaming.net/tag/" + texto + "/"
+    item.url = "http://hdcineblog01.com/search/" + texto
 
     try:
         return elenco(item)

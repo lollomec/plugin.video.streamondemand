@@ -731,3 +731,4 @@ def decode_adfly(data):
 
     decoded_url = base64.b64decode(left.encode() + right.encode())[2:].decode()
     return decoded_url
+

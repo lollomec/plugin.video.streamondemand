@@ -524,9 +524,9 @@ class Client(object):
             
             
     def _check_meta(self):
-        """
+        '''
         Servicio encargado de comprobar si los metadatos se han descargado
-        """
+        '''
         if self.status.state>=3 and  self.status.state <= 5 and not self.has_meta:
 
             #Guardamos los metadatos
@@ -577,9 +577,9 @@ class Client(object):
               pieces_count +=1
 
     def print_status(self):
-        '''
+        """
         Servicio encargado de mostrar en el log el estado de la descarga
-        '''
+        """
         s = self.status
         if self.file:
           archivo = self.file.index
@@ -588,4 +588,4 @@ class Client(object):
         logger.info('%.2f%% de %.1fMB %s | %.1f kB/s | #%s %d%% | AutoClose: %s | S: %d(%d) P: %d(%d)) | TRK: %d DHT: %d PEX: %d LSD %d | DHT:%s (%d) | Trakers: %d' % \
                     (s.progress_file , s.file_size, s.str_state, s._download_rate, archivo, s.buffer, s.timeout , s.num_seeds,\
                      s.num_complete, s.num_peers, s.num_incomplete, s.trk_peers,s.dht_peers, s.pex_peers, s.lsd_peers, s.dht_state, s.dht_nodes, s.trackers))                   
-                     
+

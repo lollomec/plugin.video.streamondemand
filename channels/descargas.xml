@@ -13,7 +13,7 @@
 	<bannermenu></bannermenu>
 
 	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/channels/</update_url>
-	<version>5</version>
+	<version>7</version>
 
 	<changes>
 		<change>
@@ -25,24 +25,24 @@
 
 
 	<categories>
-		<category>movie</category>
+		<category></category>
 	</categories>
 	
 	<settings>
 		<id>library_move</id>
 		<type>bool</type>
 		<label>Spostare download completi in libreria</label>
-		<default>true</default>
-		<enabled>true</enabled>
-		<visible>true</visible>
+		<default>false</default>
+		<enabled>false</enabled>
+		<visible>false</visible>
 	</settings>
   <settings>
 		<id>browser</id>
 		<type>bool</type>
 		<label>Visualizza download completi</label>
 		<default>false</default>
-		<enabled>true</enabled>
-		<visible>true</visible>
+		<enabled>false</enabled>
+		<visible>false</visible>
 	</settings>
 </channel>
 

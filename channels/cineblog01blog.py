@@ -8,6 +8,7 @@
 
 import re
 
+from core import httptools
 from core import logger
 from core import config
 from core import servertools
@@ -15,26 +16,13 @@ from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
-__channel__ = "cineblog01blog"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "Cineblog01Blog"
-__language__ = "IT"
-
 host = "https://www.cineblog01.blog"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
-
-def isGeneric():
-    return True
+__channel__ = "cineblog01blog"
 
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
-    logger.info("[Cineblog01Blog.py]==> mainlist")
+    logger.info()
     itemlist = [Item(channel=__channel__,
                      action="peliculas",
                      title=color("Nuovi film", "azure"),
@@ -57,7 +45,7 @@ def mainlist(item):
 
 # ----------------------------------------------------------------------------------------------------------------
 def newest(categoria):
-    logger.info("[Cineblog01Blog.py]==> newest" + categoria)
+    logger.info()
     itemlist = []
     item = Item()
     try:
@@ -82,10 +70,10 @@ def newest(categoria):
 
 # ----------------------------------------------------------------------------------------------------------------
 def categorie(item):
-    logger.info("[Cineblog01Blog.py]==> categorie")
+    logger.info()
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     blocco = scrapertools.get_match(data, r'<ul>\s*<li class="drop">(.*?)</ul>')
     patron = r'<li><a href="([^"]+)">([^"]+)</a></li>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
@@ -105,10 +93,10 @@ def categorie(item):
 
 # ----------------------------------------------------------------------------------------------------------------
 def filmperanno(item):
-    logger.info("[Cineblog01Blog.py]==> filmperanno")
+    logger.info()
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     blocco = scrapertools.get_match(data, r'<li class="drop"><a.*?class="link1"><b>Film per anno</b></a>(.*?)</ul>')
     patron = r'<li><a href="([^"]+)">([^"]+)</a></li>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
@@ -128,10 +116,10 @@ def filmperanno(item):
 
 # ----------------------------------------------------------------------------------------------------------------
 def peliculas(item):
-    logger.info("[Cineblog01Blog.py]==> peliculas")
+    logger.info()
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     patron = r'<div class="short-story">\s*<a href="([^"]+)".*?>\s*'
     patron += r'<img.*?style="background:url\(([^\)]+)\).*?">'
     patron += r'\s*<div class="custom-title">([^<]+)</div>'
@@ -178,8 +166,8 @@ def peliculas(item):
 
 # ----------------------------------------------------------------------------------------------------------------
 def findvideos(item):
-    logger.info("[Cineblog01Blog.py]==> findvideos")
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    logger.info()
+    data = httptools.downloadpage(item.url).data
 
     itemlist = servertools.find_video_items(data=data)
 
