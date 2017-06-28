@@ -247,10 +247,9 @@ def check_for_update(overwrite=True):
             heading = 'Aggiornando la libreria....'
             p_dialog = platformtools.dialog_progress_bg('streamondemand', heading)
             p_dialog.update(0, '')
-            show_list = []
 
-            for path, folders, files in filetools.walk(library.TVSHOWS_PATH):
-                show_list.extend([filetools.join(path, f) for f in files if f == "tvshow.nfo"])
+            import glob
+            show_list = glob.glob(filetools.join(library.TVSHOWS_PATH, u'/*/tvshow.nfo'))
 
             if show_list:
                 t = float(100) / len(show_list)

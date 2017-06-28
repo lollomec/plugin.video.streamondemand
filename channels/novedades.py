@@ -76,7 +76,6 @@ def mainlist(item,thumbnail_type="squares"):
     new_item.category = "Novità in %s" % new_item.title
     itemlist.append(new_item)
 
-    '''
     if list_canales['infantiles']:
         thumbnail = thumbnail_base + "/thumb_canales_infantiles.png"
     new_item = Item(channel=item.channel, action="novedades", extra="infantiles", title="Cartoni Animati",
