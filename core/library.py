@@ -27,15 +27,15 @@
 
 import errno
 import math
+import os
 
 from core import config
 from core import filetools
 from core import logger
-from core import scrapertools
 from core import scraper
+from core import scrapertools
 from core.item import Item
 from platformcode import platformtools
-
 
 FOLDER_MOVIES = config.get_setting("folder_movies")
 FOLDER_TVSHOWS = config.get_setting("folder_tvshows")
@@ -149,13 +149,14 @@ def save_library_movie(item):
 
     base_name = unicode(filetools.validate_path(base_name.replace('/', '-')), "utf8").lower().encode("utf8")
 
-    for raiz, subcarpetas, ficheros in filetools.walk(MOVIES_PATH):
-        for c in subcarpetas:
-            code = scrapertools.find_single_match(c, '\[(.*?)\]')
-            if code and code in item.infoLabels['code']:
-                path = filetools.join(raiz, c)
-                _id = code
-                break
+    subcarpetas = os.listdir(MOVIES_PATH)
+
+    for c in subcarpetas:
+        code = scrapertools.find_single_match(c, '\[(.*?)\]')
+        if code and code in item.infoLabels['code']:
+            path = c
+            _id = code
+            break
 
     if not path:
         # Crear carpeta
@@ -269,13 +270,14 @@ def save_library_tvshow(item, episodelist):
 
     base_name = unicode(filetools.validate_path(base_name.replace('/', '-')), "utf8").lower().encode("utf8")
 
-    for raiz, subcarpetas, ficheros in filetools.walk(TVSHOWS_PATH):
-        for c in subcarpetas:
-            code = scrapertools.find_single_match(c, '\[(.*?)\]')
-            if code and code in item.infoLabels['code']:
-                path = filetools.join(raiz, c)
-                _id = code
-                break
+    subcarpetas = os.listdir(TVSHOWS_PATH)
+
+    for c in subcarpetas:
+        code = scrapertools.find_single_match(c, '\[(.*?)\]')
+        if code and code in item.infoLabels['code']:
+            path = c
+            _id = code
+            break
 
     if not path:
         path = filetools.join(TVSHOWS_PATH, ("%s [%s]" % (base_name, _id)).strip())
@@ -285,7 +287,6 @@ def save_library_tvshow(item, episodelist):
         except OSError, exception:
             if exception.errno != errno.EEXIST:
                 raise
-
 
     tvshow_path = filetools.join(path, "tvshow.nfo")
     if not filetools.exists(tvshow_path):
@@ -308,7 +309,7 @@ def save_library_tvshow(item, episodelist):
 
     # FILTERTOOLS
     # si el canal tiene filtro de idiomas, añadimos el canal y el show
-    if episodelist and "list_idiomas" in episodelist[0]:
+    if episodelist and "list_language" in episodelist[0]:
         # si ya hemos añadido un canal previamente con filtro, añadimos o actualizamos el canal y show
         if "library_filter_show" in item_tvshow:
             item_tvshow.library_filter_show[item.channel] = item.show
@@ -334,7 +335,7 @@ def save_library_tvshow(item, episodelist):
           (insertados, sobreescritos, fallidos, time.time() - start_time)
     logger.debug(msg)'''
 
-    return insertados, sobreescritos, fallidos
+    return insertados, sobreescritos, fallidos, path
 
 
 def save_library_episodes(path, episodelist, serie, silent=False, overwrite=True):
@@ -370,7 +371,7 @@ def save_library_episodes(path, episodelist, serie, silent=False, overwrite=True
     news_in_playcounts = {}
 
     # Listamos todos los ficheros de la serie, asi evitamos tener que comprobar si existe uno por uno
-    raiz, carpetas_series, ficheros = filetools.walk(path).next()
+    ficheros = os.listdir(path)
     ficheros = [filetools.join(path, f) for f in ficheros]
 
     # Silent es para no mostrar progreso (para library_service)
@@ -423,7 +424,7 @@ def save_library_episodes(path, episodelist, serie, silent=False, overwrite=True
             item_strm.contentTitle = season_episode
 
             # FILTERTOOLS
-            if item_strm.list_idiomas:
+            if item_strm.list_language:
                 # si tvshow.nfo tiene filtro se le pasa al item_strm que se va a generar
                 if "library_filter_show" in serie:
                     item_strm.library_filter_show = serie.library_filter_show
@@ -574,6 +575,7 @@ def add_serie_to_library(item, channel=None):
 
     """
     logger.info("show=#" + item.show + "#")
+
     if config.is_xbmc():
         from platformcode import xbmc_library
         xbmc_library.ask_set_content()
@@ -602,9 +604,7 @@ def add_serie_to_library(item, channel=None):
         # Obtiene el listado de episodios
         itemlist = getattr(channel, item.action)(item)
 
-
-
-    insertados, sobreescritos, fallidos = save_library_tvshow(item, itemlist)
+    insertados, sobreescritos, fallidos, path = save_library_tvshow(item, itemlist)
 
     if not insertados and not sobreescritos and not fallidos:
         platformtools.dialog_ok("Biblioteca", "ERRORE, la serie non è stata aggiunta alla libreria",
@@ -632,5 +632,7 @@ def add_serie_to_library(item, channel=None):
                     # Comprobar que no se esta buscando contenido en la biblioteca de Kodi
                     while xbmc.getCondVisibility('Library.IsScanningVideo()'):
                         xbmc.sleep(1000)
-                # Se lanza la sincronizacion
-                xbmc_library.sync_trakt()
+                # Se lanza la sincronizacion para la biblioteca de Kodi
+                xbmc_library.sync_trakt_kodi()
+                # Se lanza la sincronización para la biblioteca de pelisalacarta
+                xbmc_library.sync_trakt_pelisalacarta(path)

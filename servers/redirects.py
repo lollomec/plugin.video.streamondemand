@@ -32,7 +32,8 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
         headers.append(["Accept-Encoding", "gzip,deflate,sdch"])
         page_url = page_url.replace("https://animeflv.net/embed_izanagi.php?key=",
                                     "https://s2.animeflv.net/izanagi.php?id=")
-        page_url = page_url.replace("http://animeflv.net/embed_yotta.php?key=", "https://s1.animeflv.com/gdrive.php?id=")
+        page_url = page_url.replace("http://animeflv.net/embed_yotta.php?key=",
+                                    "https://s1.animeflv.com/gdrive.php?id=")
         data = scrapertools.cache_page(page_url, headers=headers)
         data = data.replace("\\\\", "")
         data = data.replace("\\/", "/")
@@ -40,20 +41,20 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
         matches = re.compile(patronvideos, re.DOTALL).findall(data)
         for match in matches:
             video_urls.append([".mp4 [redirects]", match])
-        
+
         patronvideos = '(http://www.animeid.+?)"'
         matches = re.compile(patronvideos, re.DOTALL).findall(data)
         for match in matches:
             response = urllib2.urlopen(match)
             video_urls.append([".mp4 [redirects]", response.geturl()])
-    
+
     return video_urls
 
 
 # Encuentra vídeos del servidor en el texto pasado
 def find_videos(data):
     encontrados = set()
-    devuelve = []    
+    devuelve = []
     patronvideos = '(https://animeflv.net/embed_izanagi.php\?key=.+?),'
     logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
@@ -82,12 +83,11 @@ def find_videos(data):
             encontrados.add(url)
         else:
             logger.info("  url duplicada=" + url)
-            
-    
+
     patronvideos = "(http://www.animeid..{2,3}/embed/.+?/)"
     logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
-    
+
     titulo = "[animeimoe]"
     for match in matches:
         url = match
@@ -98,11 +98,11 @@ def find_videos(data):
             encontrados.add(url)
         else:
             logger.info("  url duplicada=" + url)
-            
+
     patronvideos = "(https://jkanime.net/jk.php\?u=stream/jkmedia.+?)\s"
     logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
-    
+
     titulo = "[jkanime]"
     for match in matches:
         url = match.replace('"', '')

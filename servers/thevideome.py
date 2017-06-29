@@ -24,7 +24,7 @@ def test_video_exists(page_url):
 
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
     logger.info("url=" + page_url)
-    if not "embed" in page_url:
+    if "embed" not in page_url:
         page_url = page_url.replace("http://thevideo.me/", "http://thevideo.me/embed-") + ".html"
 
     data = httptools.downloadpage(page_url).data
@@ -58,7 +58,7 @@ def find_videos(data):
 
     for match in matches:
         titulo = "[thevideo.me]"
-        url = "http://thevideo.me/embed-" + match + ".html"
+        url = "http://thevideo.me/embed-%s.html" % match
         if url not in encontrados:
             logger.info("  url=" + url)
             devuelve.append([titulo, url, 'thevideome'])

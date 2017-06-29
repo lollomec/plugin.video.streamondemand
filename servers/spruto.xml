@@ -1,13 +1,54 @@
 <?xml version="1.0" ?>
 <server>
 	<active>true</active>
-	<changes>Reparado por cambios en la expresion regular de los enlaces a los videos</changes>
-	<date>04/06/2016</date>
+	<changes>
+		<change>
+			<autor></autor>
+			<date>25/03/2016</date>
+			<description>Versión inicial</description>
+		</change>
+	</changes>
+	<find_videos>
+		<ignore_urls>
+		</ignore_urls>
+		<patterns>
+			<pattern>//(?:www.)?spruto.tv/iframe_embed.php\?video_id=(\d+)</pattern>
+			<url>http://www.spruto.tv/iframe_embed.php?video_id=\1</url>
+		</patterns>
+		<patterns>
+			<pattern>//(?:www.)?spruto.tv/videos/(\d+)</pattern>
+			<url>http://www.spruto.tv/iframe_embed.php?video_id=\1</url>
+		</patterns>
+	</find_videos>
 	<free>true</free>
 	<id>spruto</id>
 	<name>spruto</name>
-	<premium></premium>
+	<premium>
+		<value>realdebrid</value>
+	</premium>
+	<settings>
+		<default>false</default>
+		<enabled>true</enabled>
+		<id>black_list</id>
+		<label>Incluir en lista negra</label>
+		<type>bool</type>
+		<visible>true</visible>
+	</settings>
+	<settings>
+		<default>100</default>
+		<enabled>true</enabled>
+		<id>favorites_servers_list</id>
+		<label>Incluir en lista de favoritos</label>
+		<lvalues>No</lvalues>
+		<lvalues>1</lvalues>
+		<lvalues>2</lvalues>
+		<lvalues>3</lvalues>
+		<lvalues>4</lvalues>
+		<lvalues>5</lvalues>
+		<type>list</type>
+		<visible>false</visible>
+	</settings>
 	<thumbnail>http://media.tvalacarta.info/servers/server_spruto.png</thumbnail>
 	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/servers/</update_url>
-	<version>2</version>
+	<version>3</version>
 </server>

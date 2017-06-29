@@ -6,9 +6,11 @@
 # ---------------------------------------------------------------------------------------------------------------------
 
 import re
+
 from core import httptools
 from core import logger
 from core import scrapertools
+
 
 def test_video_exists(page_url):
     logger.info("(page_url='%s')" % page_url)
@@ -27,6 +29,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     response = httptools.downloadpage(page_url, cookies=False)
     cookie = {'Cookie': response.headers["set-cookie"]}
     data = response.data.replace("\\", "")
+
     '''
     "240":[{"type":"video/mp4","url":"http://www.dailymotion.com/cdn/H264-320x240/video/x33mvht.mp4?auth=1441130963-2562-u49z9kdc-84796332ccab3c7ce84e01c67a18b689"}]
     '''

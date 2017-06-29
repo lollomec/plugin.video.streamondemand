@@ -1,4 +1,4 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 # ------------------------------------------------------------
 # streamondemand - XBMC Plugin
 # Conector para streamango
@@ -7,29 +7,37 @@
 # ------------------------------------------------------------
 
 import re
-import urllib
 
+from core import httptools
 from core import logger
 from core import scrapertools
 
 
+def test_video_exists(page_url):
+    logger.info("(page_url='%s')" % page_url)
+
+    data = httptools.downloadpage(page_url).data
+    if "We are unable to find the video" in data:
+        return False, "[streamango] Il file non esiste o è stato cancellato"
+
+    return True, ""
+
+
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
-    logger.info("url=" + page_url)
+    logger.info("(page_url='%s')" % page_url)
+
+    data = httptools.downloadpage(page_url).data
+
     video_urls = []
+    matches = scrapertools.find_multiple_matches(data, 'type:"video/([^"]+)",src:"([^"]+)",height:(\d+)')
+    for ext, media_url, calidad in matches:
+        if not media_url.startswith("http"):
+            media_url = "http:" + media_url
+        video_urls.append([".%s %sp [streamango]" % (ext, calidad), media_url])
 
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_0_2 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A501 Safari/9537.53'}
-
-    data = scrapertools.cache_page(page_url, headers=headers)
-
-    headers['Referer'] = page_url
-    headers = urllib.urlencode(headers)
-
-    matches = scrapertools.find_multiple_matches(data, r'{type:"video/mp4",src:"([^"]+)",height:([^,]+),')
-    for media_url, vtype in matches:
-        if media_url.startswith("//"):
-            media_url = "http:%s" % media_url
-        video_urls.append([vtype + " [streamango]", media_url + '|' + headers])
+    video_urls.reverse()
+    for video_url in video_urls:
+        logger.info("%s - %s" % (video_url[0], video_url[1]))
 
     return video_urls
 
@@ -47,10 +55,10 @@ def find_videos(text):
         titulo = "[streamango]"
         url = "http://streamango.com/embed/%s" % match
         if url not in encontrados:
-            logger.info("url=" + url)
+            logger.info("  url=" + url)
             devuelve.append([titulo, url, 'streamango'])
             encontrados.add(url)
         else:
-            logger.info("url duplicada=" + url)
+            logger.info("  url duplicada=" + url)
 
     return devuelve

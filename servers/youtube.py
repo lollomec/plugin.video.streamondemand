@@ -11,47 +11,46 @@ import urlparse
 
 from core import config
 from core import httptools
+from core import jsontools as json
 from core import logger
 from core import scrapertools
 
-from core import jsontools as json
 
-def get_video_url( page_url , premium = False , user="" , password="", video_password="" ):
+def get_video_url(page_url, premium=False, user="", password="", video_password=""):
     logger.info("(page_url='%s')" % page_url)
 
     if not page_url.startswith("http"):
         page_url = "http://www.youtube.com/watch?v=%s" % page_url
         logger.info(" page_url->'%s'" % page_url)
-        
+
     video_id = scrapertools.find_single_match(page_url, 'v=([A-z0-9_-]{11})')
     video_urls = extract_videos(video_id)
-
     video_urls.reverse()
-    
+
     for video_url in video_urls:
         logger.info(str(video_url))
-    
+
     return video_urls
 
 
 def remove_additional_ending_delimiter(data):
-        pos = data.find("};")                                          
-        if pos != -1:                                                  
-            data = data[:pos + 1]
-        return data                                                  
-                                                               
+    pos = data.find("};")
+    if pos != -1:
+        data = data[:pos + 1]
+    return data
+
 
 def normalize_url(url):
-        if url[0:2] == "//":                                       
-            url = "http:" + url                                   
-        return url 
-                                                                     
-                                                                                      
+    if url[0:2] == "//":
+        url = "http:" + url
+    return url
+
+
 def extract_flashvars(data):
     assets = 0
     flashvars = {}
     found = False
-                                                                                      
+
     for line in data.split("\n"):
         if line.strip().find(";ytplayer.config = ") > 0:
             found = True
@@ -62,14 +61,14 @@ def extract_flashvars(data):
             data = line[p1 + 1:p2]
             break
     data = remove_additional_ending_delimiter(data)
-                                                              
+
     if found:
         data = json.load_json(data)
         if assets:
             flashvars = data["assets"]
         else:
             flashvars = data["args"]
-                                                              
+
     for k in ["html", "css", "js"]:
         if k in flashvars:
             flashvars[k] = normalize_url(flashvars[k])
@@ -103,7 +102,7 @@ def extract_videos(video_id):
         100: "360p vp8 3D",
         101: "480p vp8 3D",
         102: "720p vp8 3D"
-        }
+    }
 
     url = 'http://www.youtube.com/get_video_info?video_id=%s&eurl=https://youtube.googleapis.com/v/%s&ssl_stream=1' % \
           (video_id, video_id)
@@ -119,10 +118,10 @@ def extract_videos(video_id):
         import xbmc
         xbmc_version = config.get_platform(True)['num_version']
         if xbmc_version >= 17 and xbmc.getCondVisibility('System.HasAddon(inputstream.adaptive)') \
-                             and params.get('dashmpd'):
+                and params.get('dashmpd'):
             if params.get('use_cipher_signature', '') != 'True':
                 video_urls.append(['mpd  HD [youtube]', params['dashmpd'], 0, '', True])
-    
+
     js_signature = ""
     youtube_page_data = httptools.downloadpage("http://www.youtube.com/watch?v=%s" % video_id).data
     params = extract_flashvars(youtube_page_data)
@@ -170,62 +169,63 @@ def extract_videos(video_id):
                     signature = js_signature([sig])
                     url += "&signature=" + signature
                 url = url.replace(",", "%2C")
-                video_urls.append(["("+fmt_value[key]+") [youtube]", url])
+                video_urls.append(["(" + fmt_value[key] + ") [youtube]", url])
             except:
                 import traceback
                 logger.info(traceback.format_exc())
 
     return video_urls
 
+
 def find_videos(data):
     encontrados = set()
     devuelve = []
 
-    patronvideos = 'youtube(?:-nocookie)?\.com/(?:(?:(?:v/|embed/))|(?:(?:watch(?:_popup)?(?:\.php)?)?(?:\?|#!?)(?:.+&)?v=))?([0-9A-Za-z_-]{11})'#'"http://www.youtube.com/v/([^"]+)"'
-    logger.info(" #"+patronvideos+"#")
+    patronvideos = 'youtube(?:-nocookie)?\.com/(?:(?:(?:v/|embed/))|(?:(?:watch(?:_popup)?(?:\.php)?)?(?:\?|#!?)(?:.+&)?v=))?([0-9A-Za-z_-]{11})'  # '"http://www.youtube.com/v/([^"]+)"'
+    logger.info(" #" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for match in matches:
         titulo = "[YouTube]"
-        url = "http://www.youtube.com/watch?v="+match
-        
-        if url!='':
+        url = "http://www.youtube.com/watch?v=" + match
+
+        if url != '':
             if url not in encontrados:
-                logger.info("  url="+url)
+                logger.info("  url=" + url)
                 devuelve.append([titulo, url, 'youtube'])
                 encontrados.add(url)
             else:
-                logger.info("  url duplicada="+url)
-    
+                logger.info("  url duplicada=" + url)
+
     patronvideos = 'www.youtube.*?v(?:=|%3D)([0-9A-Za-z_-]{11})'
-    logger.info(" #"+patronvideos+"#")
+    logger.info(" #" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for match in matches:
         titulo = "[YouTube]"
-        url = "http://www.youtube.com/watch?v="+match
+        url = "http://www.youtube.com/watch?v=" + match
 
         if url not in encontrados:
-            logger.info("  url="+url)
+            logger.info("  url=" + url)
             devuelve.append([titulo, url, 'youtube'])
             encontrados.add(url)
         else:
-            logger.info("  url duplicada="+url)
+            logger.info("  url duplicada=" + url)
 
-    #http://www.youtube.com/v/AcbsMOMg2fQ
+    # http://www.youtube.com/v/AcbsMOMg2fQ
     patronvideos = 'youtube.com/v/([0-9A-Za-z_-]{11})'
-    logger.info(" #"+patronvideos+"#")
+    logger.info(" #" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for match in matches:
         titulo = "[YouTube]"
-        url = "http://www.youtube.com/watch?v="+match
+        url = "http://www.youtube.com/watch?v=" + match
 
         if url not in encontrados:
-            logger.info("  url="+url)
+            logger.info("  url=" + url)
             devuelve.append([titulo, url, 'youtube'])
             encontrados.add(url)
         else:
-            logger.info("  url duplicada="+url)
+            logger.info("  url duplicada=" + url)
 
     return devuelve

@@ -9,6 +9,7 @@
 import re
 import urllib
 
+from core import httptools
 from core import logger
 from core import scrapertools
 
@@ -16,6 +17,18 @@ headers = [
     ['User-Agent',
      'Mozilla/5.0 (iPhone; CPU iPhone OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5376e Safari/8536.25'],
 ]
+
+
+def test_video_exists(page_url):
+    logger.info("(page_url='%s')" % page_url)
+    
+    data = httptools.downloadpage(page_url).data
+    if "copyrightsRestricted" in data or "COPYRIGHTS_RESTRICTED" in data:
+        return False, "[Okru] Il file è stato rimosso per violazione del copyright"
+    elif "notFound" in data:
+        return False, "[Okru] Il file non esiste o è stato rimosso"
+
+    return True, ""
 
 
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
@@ -45,7 +58,7 @@ def find_videos(text):
     devuelve = []
 
     patronvideos = '//(?:www.)?ok.../(?:videoembed|video)/(\d+)'
-    logger.info("[okru.py] find_videos #" + patronvideos + "#")
+    logger.info("#" + patronvideos + "#")
 
     matches = re.compile(patronvideos, re.DOTALL).findall(text)
 
@@ -53,10 +66,10 @@ def find_videos(text):
         titulo = "[okru]"
         url = 'http://ok.ru/dk?cmd=videoPlayerMetadata&mid=%s|http://ok.ru/videoembed/%s' % (media_id, media_id)
         if url not in encontrados:
-            logger.info("  url=" + url)
+            logger.info("url=" + url)
             devuelve.append([titulo, url, 'okru'])
             encontrados.add(url)
         else:
-            logger.info("  url duplicada=" + url)
+            logger.info("url duplicada=" + url)
 
     return devuelve
