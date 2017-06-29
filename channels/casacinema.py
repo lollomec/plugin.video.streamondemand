@@ -312,20 +312,24 @@ def episodios(item):
                  action="add_serie_to_library",
                  extra="episodios" + "###" + item.extra,
                  show=item.show))
-        itemlist.append(
-            Item(channel=__channel__,
-                 title="Scarica tutti gli episodi della serie",
-                 url=item.url,
-                 action="download_all_episodes",
-                 extra="episodios" + "###" + item.extra,
-                 show=item.show))
 
     return itemlist
 
 def findvideos(item):
     logger.info("streamondemand.casacinema findvideos")
 
+    itemlist = []
+
     data = item.url if item.extra == 'serie' else scrapertools.cache_page(item.url, headers=headers)
+
+    html = scrapertools.cache_page(data)
+    patron = '"http:\/\/shrink-service\.it\/[^\/]+\/[^\/]+\/([^"]+)"'
+    matches = re.compile(patron, re.DOTALL).findall(html)
+
+    for url in matches:
+        if url is not None:
+               data = data
+        else: continue
 
     itemlist = servertools.find_video_items(data=data)
     for videoitem in itemlist:

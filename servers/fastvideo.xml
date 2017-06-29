@@ -11,38 +11,16 @@
 	<find_videos>
 		<ignore_urls>
 			<value>http://www.fastvideo.me/theme</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/jquery</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/s</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/images</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/faq</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/embed</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/ri</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/d</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/css</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/js</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/player</value>
-		</ignore_urls>
-		<ignore_urls>
 			<value>http://www.fastvideo.me/cgi</value>
 		</ignore_urls>
 		<patterns>
