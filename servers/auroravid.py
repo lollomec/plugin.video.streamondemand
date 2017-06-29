@@ -17,7 +17,7 @@ def test_video_exists(page_url):
     logger.info("(page_url='%s')" % page_url)
 
     data = httptools.downloadpage(page_url).data
-    
+
     if "This file no longer exists on our servers" in data:
         return False, "[Auroravid] Il video è stato rimosso"
 
@@ -31,7 +31,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     logger.info("(page_url='%s')" % page_url)
     data = httptools.downloadpage(page_url).data
 
-    video_urls = [] 
+    video_urls = []
     videourls = scrapertools.find_multiple_matches(data, 'src\s*:\s*[\'"]([^\'"]+)[\'"]')
     if not videourls:
         videourls = scrapertools.find_multiple_matches(data, '<source src=[\'"]([^\'"]+)[\'"]')
@@ -47,6 +47,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
         video_urls.append([ext + " [auroravid]", videourl])
 
     return video_urls
+
 
 def find_videos(data):
     encontrados = set()

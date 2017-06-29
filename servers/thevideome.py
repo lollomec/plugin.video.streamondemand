@@ -9,23 +9,28 @@
 import re
 import urllib
 
+from core import httptools
 from core import logger
 from core import scrapertools
 
-headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0'],
+headers = [['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:54.0) Gecko/20100101 Firefox/54.0'],
            ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
            ['Accept-Language', 'en-US,en;q=0.5'],
            ['Accept-Encoding', 'gzip, deflate'],
            ['Cache-Control', 'max-age=0']]
 
-
 def test_video_exists(page_url):
-    logger.info("streamondemand.servers.thevideome test_video_exists(page_url='%s')" % page_url)
+    logger.info("(page_url='%s')" % page_url)
+
+    data = httptools.downloadpage(page_url).data
+    if "File was deleted" in data or "Page Cannot Be Found" in data:
+        return False, "[thevideo.me] Il file non esiste o è stato cancellato"
+
     return True, ""
 
 
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
-    logger.info("streamondemand.servers.thevideome url=" + page_url)
+    logger.info("url=" + page_url)
 
     if "embed" not in page_url:
         page_url = page_url.replace("http://thevideo.me/", "http://thevideo.me/embed-") + ".html"
@@ -70,4 +75,5 @@ def find_videos(data):
             encontrados.add(url)
         else:
             logger.info("  url duplicada=" + url)
+
     return devuelve

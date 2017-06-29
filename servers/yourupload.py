@@ -21,6 +21,7 @@ def test_video_exists(page_url):
 
     return True, ""
 
+
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
     logger.info("(page_url='%s')" % page_url)
 
@@ -42,19 +43,18 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
 
     return video_urls
 
+
 # Encuentra vídeos del servidor en el texto pasado
 def find_videos(data):
     encontrados = set()
     encontrados.add("http://www.yourupload.com/embed/embed")
     devuelve = []
 
-    #http://www.yourupload.com/embed/2PU6jqindD1Q
-
-    #http://embed.yourupload.com/2PU6jqindD1Q
+    # http://www.yourupload.com/embed/2PU6jqindD1Q
+    # http://embed.yourupload.com/2PU6jqindD1Q
     patronvideos = 'yourupload.com/(?:watch/|embed/|)([A-z0-9]+)'
     logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
-
     for match in matches:
         titulo = "[yourupload]"
         url = "http://www.yourupload.com/embed/" + match
@@ -64,5 +64,5 @@ def find_videos(data):
             encontrados.add(url)
         else:
             logger.info("  url duplicada=" + url)
-            
+
     return devuelve

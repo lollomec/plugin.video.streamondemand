@@ -16,7 +16,7 @@ from core import scrapertools
 
 
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
-    logger.info("[backin.py] url=" + page_url)
+    logger.info("page_url=" + page_url)
 
     video_urls = []
 
@@ -45,7 +45,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     video_urls.append([".mp4" + " [backin]", url + '|' + urllib.urlencode(dict(headers))])
 
     for video_url in video_urls:
-        logger.info("[backin.py] %s - %s" % (video_url[0], video_url[1]))
+        logger.info("%s - %s" % (video_url[0], video_url[1]))
 
     return video_urls
 
@@ -57,7 +57,7 @@ def find_videos(text):
 
     # http://backin.net/iwbe6genso37
     patronvideos = '(?:backin).net/([A-Z0-9a-z]+)'
-    logger.info("[backin.py] find_videos #" + patronvideos + "#")
+    logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(text)
 
     for match in matches:
