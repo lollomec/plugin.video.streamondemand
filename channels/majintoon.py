@@ -11,27 +11,15 @@ import re
 from core import config
 from core import logger
 from core import servertools
+from core import httptools
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "majintoon"
-__category__ = "A, S"
-__type__ = "generic"
-__title__ = "Majintoon"
-__language__ = "IT"
 
 host = "https://majintoon.wordpress.com"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
-
-
-def isGeneric():
-    return True
 
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
@@ -91,8 +79,8 @@ def categorie(item):
     logger.info("[Majintoon.py]==> categorie")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
-    blocco = scrapertools.get_match(data, r'Categorie</a>\s*<ul class="sub-menu">(.*?)</ul>\s*</li>')
+    data = httptools.downloadpage(item.url).data
+    blocco = scrapertools.get_match(data, r'Categorie</a>\s*<ul\s*class="sub-menu">(.*?)</ul>\s*</li>')
     patron = r'<li[^>]+><a href="([^"]+)">([^<]+)</a></li>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
 
@@ -115,7 +103,7 @@ def lista_anime(item):
     logger.info("[Majintoon.py]==> lista_anime")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     patron = r'<figure class="post-image">\s*<a title="([^"]+)" href="([^"]+)">'
     patron += r'\s*<img.*?src="([^"]*)".*?/>\s*</a>\s*</figure>'
@@ -163,9 +151,9 @@ def episodi(item):
     logger.info("[Majintoon.py]==> episodi")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
-    patron = r'<a href="([^"]+)" target="_blank"(?:\s*rel="noopener noreferrer"|)>([^<]+)</a>'
+    patron = r'<a href="([^"]+)" target="_blank"(?:\s*rel="[^"]+"|)>([^<]+)</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedtitle in matches:
