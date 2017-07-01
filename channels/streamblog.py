@@ -90,7 +90,6 @@ def categorias(item):
     matches = re.compile(patron, re.DOTALL).findall(bloque)
 
     for scrapedurl, scrapedtitle in matches:
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         scrapedurl = host + scrapedurl
         itemlist.append(
             Item(channel=__channel__,
@@ -143,8 +142,6 @@ def pelis_movie_src(item):
             else:
                 continue
 
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -173,8 +170,7 @@ def pelis_tv_src(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedthumbnail = host + scrapedthumbnail
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",
@@ -261,8 +257,7 @@ def peliculas_tv(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedthumbnail = host + scrapedthumbnail
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",

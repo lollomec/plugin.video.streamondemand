@@ -49,8 +49,7 @@ def peliculas(item):
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedurl = scrapedurl.replace("-1/", "-links/")
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",

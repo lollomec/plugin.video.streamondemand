@@ -99,7 +99,6 @@ def categorias(item):
     matches = re.compile(patron, re.DOTALL).findall(bloque)
 
     for scrapedurl, scrapedtitle in matches:
-        if DEBUG: logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -149,8 +148,7 @@ def search_peliculas(item):
         scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedtitle = scrapedtitle.replace("streaming", "").replace("Permalink to ", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+
         itemlist.append(
             Item(channel=__channel__,
                  action="episodios" if item.extra == "serie" else "findvideos",
@@ -185,8 +183,7 @@ def search_peliculas_tv(item):
         scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedtitle = scrapedtitle.replace("streaming", "").replace("Permalink to ", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+
         itemlist.append(
             Item(channel=__channel__,
                  action="episodios" if item.extra == "serie" else "findvideos",
@@ -221,8 +218,7 @@ def peliculas(item):
         scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedtitle = scrapedtitle.replace("streaming", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios" if item.extra == "serie" else "findvideos",
@@ -276,8 +272,7 @@ def peliculas_tv(item):
         scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedtitle = scrapedtitle.replace("streaming", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
+
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios" if item.extra == "serie" else "findvideos",

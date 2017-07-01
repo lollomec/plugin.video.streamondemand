@@ -95,7 +95,6 @@ def categorias(item):
     matches = re.compile(patron, re.DOTALL).findall(bloque)
 
     for scrapedtitle, scrapedurl in matches:
-        if DEBUG: logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -139,8 +138,7 @@ def peliculas_movie_src(item):
         scrapedthumbnail = ""
         scrapedtitle = scrapertools.unescape(match.group(2))
         scrapedurl = urlparse.urljoin(item.url, match.group(1))
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
+
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -191,8 +189,7 @@ def peliculas(item):
         scrapedthumbnail = ""
         scrapedtitle = scrapertools.unescape(match.group(2))
         scrapedurl = urlparse.urljoin(item.url, match.group(1))
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
+
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -243,8 +240,7 @@ def peliculas_tv_src(item):
         scrapedthumbnail = ""
         scrapedtitle = scrapertools.unescape(match.group(2))
         scrapedurl = urlparse.urljoin(item.url, match.group(1))
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
+
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="seasons",
@@ -294,8 +290,7 @@ def peliculas_tv(item):
         scrapedthumbnail = ""
         scrapedtitle = scrapertools.unescape(match.group(2))
         scrapedurl = urlparse.urljoin(item.url, match.group(1))
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
+
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="seasons",

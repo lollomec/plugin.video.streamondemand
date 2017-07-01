@@ -168,7 +168,6 @@ def categoria(item):
     patron = '<option value="(.*?)">.*?</option>'
 
     for scrapedCategoria in scrapedAll(item.url, patron):
-        if DEBUG: logger.info("scrapedCategoria: " + scrapedCategoria)
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedCategoria)
         cat = Crea_Url("", "ricerca", scrapedtitle.replace(' ', "%20"))
         if len(scrapedtitle) > 0:
@@ -198,8 +197,6 @@ def episodios(item):
 
     while True:
         for scrapedurl, scrapedthumbnail, scrapedtitle in scrapedAll(url, patron):
-            if DEBUG: logger.info(
-                "scrapedurl: " + scrapedurl + " scrapedthumbnail: " + scrapedthumbnail + " scrapedtitle:" + scrapedtitle)
 
             itemlist.append(
                 Item(channel=__channel__,
@@ -263,7 +260,6 @@ def findvideos(item):
 def scrapedAll(url="", patron=""):
 
     data = httptools.downloadpage(url).data
-    if DEBUG: logger.info("data:" + data)
     MyPatron = patron
     matches = re.compile(MyPatron, re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
@@ -298,7 +294,6 @@ def Crea_Url(pagina="1", azione="ricerca", categoria="", nome=""):
 
 # -----------------------------------------------------------------
 def log(funzione="", stringa="", canale=__channel__):
-    if DEBUG: logger.info("[" + canale + "].[" + funzione + "] " + stringa)
 
 
 # =================================================================

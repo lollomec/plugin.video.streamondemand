@@ -112,8 +112,6 @@ def categorias(item):
 
         scrapedplot = ""
         scrapedthumbnail = ""
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action='peliculas',
@@ -159,8 +157,6 @@ def peliculas(item):
         url = scrapertools.find_single_match(match, '<h3[^<]+<a href="([^"]+)"')
         plot = ""
         thumbnail = scrapertools.find_single_match(match, 'data-echo="([^"]+)"')
-
-        if (DEBUG): logger.info("title=[" + title + "], url=[" + url + "], thumbnail=[" + thumbnail + "]")
 
         itemlist.append(infoSod(
             Item(channel=__channel__,
@@ -254,8 +250,6 @@ def peliculas_tv(item):
         plot = ""
         thumbnail = scrapertools.find_single_match(match, 'data-echo="([^"]+)"')
 
-        if (DEBUG): logger.info("title=[" + title + "], url=[" + url + "], thumbnail=[" + thumbnail + "]")
-
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  extra=item.extra,
@@ -304,8 +298,6 @@ def pel_tv(item):
         plot = ""
         thumbnail = ""
         url = scrapedurl
-
-        if (DEBUG): logger.info("title=[" + title + "], url=[" + url + "], thumbnail=[" + thumbnail + "]")
 
         itemlist.append(infoSod(
             Item(channel=__channel__,
