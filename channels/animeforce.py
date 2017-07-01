@@ -16,7 +16,7 @@ from core import scrapertools
 from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
-from servers import adfly
+from servers.decrypters import adfly
 
 __channel__ = "animeforce"
 __category__ = "A"
