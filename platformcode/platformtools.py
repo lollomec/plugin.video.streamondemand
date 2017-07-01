@@ -732,8 +732,8 @@ def get_dialogo_opciones(item, default_action, strm):
             opciones.append(config.get_localized_string(30164))
         else:
             # "Descargar"
-            opcion = config.get_localized_string(30153)
-            opciones.append(opcion)
+            #opcion = config.get_localized_string(30153)
+            #opciones.append(opcion)
 
             if item.isFavourite:
                 # "Quitar de favoritos"
