@@ -10,26 +10,15 @@ import re
 
 from core import logger
 from core import servertools
+from core import httptools
 from core import scrapertools
 from core.item import Item
-from servers import adfly
+from servers.decrypters import adfly
 
 __channel__ = "occhiodelwrestling"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "Occhio Del Wrestling"
-__language__ = "IT"
 
 host = "http://www.occhiodelwrestling.netsons.org"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
-
-def isGeneric():
-    return True
 
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
@@ -47,10 +36,10 @@ def mainlist(item):
 
 # ----------------------------------------------------------------------------------------------------------------
 def categorie(item):
-    logger.info("[OcchioDelWrestling.py]==> categorie")
+    logger.info()
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = data = httptools.downloadpage(item.url).data
 
     blocco = scrapertools.get_match(data, '<div class="menu-main-container">(.*?)</div>')
 
@@ -72,10 +61,10 @@ def categorie(item):
 
 # ----------------------------------------------------------------------------------------------------------------
 def loaditems(item):
-    logger.info("[OcchioDelWrestling.py]==> loaditems")
+    logger.info()
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = data = httptools.downloadpage(item.url).data
 
     patron = r'<img.*?src="([^"]+)".*?/>\s*<a href="([^"]+)" title="([^"]+)".*?>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -97,10 +86,10 @@ def loaditems(item):
 
 # ----------------------------------------------------------------------------------------------------------------
 def findvideos(item):
-    logger.info("[OcchioDelWrestling.py]==> findvideos")
+    logger.info()
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = data = httptools.downloadpage(item.url).data
     patron = r'<a href="(http://adf.ly/[^"]+)"(?: target="_blank"|)>(.*?)</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -120,7 +109,7 @@ def findvideos(item):
 
 # ----------------------------------------------------------------------------------------------------------------
 def play(item):
-    logger.info("[OcchioDelWrestling.py]==> play")
+    logger.info()
     data = adfly.get_long_url(item.url)
     
     itemlist = servertools.find_video_items(data=data)
