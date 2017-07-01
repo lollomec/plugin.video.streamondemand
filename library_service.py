@@ -407,7 +407,7 @@ def monitor_update():
 
 if __name__ == "__main__":
     if scrapertools.wait_for_internet(retry=10):
-        if config.get_setting("check_for_channel_updates") == "true":
+        if config.get_setting("check_for_channel_updates") == True:
             # -- Update channels from repository streamondemand ------
             try:
                 from core import update_channels

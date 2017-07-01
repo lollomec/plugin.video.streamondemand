@@ -391,7 +391,7 @@ def resolve_video_urls_for_playing(server, url, video_password="", muestra_dialo
                         logger.error(traceback.format_exc())
                 
                 #Si ya tenemos URLS, dejamos de buscar
-                if video_urls and config.get_setting("resolve_stop") == "true":
+                if video_urls and config.get_setting("resolve_stop") == True:
                     break
                 
             #Cerramos el progreso
