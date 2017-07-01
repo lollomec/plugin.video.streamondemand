@@ -9,24 +9,15 @@ import re
 
 import xbmc
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmbelli"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "filmbelli.net"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://www.filmbelli.gratis"
-
-def isGeneric():
-    return True
 
 
 # -------------------------------------------------------------------------------------------------------------------------------------------
@@ -89,7 +80,8 @@ def elenco(item):
     itemlist = []
 
     patron = 'class="bottom_line"></div>[^<]+<[^<]+<img.*?src="(.*?)"[^<]+</a>[^>]+<[^<]+<[^<]+<[^<]+<.*?class="movie_title"><a href="(.*?)">(.*?)</a>'
-    for scrapedthumbnail, scrapedurl, scrapedtitle in scrapedSingle(item.url, 'div id="movie_post_content">(.*?)</ul>', patron):
+    for scrapedthumbnail, scrapedurl, scrapedtitle in scrapedSingle(item.url, 'div id="movie_post_content">(.*?)</ul>',
+                                                                    patron):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         log("elenco", "title=[" + scrapedtitle + "] url=[" + scrapedurl + "] thumbnail=[" + scrapedthumbnail + "]")
 
@@ -104,7 +96,8 @@ def elenco(item):
 
     # Paginazione
     # ===========================================================================================================================
-    matches = scrapedSingle(item.url, 'class="vh-pages-wrapper span12 body-bg">(.*?)</div>', 'class="current">.*?</span><.*?href="(.*?)"')
+    matches = scrapedSingle(item.url, 'class="vh-pages-wrapper span12 body-bg">(.*?)</div>',
+                            'class="current">.*?</span><.*?href="(.*?)"')
     if len(matches) > 0:
         paginaurl = matches[0]
         itemlist.append(Item(channel=__channel__, action="elenco", title=AvantiTxt, url=paginaurl, thumbnail=AvantiImg))
@@ -154,7 +147,7 @@ def search(item, texto):
 # -----------------------------------------------------------------
 def scrapedAll(url="", patron=""):
     matches = []
-    data = scrapertools.cache_page(url)
+    data = httptools.downloadpage(url).data
     MyPatron = patron
     matches = re.compile(MyPatron, re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
@@ -167,7 +160,7 @@ def scrapedAll(url="", patron=""):
 # -----------------------------------------------------------------
 def scrapedSingle(url="", single="", patron=""):
     matches = []
-    data = scrapertools.cache_page(url)
+    data = httptools.downloadpage(url).data
     elemento = scrapertools.find_single_match(data, single)
     log("scrapedSingle", "elemento:" + elemento)
     matches = re.compile(patron, re.DOTALL).findall(elemento)

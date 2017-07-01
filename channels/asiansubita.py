@@ -7,24 +7,16 @@
 import re
 import urlparse
 
-from core import logger
+from core import logger, httptools
 from core import scrapertools
 from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
-from servers import adfly
+from servers.decrypters import adfly
 
 __channel__ = "asiansubita"
-__category__ = "F,A"
-__type__ = "generic"
-__title__ = "asiansubita"
-__language__ = "IT"
 
 host = "http://asiansubita.altervista.org"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -71,7 +63,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<!-- Post Type 3 -->\s*'
@@ -115,7 +107,7 @@ def categorias(item):
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # The categories are the options for the combo
     patron = '<li id="menu-item-[^>"]+" class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-[^>"]+"><a href="(.*?)">(.*?)</a></li>'
@@ -138,7 +130,7 @@ def findvideos(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las datos
     thumbnail = scrapertools.find_single_match(data, 'src="([^"]+)"[^<]+</p>')

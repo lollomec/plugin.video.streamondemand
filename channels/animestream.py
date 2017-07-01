@@ -6,29 +6,19 @@
 #  By Costaplus
 # ------------------------------------------------------------
 import re
-
 import urlparse
+
 import xbmc
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "animestream"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "animestram.it"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://www.animestream.it/"
 hostcategoria = "http://www.animestream.it/Ricerca-Tutti-pag1"
-
-
-def isGeneric():
-    return True
 
 
 # -----------------------------------------------------------------
@@ -178,7 +168,6 @@ def categoria(item):
     patron = '<option value="(.*?)">.*?</option>'
 
     for scrapedCategoria in scrapedAll(item.url, patron):
-        if DEBUG: logger.info("scrapedCategoria: " + scrapedCategoria)
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedCategoria)
         cat = Crea_Url("", "ricerca", scrapedtitle.replace(' ', "%20"))
         if len(scrapedtitle) > 0:
@@ -208,8 +197,6 @@ def episodios(item):
 
     while True:
         for scrapedurl, scrapedthumbnail, scrapedtitle in scrapedAll(url, patron):
-            if DEBUG: logger.info(
-                "scrapedurl: " + scrapedurl + " scrapedthumbnail: " + scrapedthumbnail + " scrapedtitle:" + scrapedtitle)
 
             itemlist.append(
                 Item(channel=__channel__,
@@ -222,7 +209,7 @@ def episodios(item):
                      show=item.show,
                      fanart=urlparse.urljoin(host, scrapedthumbnail)))
 
-        data = scrapertools.cache_page(urlparse.urljoin(host, item.url))
+        data = httptools.downloadpage(urlparse.urljoin(host, item.url)).data
         matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
         if len(matches) > 0:
@@ -272,8 +259,7 @@ def findvideos(item):
 # -----------------------------------------------------------------
 def scrapedAll(url="", patron=""):
 
-    data = scrapertools.cache_page(url)
-    if DEBUG: logger.info("data:" + data)
+    data = httptools.downloadpage(url).data
     MyPatron = patron
     matches = re.compile(MyPatron, re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
@@ -285,7 +271,7 @@ def scrapedAll(url="", patron=""):
 
 # -----------------------------------------------------------------
 def scrapedSingle(url="", single="", patron=""):
-    data = scrapertools.cache_page(url)
+    data = httptools.downloadpage(url).data
     paginazione = scrapertools.find_single_match(data, single)
     matches = re.compile(patron, re.DOTALL).findall(paginazione)
     scrapertools.printMatches(matches)
@@ -308,7 +294,6 @@ def Crea_Url(pagina="1", azione="ricerca", categoria="", nome=""):
 
 # -----------------------------------------------------------------
 def log(funzione="", stringa="", canale=__channel__):
-    if DEBUG: logger.info("[" + canale + "].[" + funzione + "] " + stringa)
 
 
 # =================================================================

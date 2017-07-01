@@ -8,29 +8,18 @@
 
 import re
 
-from core import logger
-from core import config
-from core import servertools
+from core import logger, httptools
 from core import scrapertools
+from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "italiafilm01"
-__category__ = "F,A"
-__type__ = "generic"
-__title__ = "ItaliaFilm01"
-__language__ = "IT"
 
 host = "http://italiafilm01.co"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
 
-def isGeneric():
-    return True
 
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
@@ -57,6 +46,7 @@ def mainlist(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -72,6 +62,7 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -79,7 +70,7 @@ def peliculas(item):
     logger.info("[ItaliaFilm01.py]==> peliculas")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = r'<div class="(?:film-item|item-film)">\s*(?:[^>]+>\s*|)<a href="([^"]+)".*?>\s*'
     patron += r'(?:<div class="item\-film\-img">\s*|)<img src="([^"]+)" alt="([^"]+)">'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -120,13 +111,14 @@ def peliculas(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
 def findvideos(item):
     logger.info("[ItaliaFilm01.py]==> findvideos")
-    data = scrapertools.anti_cloudflare(item.url, headers)
-    
+    data = httptools.downloadpage(item.url, headers=headers).data
+
     itemlist = servertools.find_video_items(data=data)
 
     for videoitem in itemlist:
@@ -148,12 +140,14 @@ def findvideos(item):
              show=item.fulltitle))
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
 def color(text, color):
-    return "[COLOR "+color+"]"+text+"[/COLOR]"
-    
+    return "[COLOR " + color + "]" + text + "[/COLOR]"
+
+
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand/)")

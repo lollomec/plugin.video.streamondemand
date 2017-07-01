@@ -8,27 +8,17 @@
 import re
 import urllib
 
-from core import config
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmontv"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "filmontv.tv (IT)"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://www.comingsoon.it"
 
 TIMEOUT_TOTAL = 60
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -77,7 +67,7 @@ def tvoggi(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="col-xs-5 box-immagine">[^<]+<img src="([^"]+)[^<]+<[^<]+<[^<]+<[^<]+<[^<]+<.*?titolo">(.*?)<[^<]+<[^<]+<[^<]+<[^>]+><br />(.*?)<[^<]+</div>'
@@ -86,7 +76,6 @@ def tvoggi(item):
     for scrapedthumbnail, scrapedtitle, scrapedtv in matches:
         scrapedurl = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle).strip()
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
 
         itemlist.append(infoSod(
             Item(channel=__channel__,

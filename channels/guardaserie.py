@@ -5,31 +5,17 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "guardaserie"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "Guarda Serie"
-__language__ = "IT"
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
 
 host = "http://www.guardaserie.club"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -91,13 +77,11 @@ def fichas(item):
 
     itemlist = []
 
-    # data = scrapertools.cache_page(item.url)
-
     ## Descarga la página
     data = re.sub(
         r'\t|\n|\r',
         '',
-        scrapertools.anti_cloudflare(item.url, headers)
+        httptools.downloadpage(item.url).data
     )
 
     data = scrapertools.find_single_match(data, '<a[^>]+>Serie Tv</a><ul>(.*?)</ul>')
@@ -129,9 +113,9 @@ def ultimi(item):
     data = re.sub(
         r'\t|\n|\r',
         '',
-        scrapertools.anti_cloudflare(item.url, headers)
+        httptools.downloadpage(item.url).data
     )
- #   data = scrapertools.cache_page(item.url)
+
     patron = '<p>Nuove Puntate delle SERIE TV, Aggiunte OGGI:</p>(.*?)<div id="disclamer">'
     data = scrapertools.find_single_match(data, patron)
 
@@ -155,18 +139,17 @@ def ultimi(item):
 
     return itemlist
 
+
 def anime(item):
     logger.info("streamondemand.channels.guardaserie anime")
 
     itemlist = []
 
-    # data = scrapertools.cache_page(item.url)
-
     ## Descarga la página
     data = re.sub(
         r'\t|\n|\r',
         '',
-        scrapertools.anti_cloudflare(item.url, headers)
+        httptools.downloadpage(item.url).data
     )
 
     data = scrapertools.find_single_match(data, '<a[^>]+>Anime</a><ul>(.*?)</ul>')
@@ -199,7 +182,7 @@ def cartoni(item):
     data = re.sub(
         r'\t|\n|\r',
         '',
-        scrapertools.anti_cloudflare(item.url, headers)
+        httptools.downloadpage(item.url).data
     )
 
     data = scrapertools.find_single_match(data, '<a[^>]+>Cartoni</a><ul>(.*?)</ul>')
@@ -232,7 +215,7 @@ def progs(item):
     data = re.sub(
         r'\t|\n|\r',
         '',
-        scrapertools.anti_cloudflare(item.url, headers)
+        httptools.downloadpage(item.url).data
     )
 
     data = scrapertools.find_single_match(data, '<a[^>]+>Programmi TV</a><ul>(.*?)</ul>')
@@ -265,7 +248,7 @@ def cerca(item):
     data = re.sub(
         r'\t|\n|\r',
         '',
-        scrapertools.anti_cloudflare(item.url, headers)
+        httptools.downloadpage(item.url).data
     )
 
     patron = '<div class="search_thumbnail">.*?<a class="search_link" href="([^"]+)" rel="bookmark" title="([^"]+)">.*?<img src="([^"]+)" />.*?</a>'
@@ -301,7 +284,7 @@ def episodios(item):
     data = re.sub(
         r'\t|\n|\r',
         '',
-        scrapertools.anti_cloudflare(item.url, headers)
+        httptools.downloadpage(item.url).data
     )
 
     serie_id = scrapertools.get_match(data, 'id=([^"]+)" rel="nofollow" target="_blank"')
@@ -356,9 +339,9 @@ def findvideos(item):
     post = item.url.split('?')[1]
     referer = item.url.split('?')[2]
 
-    headers.append(['Referer', referer])
+    headers = [['Referer', referer]]
 
-    data = scrapertools.cache_page(url, post=post, headers=headers)
+    data = httptools.downloadpage(url, post=post, headers=headers).data
 
     url = scrapertools.get_match(data.lower(), 'src="([^"]+)"')
     url = re.sub(r'embed\-|\-607x360\.html', '', url)

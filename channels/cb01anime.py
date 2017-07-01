@@ -13,24 +13,8 @@ from core import servertools
 from core.item import Item
 
 __channel__ = "cb01anime"
-__category__ = "A"
-__type__ = "generic"
-__title__ = "CineBlog01 Anime"
-__language__ = "IT"
 
 host = "http://www.cineblog01.cc"
-
-headers = [['Upgrade-Insecure-Requests', '1'],
-           ['User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/53.0.2785.143 Chrome/53.0.2785.143 Safari/537.36'],
-           ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'],
-           ['Accept-Encoding', 'gzip, deflate, sdch'],
-           ['Accept-Language', 'en-US,en;q=0.8']]
-
-DEBUG = config.get_setting("debug")
-
-
-def isGeneric():
-    return True
 
 
 # -----------------------------------------------------------------
@@ -76,7 +60,7 @@ def novita(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patronvideos = '<div class="span4"> <a.*?<img src="(.*?)".*?'
@@ -92,8 +76,6 @@ def novita(item):
         scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         if scrapedplot.startswith(""):
             scrapedplot = scrapedplot[64:]
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
 
         ## ------------------------------------------------
         scrapedthumbnail = httptools.get_url_headers(scrapedthumbnail)
@@ -139,7 +121,7 @@ def genere(item):
     logger.info("[cb01anime.py] genere")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url).data
 
     # Narrow search by selecting only the combo
     bloque = scrapertools.get_match(data, '<select name="select2"(.*?)</select>')
@@ -151,8 +133,6 @@ def genere(item):
 
     for scrapedurl, scrapedtitle in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="novita",
@@ -170,7 +150,7 @@ def alfabetico(item):
     logger.info("[cb01anime.py] listacompleta")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url).data
 
     # Narrow search by selecting only the combo
     bloque = scrapertools.get_match(data, '<option value=\'-1\'>Anime per Lettera</option>(.*?)</select>')
@@ -185,7 +165,6 @@ def alfabetico(item):
         scrapedurl = url
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="novita",
@@ -205,7 +184,7 @@ def listacompleta(item):
     logger.info("[cb01anime.py] listacompleta")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url).data
 
     # Narrow search by selecting only the combo
     patron = '<a href="#char_5a" title="Go to the letter Z">Z</a></span></div>(.*?)</ul></div><div style="clear:both;"></div></div>'
@@ -221,7 +200,6 @@ def listacompleta(item):
         scrapedurl = url
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="episodios",
@@ -257,7 +235,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url).data
     data = scrapertools.decodeHtmlentities(data)
 
     patron1 = '(?:<p>|<td bgcolor="#ECEAE1">)<span class="txt_dow">(.*?)(?:</p>)?(?:\s*</span>)?\s*</td>'
@@ -338,7 +316,7 @@ def play(item):
 
     logger.debug("##############################################################")
     if "go.php" in item.url:
-        data = scrapertools.anti_cloudflare(item.url, headers)
+        data = httptools.downloadpage(item.url).data
         try:
             data = scrapertools.get_match(data, 'window.location.href = "([^"]+)";')
         except IndexError:
@@ -347,12 +325,13 @@ def play(item):
                 # In alternativa, dato che a volte compare "Clicca qui per proseguire":
                 data = scrapertools.get_match(data, r'<a href="([^"]+)".*?class="btn-wrapper">.*?licca.*?</a>')
             except IndexError:
-                data = scrapertools.get_header_from_response(item.url, headers=headers, header_to_get="Location")
+                data = httptools.downloadpage(item.url, only_headers=True, follow_redirects=False).headers.get(
+                    "location")
         while 'vcrypt' in data:
-            data = scrapertools.get_header_from_response(data, headers=headers, header_to_get="Location")
+            data = httptools.downloadpage(data, only_headers=True, follow_redirects=False).headers.get("location")
         logger.debug("##### play go.php data ##\n%s\n##" % data)
     elif "/link/" in item.url:
-        data = scrapertools.anti_cloudflare(item.url, headers)
+        data = httptools.downloadpage(item.url).data
         from lib import jsunpack
 
         try:
@@ -364,7 +343,7 @@ def play(item):
 
         data = scrapertools.find_single_match(data, 'var link(?:\s)?=(?:\s)?"([^"]+)";')
         while 'vcrypt' in data:
-            data = scrapertools.get_header_from_response(data, headers=headers, header_to_get="Location")
+            data = httptools.downloadpage(data, only_headers=True, follow_redirects=False).headers.get("location")
         logger.debug("##### play /link/ data ##\n%s\n##" % data)
     else:
         data = item.url

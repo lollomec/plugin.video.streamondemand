@@ -7,25 +7,15 @@
 import re
 import urlparse
 
-from core import config
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "istreaming"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "istreaming (IT)"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://i-streaming.co/"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -71,11 +61,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<label class="screen-reader-text" for="cat">(.*?)</select>')
 
     # Extrae las entradas (carpetas)
@@ -93,7 +84,6 @@ def categorias(item):
         scrapedthumbnail = ""
         scrapedurl = "http://i-streaming.co/category/" + scrapedtitle
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -123,7 +113,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="post-thumbnail">\s*<a href="([^"]+)" title="(.*?)">\s*<img[^s]+src="([^"]+)"[^>]+>'
@@ -132,8 +122,6 @@ def peliculas(item):
     for scrapedurl, scrapedtitle, scrapedthumbnail in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",

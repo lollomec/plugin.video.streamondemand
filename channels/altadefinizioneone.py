@@ -7,32 +7,17 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "altadefinizioneone"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "altadefinizioneone (IT)"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://www.altadefinizione.blog/"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:39.0) Gecko/20100101 Firefox/39.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Connection', 'keep-alive'],
-    ['Referer', host]
-]
-
-
-def isGeneric():
-    return True
+headers = [['Referer', host]]
 
 
 def mainlist(item):
@@ -93,7 +78,7 @@ def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Narrow search by selecting only the in this list
     patron = '<div class="hidden-menu">(.*?)</div>'
@@ -109,8 +94,6 @@ def categorias(item):
         scrapedurl = urlparse.urljoin(item.url, url)
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -126,7 +109,7 @@ def byyear(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Narrow search by selecting only the in this list
     patron = '<a href="#" class="menu-link menu3">(.*?)</div>'
@@ -141,8 +124,6 @@ def byyear(item):
         scrapedurl = urlparse.urljoin(item.url, url)
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -158,7 +139,7 @@ def nazione(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Narrow search by selecting only the in this list
     patron = '<a href="#" class="menu-link menu4">(.*?)</div>'
@@ -174,8 +155,6 @@ def nazione(item):
         scrapedurl = urlparse.urljoin(item.url, url)
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -205,7 +184,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="tcarusel-item-title">\s*<a href="([^"]+)">(.*?)</a>\s*</div>'
@@ -215,8 +194,6 @@ def peliculas(item):
         scrapedplot = ""
         scrapedthumbnail = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",

@@ -5,32 +5,18 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 
-import Queue
 import datetime
-import glob
-import imp
 import json
-import os
-import threading
 import urllib
 
-from core import channeltools
-from core import config
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
-from lib.fuzzywuzzy import fuzz
 
 __channel__ = "saghe"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "saghe"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 tmdb_key = '6889f6089877fd092454d00edb44a84d'
-# tmdb_key = base64.urlsafe_b64decode('NTc5ODNlMzFmYjQzNWRmNGRmNzdhZmI4NTQ3NDBlYTk=')
 dttime = (datetime.datetime.utcnow() - datetime.timedelta(hours=5))
 systime = dttime.strftime('%Y%m%d%H%M%S%f')
 today_date = dttime.strftime('%Y-%m-%d')
@@ -39,10 +25,6 @@ month2_date = (dttime - datetime.timedelta(days=60)).strftime('%Y-%m-%d')
 year_date = (dttime - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
 tmdb_image = 'http://image.tmdb.org/t/p/original'
 tmdb_poster = 'http://image.tmdb.org/t/p/w500'
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -92,7 +74,7 @@ def mainlist(item):
 
 def tmdb_saghe(item):
     try:
-        result = scrapertools.cache_page(item.url)
+        result = httptools.downloadpage(item.url).data
         result = json.loads(result)
         items = result['items']
     except:

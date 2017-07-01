@@ -7,27 +7,15 @@
 import re
 import urlparse
 
-from core import config
+from core import httptools
 from core import logger
-from core import scrapertools
 from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "cinesuggestions"
-__category__ = "F,C"
-__type__ = "generic"
-__title__ = "cinesuggestions (IT)"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://csarchiviofilm.blogfree.net/?f=1105944"
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
 
 headers_src = [
     ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0'],
@@ -39,9 +27,6 @@ headers_src = [
     ['Upgrade-Insecure-Requests', '1'],
     ['Cache-Control', 'max-age=0']
 ]
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -56,13 +41,14 @@ def mainlist(item):
                      action="archivio",
                      url="http://csarchiviofilm.blogfree.net/?t=5309224",
                      thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png")]
-                #Item(channel=__channel__,
-                #     title="[COLOR yellow]Cerca...[/COLOR]",
-                #     action="search",
-                #     extra="movie",
-                #     thumbnail="http://dc467.4shared.com/img/fEbJqOum/s7/13feaf0c8c0/Search")]
+    # Item(channel=__channel__,
+    #     title="[COLOR yellow]Cerca...[/COLOR]",
+    #     action="search",
+    #     extra="movie",
+    #     thumbnail="http://dc467.4shared.com/img/fEbJqOum/s7/13feaf0c8c0/Search")]
 
     return itemlist
+
 
 def search(item, texto):
     logger.info("[cinesuggestions.py] " + item.url + " search " + texto)
@@ -76,12 +62,13 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 def peliculas_src(item):
     logger.info("streamondemand.cinesuggestions peliculas_src")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers_src)
+    data = httptools.downloadpage(item.url, headers=headers_src).data
 
     # Extrae las entradas (carpetas)
     patron = '<h2 class="post-title entry-title">\s*<a href="([^"]+)">(.*?)</a>'
@@ -102,14 +89,14 @@ def peliculas_src(item):
                  plot=scrapedplot,
                  folder=True), tipo='movie'))
 
-
     return itemlist
+
 
 def archivio(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<br>(.*?)<a href="([^"]+)" target="_blank">'
@@ -117,7 +104,6 @@ def archivio(item):
 
     for scrapedtitle, scrapedurl in matches:
 
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="findvideos",
@@ -128,12 +114,13 @@ def archivio(item):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.cinesuggestions peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<h3 class="web"><a HREF="(.*?)" title[^>]+>(.*?)<'
@@ -176,11 +163,12 @@ def peliculas(item):
 
     return itemlist
 
+
 def findvideos(item):
     logger.info("streamondemand.cinesuggestions findvideos")
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     data = data.replace("&#33;", "!")
 
     itemlist = servertools.find_video_items(data=data)
@@ -195,7 +183,7 @@ def findvideos(item):
 
     return itemlist
 
+
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
-

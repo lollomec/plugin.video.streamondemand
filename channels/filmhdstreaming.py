@@ -6,27 +6,20 @@
 #  By Costaplus
 # ------------------------------------------------------------
 
-#   Import  sono importanti per il funzionamento del canale
 import re
 import urlparse
 
-from core import config
+from core import httptools
 from core import logger
 from core import scrapertools
-from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmhdstreaming"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "filmhdstreaming (IT)"
-__language__ = "IT"
 
 # riferimento alla gestione del log
-DEBUG = config.get_setting("debug")
-
 host = "http://hdcineblog01.com"
+
 
 # -----------------------------------------------------------------
 # Elenco inziale del canale
@@ -34,16 +27,23 @@ def mainlist(item):
     logger.info("filmhdstreaming mainlist")
 
     itemlist = []
-    #itemlist.append(Item(channel=item.channel, action="elenco_ten", title="[COLOR yellow]Film Top 10[/COLOR]", url=host,thumbnail=NovitaThumbnail, fanart=fanart))
-    #itemlist.append(Item(channel=item.channel, action="elenco_top", title="[COLOR azure]Film Top[/COLOR]", url=host,thumbnail=NovitaThumbnail, fanart=fanart))
-    itemlist.append(Item(channel=item.channel, action="elenco", title="[COLOR azure]Aggiornamenti Film[/COLOR]", url=host+"/page/1.html",thumbnail=NovitaThumbnail, fanart=fanart))
-    itemlist.append(Item(channel=item.channel, action="elenco_genere", title="[COLOR azure]Film per Genere[/COLOR]", url=host,thumbnail=GenereThumbnail, fanart=fanart))
-    itemlist.append(Item(channel=item.channel, action="search", title="[COLOR orange]Cerca film...[/COLOR]", extra="movie",thumbnail=thumbcerca, fanart=fanart))
+    # itemlist.append(Item(channel=item.channel, action="elenco_ten", title="[COLOR yellow]Film Top 10[/COLOR]", url=host,thumbnail=NovitaThumbnail, fanart=fanart))
+    # itemlist.append(Item(channel=item.channel, action="elenco_top", title="[COLOR azure]Film Top[/COLOR]", url=host,thumbnail=NovitaThumbnail, fanart=fanart))
+    itemlist.append(Item(channel=item.channel, action="elenco", title="[COLOR azure]Aggiornamenti Film[/COLOR]",
+                         url=host + "/page/1.html", thumbnail=NovitaThumbnail, fanart=fanart))
+    itemlist.append(
+        Item(channel=item.channel, action="elenco_genere", title="[COLOR azure]Film per Genere[/COLOR]", url=host,
+             thumbnail=GenereThumbnail, fanart=fanart))
+    itemlist.append(
+        Item(channel=item.channel, action="search", title="[COLOR orange]Cerca film...[/COLOR]", extra="movie",
+             thumbnail=thumbcerca, fanart=fanart))
 
     return itemlist
+
+
 # =================================================================
 
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 def newest(categoria):
     logger.info("filmhdstreaming newest" + categoria)
     itemlist = []
@@ -65,16 +65,18 @@ def newest(categoria):
         return []
 
     return itemlist
+
+
 # =================================================================
 
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 # Funzione elenco top
 def elenco_top(item):
     logger.info("filmhdstreaming elenco_top")
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # metodo che utilizzo pee verificare cosa scarica nella chace
     # provate and andare nel log di kodi e controllate in fondo...
@@ -98,24 +100,26 @@ def elenco_top(item):
         logger.info("Url:" + scrapedurl + " thumbnail:" + scrapedimg + " title:" + scrapedtitle)
         title = scrapedtitle.split("(")[0]
         itemlist.append(infoSod(Item(channel=item.channel,
-                             action="findvideos",
-                             title="[COLOR azure]" + scrapedtitle + "[/COLOR]",
-                             fulltitle=scrapedtitle,
-                             url=scrapedurl,
-                             thumbnail=scrapedimg,
-                             fanart=""
-                             )))
+                                     action="findvideos",
+                                     title="[COLOR azure]" + scrapedtitle + "[/COLOR]",
+                                     fulltitle=scrapedtitle,
+                                     url=scrapedurl,
+                                     thumbnail=scrapedimg,
+                                     fanart=""
+                                     )))
 
     return itemlist
+
+
 # =================================================================
 
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 # Funzione elenco top
 def elenco(item):
     logger.info("filmhdstreaming elenco")
 
     itemlist = []
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = r'<a href="([^"]+)" title="([^"]+)"><img src="([^"]+)"[^>]+>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -125,8 +129,6 @@ def elenco(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedtitle = scrapedtitle.replace(" streaming ita", "")
         scrapedtitle = scrapedtitle.replace(" film streaming", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -160,9 +162,10 @@ def elenco(item):
 
     return itemlist
 
+
 # =================================================================
 
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 # Funzione elenco genere
 def elenco_genere(item):
     logger.info("filmhdstreaming elenco_genere")
@@ -170,7 +173,7 @@ def elenco_genere(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<ul>(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -179,7 +182,6 @@ def elenco_genere(item):
 
     for scrapedurl, scrapedtitle in matches:
         scrapedtitle = scrapedtitle.replace("Film streaming ", "")
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="elenco",
@@ -190,37 +192,40 @@ def elenco_genere(item):
 
     return itemlist
 
-#==================================================================
 
-#------------------------------------------------------------------
+# ==================================================================
+
+# ------------------------------------------------------------------
 # Funzione elenco genere
 def elenco_ten(item):
     logger.info("filmhdstreaming elenco_ten")
 
     itemlist = []
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     patron = '<ul class="lista">(.*?)</ul>'
 
-    filtro= scrapertools.find_single_match(data, patron)
+    filtro = scrapertools.find_single_match(data, patron)
     patron = '<li>.*?href="(.*?)">(.*?)</a>'
     matches = scrapertools.find_multiple_matches(filtro, patron)
 
-    for scrapedurl,scrapedtitle in matches:
+    for scrapedurl, scrapedtitle in matches:
         logger.info("Url:" + scrapedurl + " title:" + scrapedtitle)
         itemlist.append(infoSod(Item(channel=item.channel,
-                             action="findvideos",
-                             title="[COLOR azure]" + scrapedtitle + "[/COLOR]",
-                             fulltitle=scrapedtitle,
-                             url=scrapedurl,
-                             thumbnail="",
-                             fanart=""
-                             )))
+                                     action="findvideos",
+                                     title="[COLOR azure]" + scrapedtitle + "[/COLOR]",
+                                     fulltitle=scrapedtitle,
+                                     url=scrapedurl,
+                                     thumbnail="",
+                                     fanart=""
+                                     )))
 
     return itemlist
-#==================================================================
 
 
-#------------------------------------------------------------------
+# ==================================================================
+
+
+# ------------------------------------------------------------------
 def search(item, texto):
     logger.info("filmhdstreaming search " + texto)
 
@@ -237,14 +242,15 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
-#------------------------------------------------------------------
+
+# ------------------------------------------------------------------
 
 ########################################################################
 # Riferimenti a immagini statiche
 GenereThumbnail = "https://farm8.staticflickr.com/7562/15516589868_13689936d0_o.png"
 NovitaThumbnail = "https://superrepo.org/static/images/icons/original/xplugin.video.moviereleases.png.pagespeed.ic.j4bhi0Vp3d.png"
 thumbcerca = "http://dc467.4shared.com/img/fEbJqOum/s7/13feaf0c8c0/Search"
-fanart ="https://superrepo.org/static/images/fanart/original/script.artwork.downloader.jpg"
+fanart = "https://superrepo.org/static/images/fanart/original/script.artwork.downloader.jpg"
 HomeTxt = "[COLOR yellow]Torna Home[/COLOR]"
 AvantiTxt = "[COLOR orange]Successivo>>[/COLOR]"
 AvantiImg = "http://2.bp.blogspot.com/-fE9tzwmjaeQ/UcM2apxDtjI/AAAAAAAAeeg/WKSGM2TADLM/s1600/pager+old.png"

@@ -8,29 +8,19 @@
 
 import re
 
-from core import logger
 from core import config
-from core import servertools
+from core import logger, httptools
 from core import scrapertools
+from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "serietvu"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "SerieTVU"
-__language__ = "IT"
 
 host = "http://www.serietvu.com"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
 
-def isGeneric():
-    return True
 
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
@@ -62,6 +52,7 @@ def mainlist(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -87,6 +78,7 @@ def newest(categoria):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -102,6 +94,7 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -109,7 +102,7 @@ def categorie(item):
     logger.info("[SerieTVU.py]==> categorie")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     blocco = scrapertools.get_match(data, r'<h2>Sfoglia</h2>\s*<ul>(.*?)</ul>\s*</section>')
     patron = r'<li><a href="([^"]+)">([^<]+)</a></li>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
@@ -126,6 +119,7 @@ def categorie(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -133,7 +127,7 @@ def latestep(item):
     logger.info("[SerieTVU.py]==> latestep")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = r'<div class="item">\s*<a href="([^"]+)" data-original="([^"]+)" class="lazy inner">'
     patron += r'[^>]+>[^>]+>[^>]+>[^>]+>([^<]+)<small>([^<]+)<'
@@ -155,6 +149,7 @@ def latestep(item):
                  folder=True), tipo="tv"))
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -162,7 +157,7 @@ def lista_serie(item):
     logger.info("[SerieTVU.py]==> lista_serie")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = r'<div class="item">\s*<a href="([^"]+)" data-original="([^"]+)" class="lazy inner">'
     patron += r'[^>]+>[^>]+>[^>]+>[^>]+>([^<]+)<'
@@ -198,6 +193,7 @@ def lista_serie(item):
                  folder=True))
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -205,7 +201,7 @@ def episodios(item):
     logger.info("[SerieTVU.py]==> episodios")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = r'<option value="(\d+)"[\sselected]*>.*?</option>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -228,7 +224,7 @@ def episodios(item):
                      thumbnail=scrapedimg,
                      extra=scrapedextra,
                      folder=True))
-        
+
     if config.get_library_support() and len(itemlist) != 0:
         itemlist.append(
             Item(channel=__channel__,
@@ -245,6 +241,7 @@ def episodios(item):
                  extra="episodios",
                  show=item.show))
     return itemlist
+
 
 # ================================================================================================================
 
@@ -271,6 +268,7 @@ def findvideos(item):
         return []
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -279,16 +277,17 @@ def findepisodevideo(item):
 
     try:
         # Download Pagina
-        data = scrapertools.anti_cloudflare(item.url, headers=headers)
+        data = httptools.downloadpage(item.url, headers=headers).data
 
         # Prendo il blocco specifico per la stagione richiesta
         patron = r'<div class="list [active]*" data-id="%s">(.*?)</div>\s*</div>' % item.extra[0][0]
         blocco = scrapertools.find_single_match(data, patron)
 
         # Estraggo l'episodio
-        patron = r'<a data-id="%s[^"]*" data-href="([^"]+)" data-original="([^"]+)" class="[^"]+">' % item.extra[0][1].lstrip("0")
+        patron = r'<a data-id="%s[^"]*" data-href="([^"]+)" data-original="([^"]+)" class="[^"]+">' % item.extra[0][
+            1].lstrip("0")
         matches = re.compile(patron, re.DOTALL).findall(blocco)
-        
+
         itemlist = servertools.find_video_items(data=matches[0][0])
 
         # Non sono riuscito a trovare un modo migliore di questo, se qualcuno ha un metodo migliore di questo
@@ -308,6 +307,7 @@ def findepisodevideo(item):
         return []
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -315,7 +315,8 @@ def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand/)")
 
+
 def color(text, color):
-    return "[COLOR "+color+"]"+text+"[/COLOR]"
+    return "[COLOR " + color + "]" + text + "[/COLOR]"
 
 # ================================================================================================================

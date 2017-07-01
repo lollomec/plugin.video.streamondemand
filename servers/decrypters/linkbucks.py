@@ -1,8 +1,8 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 # ------------------------------------------------------------
-# streamondemand - XBMC Plugin
+# pelisalacarta - XBMC Plugin
 # Conector para linkbucks
-# http://www.mimediacenter.info/foro/viewforum.php?f=36
+# http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
 # ------------------------------------------------------------
 
 import urllib
@@ -11,12 +11,14 @@ from core import logger
 from core import scrapertools
 
 
-# Obtiene la URL que hay detrás de un enlace a linkbucks
+# Obtiene la URL que hay detrÃ¡s de un enlace a linkbucks
 def get_long_url(short_url):
-    logger.info("servers.linkbucks get_long_url(short_url='%s')" % short_url)
+    logger.info("(short_url='%s')" % short_url)
 
-    request_headers = [["User-Agent", "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; es-ES; rv:1.9.2.12) Gecko/20101026 Firefox/3.6.12"],
-                       ["Referer", "http://linkdecrypter.com"]]
+    request_headers = []
+    request_headers.append(["User-Agent",
+                            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; es-ES; rv:1.9.2.12) Gecko/20101026 Firefox/3.6.12"])
+    request_headers.append(["Referer", "http://linkdecrypter.com"])
     post = urllib.urlencode({"pro_links": short_url, "modo_links": "text", "modo_recursivo": "on", "link_cache": "on"})
     url = "http://linkdecrypter.com/"
 
@@ -40,7 +42,7 @@ def get_long_url(short_url):
             logger.info("location=" + location)
             break
         except:
-            n += 1
+            n = n + 1
             if n > 3:
                 break
 

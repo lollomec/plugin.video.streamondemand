@@ -39,10 +39,14 @@ from core import scrapertools
 from core.item import InfoLabels
 from platformcode import platformtools
 
-
 HOST = "https://api.thetvdb.com"
 HOST_IMAGE = "http://thetvdb.com/banners/"
-TOKEN = config.get_setting("tvdb_token")
+
+# comprobación tras el cambio de tipos en config.get_setting
+if config.get_setting("tvdb_token") is not None:
+    TOKEN = config.get_setting("tvdb_token")
+else:
+    TOKEN = ""
 
 DEFAULT_LANG = "it"
 DEFAULT_HEADERS = {
@@ -283,7 +287,6 @@ def set_infoLabels_item(item):
 
             if data_season and 'image_season_%s' % int_season in data_season:
                 item.thumbnail = HOST_IMAGE + data_season['image_season_%s' % int_season][0]['fileName']
-
                 return len(item.infoLabels)
 
     # Buscar...
@@ -430,6 +433,7 @@ class Tvdb:
 
         else:
             dict_html = jsontools.load_json(html)
+            # logger.debug("dict_html %s" % dict_html)
 
             if "token" in dict_html:
                 token = dict_html["token"]
@@ -452,7 +456,7 @@ class Tvdb:
             response.close()
 
         except urllib2.HTTPError, err:
-            logger.info("err.code es %s" % err.code)
+            logger.error("err.code es %s" % err.code)
             # si hay error 401 es que el token se ha pasado de tiempo y tenemos que volver a llamar a login
             if err.code == 401:
                 cls.__login()
@@ -908,6 +912,7 @@ class Tvdb:
 
         """
         logger.info()
+
         if self.result.get('image_season_%s' % season):
             return self.result['image_season_%s' % season]
 

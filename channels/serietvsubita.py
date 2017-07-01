@@ -7,25 +7,15 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "serietvsubita"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "serietvsubita"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://serietvsubita.net"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -70,7 +60,7 @@ def episodios(item):
     logger.info("streamondemand.channels.serietvsubita episodios")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # patron  = '</div><div class="clear"></div>.*?'
     patron = '<h2><a href="([^"]+)".*?title="([^"]+)".*?<p><a href.*?<img.*?src="([^"]+)"'
@@ -83,8 +73,6 @@ def episodios(item):
             continue
         if scrapedtitle.startswith("Link to "):
             scrapedtitle = scrapedtitle[8:]
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -115,7 +103,7 @@ def series(item):
     logger.info("streamondemand.channels.serietvsubita series")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<li id="widget_categories" class="widget png_scale"><h2 class="blocktitle"><span>Serie</span>(.*?)</ul>'
     data = scrapertools.find_single_match(data, patron)
@@ -129,7 +117,6 @@ def series(item):
         title = scrapedtitle.strip()
         url = urlparse.urljoin(item.url, scrapedurl)
 
-        if (DEBUG): logger.info("title=[" + title + "], url=[" + url + "], thumbnail=[" + thumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="episodiosearch",
@@ -157,7 +144,7 @@ def episodiosearch(item):
     logger.info("streamondemand.channels.serietvsubita episodios")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<div class="post-meta">.*?<a href="([^"]+)" title="([^"]+)".*?<img.*?src="([^"]+)"'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -165,8 +152,6 @@ def episodiosearch(item):
     for scrapedurl, scrapedtitle, scrapedthumbnail in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="findvideos",

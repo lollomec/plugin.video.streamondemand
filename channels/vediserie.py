@@ -14,22 +14,8 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "vediserie"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "Vedi Serie"
-__language__ = "IT"
 
 host = "http://www.vediserie.com"
-
-headers = [['Upgrade-Insecure-Requests', '1'],
-           ['User-Agent', 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/53.0.2785.143 Chrome/53.0.2785.143 Safari/537.36'],
-           ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
-           ['Accept-Encoding', 'gzip, deflate'],
-           ['Accept-Language', 'en-US,en;q=0.8']]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -48,6 +34,7 @@ def mainlist(item):
 
     return itemlist
 
+
 def search(item, texto):
     logger.info("[vediserie.py] search")
 
@@ -63,11 +50,12 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 def fichas(item):
     logger.info("[vediserie.py] fichas")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<h2>[^>]+>\s*'
     patron += '<img[^=]+=[^=]+=[^=]+="([^"]+)"[^>]+>\s*'
@@ -109,7 +97,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url).data
 
     patron = r'<div class="list" data-stagione="([^"]+)">\s*'
     patron += r'<ul class="listEpis">\s*'
@@ -161,4 +149,3 @@ def findvideos(item):
         videoitem.channel = __channel__
 
     return itemlist
-

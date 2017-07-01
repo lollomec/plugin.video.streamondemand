@@ -7,28 +7,16 @@
 # ------------------------------------------------------------
 
 import re
-import urlparse
 
-import xbmc
-
-from core import config
-from core import logger
+from core import httptools
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "naruto"
-__category__ = "A"
-__type__ = "generic"
-__title__ = "naruto"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://manganimenod.it/"
 home = "http://manganimenod.it/episodi.php?a=NARUTO1"
 
-def isGeneric():
-    return True
 
 # -----------------------------------------------------------------
 def mainlist(item):
@@ -50,6 +38,7 @@ def mainlist(item):
 
     return itemlist
 
+
 # =================================================================
 # Funzioni di servizio
 # =================================================================
@@ -57,14 +46,11 @@ def mainlist(item):
 # -----------------------------------------------------------------
 
 def scrapedAll(url="", patron=""):
-
-    data = scrapertools.cache_page(url)
-    if DEBUG: logger.info("data:" + data)
+    data = httptools.downloadpage(url).data
     MyPatron = patron
     matches = re.compile(MyPatron, re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
 
     return matches
+
 # =================================================================
-
-

@@ -7,33 +7,15 @@
 import re
 import urlparse
 
-from core import config
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "mondolunatico_new"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "mondolunatico_new (IT)"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://mondolunatico.org"
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
-    ['Accept-Language', 'en-US,en;q=0.5'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
-
-DEBUG = config.get_setting("debug")
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -62,7 +44,7 @@ def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<ul class="genres falsescroll">(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -70,7 +52,6 @@ def categorias(item):
     matches = re.compile(patron, re.DOTALL).findall(bloque)
 
     for scrapedurl, scrapedtitle in matches:
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -102,7 +83,7 @@ def pelis_movie_src(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="thumbnail animation-2">\s*<a href="([^"]+)">\s*<img src="([^"]+)" alt="(.*?)" />'
@@ -126,13 +107,14 @@ def pelis_movie_src(item):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.mondolunatico_new peliculas")
 
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="poster">\s*<a href="(.*?)"><img src="(.*?)" alt="(.*?)">'
@@ -175,4 +157,3 @@ def peliculas(item):
                  folder=True))
 
     return itemlist
-

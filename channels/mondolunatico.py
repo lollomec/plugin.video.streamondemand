@@ -10,7 +10,7 @@ import time
 import urllib
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -18,28 +18,13 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "mondolunatico"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "Mondo Lunatico"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://mondolunatico.org"
 
 captcha_url = '%s/pass/CaptchaSecurityImages.php?width=100&height=40&characters=5' % host
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
-    ['Accept-Language', 'en-US,en;q=0.5'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
-
 PERPAGE = 25
 
-def isGeneric():
-    return True
 
 def mainlist(item):
     logger.info("streamondemand.mondolunatico mainlist")
@@ -80,7 +65,7 @@ def categorias(item):
     logger.info("streamondemand.mondolunatico categorias")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Narrow search by selecting only the combo
     bloque = scrapertools.get_match(data, '<option class="level-0" value="7">(.*?)<option class="level-0" value="8">')
@@ -106,8 +91,6 @@ def categorias(item):
         scrapedurl = "http://mondolunatico.org/category/film-per-genere/" + scrapedtitle
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  extra=item.extra,
@@ -143,7 +126,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="boxentry">\s*<a href="([^"]+)"[^>]+>\s*<img src="([^"]+)" alt="([^"]+)"[^>]+>'
@@ -199,7 +182,7 @@ def serietv(item):
         p = int(p)
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     data = scrapertools.find_single_match(data, '<h1>Lista Alfabetica</h1>(.*?)</div>')
 
     # Extrae las entradas
@@ -253,7 +236,7 @@ def search_serietv(item, texto):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     data = scrapertools.find_single_match(data, '<h1>Lista Alfabetica</h1>(.*?)</div>')
 
     # Extrae las entradas
@@ -298,7 +281,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     html = []
 
@@ -306,20 +289,19 @@ def episodios(item):
         patron = 'href="(https?://www\.keeplinks\.eu/p92/([^"]+))"'
         matches = re.compile(patron, re.DOTALL).findall(data)
         for keeplinks, id in matches:
-            _headers = list(headers)
-            _headers.append(['Cookie', 'flag[' + id + ']=1; defaults=1; nopopatall=' + str(int(time.time()))])
-            _headers.append(['Referer', keeplinks])
+            _headers = [['Cookie', 'flag[' + id + ']=1; defaults=1; nopopatall=' + str(int(time.time()))],
+                        ['Referer', keeplinks]]
 
-            html.append(scrapertools.cache_page(keeplinks, headers=_headers))
+            html.append(httptools.downloadpage(keeplinks, headers=_headers).data)
 
         patron = r'="(%s/pass/index\.php\?ID=[^"]+)"' % host
         matches = re.compile(patron, re.DOTALL).findall(data)
         for scrapedurl in matches:
-            tmp = scrapertools.cache_page(scrapedurl, headers=headers)
+            tmp = httptools.downloadpage(scrapedurl).data
 
             if 'CaptchaSecurityImages.php' in tmp:
                 # Descarga el captcha
-                img_content = scrapertools.cache_page(captcha_url, headers=headers)
+                img_content = httptools.downloadpage(captcha_url).data
 
                 captcha_fname = os.path.join(config.get_data_path(), __channel__ + "captcha.img")
                 with open(captcha_fname, 'wb') as ff:
@@ -332,7 +314,7 @@ def episodios(item):
                 if keyb.isConfirmed():
                     captcha_text = keyb.getText()
                     post_data = urllib.urlencode({'submit1': 'Invia', 'security_code': captcha_text})
-                    tmp = scrapertools.cache_page(scrapedurl, post=post_data, headers=headers)
+                    tmp = httptools.downloadpage(scrapedurl, post=post_data).data
 
                 try:
                     os.remove(captcha_fname)
@@ -381,13 +363,14 @@ def episodios(item):
 
     return itemlist
 
+
 def findvideos(item):
     logger.info("streamondemand.mondolunatico findvideos")
 
     itemlist = []
 
     # Descarga la página
-    data = item.url if item.extra == 'serie' else scrapertools.cache_page(item.url, headers=headers)
+    data = item.url if item.extra == 'serie' else httptools.downloadpage(item.url).data
 
     # Extrae las entradas
     patron = r'noshade>(.*?)<br>.*?<a href="(%s/pass/index\.php\?ID=[^"]+)"' % host
@@ -409,17 +392,17 @@ def findvideos(item):
     patron = 'href="(%s/stream/links/\d+/)"' % host
     matches = re.compile(patron, re.DOTALL).findall(data)
     for scrapedurl in matches:
-        data += scrapertools.cache_page(scrapedurl, headers=headers)
+        data += httptools.downloadpage(scrapedurl).data
 
     ### robalo fix obfuscator - start ####
 
     patron = 'href="(https?://www\.keeplinks\.eu/p92/([^"]+))"'
     matches = re.compile(patron, re.DOTALL).findall(data)
     for keeplinks, id in matches:
-        headers.append(['Cookie', 'flag[' + id + ']=1; defaults=1; nopopatall=' + str(int(time.time()))])
-        headers.append(['Referer', keeplinks])
+        headers = [['Cookie', 'flag[' + id + ']=1; defaults=1; nopopatall=' + str(int(time.time()))],
+                   ['Referer', keeplinks]]
 
-        html = scrapertools.cache_page(keeplinks, headers=headers)
+        html = httptools.downloadpage(keeplinks, headers=headers).data
         data += str(scrapertools.find_multiple_matches(html, '</lable><a href="([^"]+)" target="_blank"'))
 
     ### robalo fix obfuscator - end ####
@@ -435,20 +418,21 @@ def findvideos(item):
 
     return itemlist
 
+
 def play(item):
     logger.info("streamondemand.mondolunatico play")
 
     itemlist = []
 
     if item.server == 'captcha':
-        headers.append(['Referer', item.url])
+        headers = [['Referer', item.url]]
 
         # Descarga la página
-        data = scrapertools.cache_page(item.url, headers=headers)
+        data = httptools.downloadpage(item.url, headers=headers).data
 
         if 'CaptchaSecurityImages.php' in data:
             # Descarga el captcha
-            img_content = scrapertools.cache_page(captcha_url, headers=headers)
+            img_content = httptools.downloadpage(captcha_url, headers=headers).data
 
             captcha_fname = os.path.join(config.get_data_path(), __channel__ + "captcha.img")
             with open(captcha_fname, 'wb') as ff:
@@ -461,7 +445,7 @@ def play(item):
             if keyb.isConfirmed():
                 captcha_text = keyb.getText()
                 post_data = urllib.urlencode({'submit1': 'Invia', 'security_code': captcha_text})
-                data = scrapertools.cache_page(item.url, post=post_data, headers=headers)
+                data = httptools.downloadpage(item.url, post=post_data, headers=headers).data
 
             try:
                 os.remove(captcha_fname)
@@ -481,4 +465,3 @@ def play(item):
         itemlist.append(item)
 
     return itemlist
-

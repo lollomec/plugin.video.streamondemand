@@ -5,10 +5,9 @@
 # http://blog.tvalacarta.info/plugin-xbmc/streamondemand.
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,22 +15,10 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "casacinema"
-__category__ = "F,S,A"
-__type__ = "generic"
-__title__ = "casacinema"
-__language__ = "IT"
 
 host = 'http://www.casacinema.video'
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', '%s/genere/serie-tv' % host],
-]
-
-
-def isGeneric():
-    return True
+headers = [['Referer', '%s/genere/serie-tv' % host]]
 
 
 def mainlist(item):
@@ -80,6 +67,7 @@ def mainlist(item):
 
     return itemlist
 
+
 def newest(categoria):
     logger.info("[casacinema.py] newest" + categoria)
     itemlist = []
@@ -102,6 +90,7 @@ def newest(categoria):
         return []
 
     return itemlist
+
 
 def search(item, texto):
     logger.info("[casacinema.py] " + item.url + " search " + texto)
@@ -127,7 +116,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<li><a href="([^"]+)"[^=]+="([^"]+)"><div>\s*<div[^>]+>(.*?)<'
@@ -176,7 +165,7 @@ def peliculas_tv(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<li><a href="([^"]+)"[^=]+="([^"]+)"><div>\s*<div[^>]+>(.*?)<'
@@ -228,7 +217,7 @@ def categorias(item):
 
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Narrow search by selecting only the combo
     bloque = scrapertools.get_match(data, 'Categorie(.*?)</ul>')
@@ -276,7 +265,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     data = scrapertools.decodeHtmlentities(data)
     data = scrapertools.get_match(data, '<p>(?:<strong>|)(.*?)<div id="disqus_thread">')
 
@@ -315,21 +304,21 @@ def episodios(item):
 
     return itemlist
 
+
 def findvideos(item):
     logger.info("streamondemand.casacinema findvideos")
 
-    itemlist = []
+    data = item.url if item.extra == 'serie' else httptools.downloadpage(item.url, headers=headers).data
 
-    data = item.url if item.extra == 'serie' else scrapertools.cache_page(item.url, headers=headers)
-
-    html = scrapertools.cache_page(data)
+    html = httptools.downloadpage(data).data
     patron = '"http:\/\/shrink-service\.it\/[^\/]+\/[^\/]+\/([^"]+)"'
     matches = re.compile(patron, re.DOTALL).findall(html)
 
     for url in matches:
         if url is not None:
-               data = data
-        else: continue
+            data = data
+        else:
+            continue
 
     itemlist = servertools.find_video_items(data=data)
     for videoitem in itemlist:

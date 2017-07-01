@@ -7,33 +7,15 @@
 import re
 import urlparse
 
-from core import config
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmstreamingzone"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "filmstreamingzone (IT)"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://www.filmstreaming.zone"
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
-    ['Accept-Language', 'en-US,en;q=0.5'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
-
-DEBUG = config.get_setting("debug")
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -81,11 +63,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<ul class="hidden-menu clearfix">(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -94,7 +77,6 @@ def categorias(item):
 
     for scrapedurl, scrapedtitle in matches:
         scrapedurl = host + scrapedurl
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -119,13 +101,14 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 def peliculas(item):
     logger.info("streamondemand.filmstreamingzone peliculas")
 
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="movie-img[^=]+="([^"]+)">\s*<img src="([^"]+)" alt="([^"]+)"'
@@ -168,4 +151,3 @@ def peliculas(item):
                  folder=True))
 
     return itemlist
-

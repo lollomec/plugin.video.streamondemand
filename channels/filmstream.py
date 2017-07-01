@@ -5,10 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,18 +15,8 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmstream"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "Film-stream.org (IT)"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://film-stream.biz"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -75,8 +64,7 @@ def newest(categoria):
     item = Item()
     try:
         if categoria == "peliculas":
-            item.url = "http://film-stream.biz"
-            extra="movie"
+            item.url = host
             item.action = "peliculas"
             itemlist = peliculas(item)
 
@@ -92,11 +80,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     logger.info("streamondemand.filmstream categorias")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Narrow search by selecting only the combo
     bloque = scrapertools.get_match(data, '<ul class="mega-sub-menu">(.*?)</ul>')
@@ -110,8 +99,6 @@ def categorias(item):
         scrapedthumbnail = ""
         scrapedplot = ""
         scrapedtitle = scrapedtitle.title()
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -148,7 +135,7 @@ def aggiornamenti(item):
     Day_List = []
     starts = []
     # Descarga la pagina
-    data = scrapertools.cache_page("%s/serietv/" % host)
+    data = httptools.downloadpage("%s/serietv/" % host).data
 
     # Extrae las entradas (carpetas)
 
@@ -207,7 +194,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="galleryitem".*?>\s*'
@@ -215,7 +202,7 @@ def peliculas(item):
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedtitle, scrapedthumbnail in matches:
-        html = scrapertools.cache_page(scrapedurl)
+        html = httptools.downloadpage(scrapedurl).data
         start = html.find("</strong></p>")
         end = html.find("<p>&nbsp;</p>", start)
         scrapedplot = html[start:end]
@@ -228,8 +215,6 @@ def peliculas(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle.replace("(Miniserie Tv)", "{Miniserie Tv}"))
         if scrapedtitle.startswith("Permanent Link to "):
             scrapedtitle = scrapedtitle[18:]
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -271,7 +256,7 @@ def peliculas_tv(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="galleryitem".*?>\s*'
@@ -279,7 +264,7 @@ def peliculas_tv(item):
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedtitle, scrapedthumbnail in matches:
-        html = scrapertools.cache_page(scrapedurl)
+        html = httptools.downloadpage(scrapedurl).data
         start = html.find("</strong></p>")
         end = html.find("<p>&nbsp;</p>", start)
         scrapedplot = html[start:end]
@@ -292,8 +277,6 @@ def peliculas_tv(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle.replace("(Miniserie Tv)", "{Miniserie Tv}"))
         if scrapedtitle.startswith("Permanent Link to "):
             scrapedtitle = scrapedtitle[18:]
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",
@@ -360,7 +343,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     data = scrapertools.decodeHtmlentities(data)
     data = scrapertools.get_match(data, '<div class="postcontent">(.*?)<div id="sidebar">')
 
@@ -411,7 +394,7 @@ def findvideos(item):
     logger.info("streamondemand.filmstream findvideos")
 
     # Descarga la página
-    data = item.url if item.extra == 'serie' else scrapertools.cache_page(item.url)
+    data = item.url if item.extra == 'serie' else httptools.downloadpage(item.url).data
 
     itemlist = servertools.find_video_items(data=data)
     for videoitem in itemlist:

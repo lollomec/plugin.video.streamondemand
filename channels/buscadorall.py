@@ -17,8 +17,7 @@ from unicodedata import normalize
 
 import xbmc
 
-from core import channeltools
-from core import scrapertools
+from core import channeltools, httptools
 from lib.fuzzywuzzy import fuzz
 from platformcode import platformtools
 
@@ -39,13 +38,11 @@ __language__ = "IT"
 
 host = "http://www.ibs.it"
 
-DEBUG = config.get_setting("debug")
-
 TMDB_KEY = '6889f6089877fd092454d00edb44a84d'
 
 TMDB_URL_BASE = 'http://api.themoviedb.org/3/'
 TMDB_IMAGES_BASEURL = 'http://image.tmdb.org/t/p/'
-INCLUDE_ADULT = 'true' if config.get_setting("enableadultmode") else 'false'
+INCLUDE_ADULT = True if config.get_setting("enableadultmode") else False
 LANGUAGE_ID = 'it'
 
 DTTIME = (datetime.datetime.utcnow() - datetime.timedelta(hours=5))
@@ -81,10 +78,6 @@ NLS_Info_Title = config.get_localized_string(30999)
 NLS_Info_Person = config.get_localized_string(30979)
 
 TMDb_genres = {}
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -557,7 +550,7 @@ def url_quote_plus(input_string):
 
 
 def get_json_response(url=""):
-    response = scrapertools.cache_page(url)
+    response = httptools.downloadpage(url).data
     try:
         results = json.loads(response)
     except:
@@ -643,7 +636,7 @@ def do_channels_search(item):
         channel_parameters = channeltools.get_channel_parameters(basename_without_extension)
 
         # No busca si es un canal inactivo
-        if channel_parameters["active"] != "true":
+        if channel_parameters["active"] != True:
             continue
 
         # En caso de busqueda por categorias
@@ -651,7 +644,7 @@ def do_channels_search(item):
             continue
 
         # No busca si es un canal para adultos, y el modo adulto está desactivado
-        if channel_parameters["adult"] == "true" and config.get_setting("adult_mode") == "false":
+        if channel_parameters["adult"] == True and config.get_setting("adult_mode") == False:
             continue
 
         # No busca si el canal es en un idioma filtrado
@@ -663,7 +656,7 @@ def do_channels_search(item):
         if include_in_global_search == "":
             # Buscar en la configuracion del canal
             include_in_global_search = str(config.get_setting("include_in_global_search", basename_without_extension))
-        if include_in_global_search.lower() != "true":
+        if include_in_global_search.lower() != True:
             continue
 
         t = Thread(target=channel_search, args=[search_results, channel_parameters, category, title_year, tecleado])

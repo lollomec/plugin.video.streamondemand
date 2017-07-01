@@ -7,24 +7,16 @@
 import re
 import urlparse
 
-from core import config
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "imovie"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "imovie (IT)"
-__language__ = "IT"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://imovie.name"
 
-def isGeneric():
-    return True
 
 def mainlist(item):
     logger.info("streamondemand.imovie mainlist")
@@ -56,6 +48,7 @@ def mainlist(item):
 
     return itemlist
 
+
 def newest(categoria):
     logger.info("[imovie.py] newest" + categoria)
     itemlist = []
@@ -78,11 +71,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<p class="title">Genere</p>(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -92,7 +86,6 @@ def categorias(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedurl = host + scrapedurl
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -103,11 +96,12 @@ def categorias(item):
 
     return itemlist
 
+
 def anno(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<p class="title">Anno</p>(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -117,7 +111,6 @@ def anno(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedurl = host + scrapedurl
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -128,11 +121,12 @@ def anno(item):
 
     return itemlist
 
+
 def paese(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<p class="title">Paese</p>(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -142,7 +136,6 @@ def paese(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedurl = host + scrapedurl
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -152,6 +145,7 @@ def paese(item):
                  folder=True))
 
     return itemlist
+
 
 def search(item, texto):
     logger.info("[imovie.py] " + item.url + " search " + texto)
@@ -171,7 +165,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="inform">\s*<p class="name_film"><a href="([^"]+)">(.*?)</a></p>'
@@ -183,8 +177,6 @@ def peliculas(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedtitle = scrapedtitle.replace("<span>", "")
         scrapedtitle = scrapedtitle.replace("</span>", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -217,6 +209,7 @@ def peliculas(item):
                  folder=True))
 
     return itemlist
+
 
 def HomePage(item):
     import xbmc
