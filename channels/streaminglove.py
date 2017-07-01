@@ -16,15 +16,9 @@ from core.tmdb import infoSod
 
 __channel__ = "streaminglove"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.streaminglove.tv"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -94,7 +88,6 @@ def categorias(item):
 
     for scrapedurl, scrapedtitle in matches:
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -133,8 +126,6 @@ def peliculas_src(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -164,8 +155,6 @@ def peliculas(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",

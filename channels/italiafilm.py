@@ -18,15 +18,9 @@ from core.tmdb import infoSod
 
 __channel__ = "italiafilm"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.italia-film.gratis"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

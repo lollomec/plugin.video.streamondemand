@@ -7,15 +7,13 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "cinesuggestions"
-
-DEBUG = config.get_setting("debug")
 
 host = "http://csarchiviofilm.blogfree.net/?f=1105944"
 
@@ -29,10 +27,6 @@ headers_src = [
     ['Upgrade-Insecure-Requests', '1'],
     ['Cache-Control', 'max-age=0']
 ]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -110,7 +104,6 @@ def archivio(item):
 
     for scrapedtitle, scrapedurl in matches:
 
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="findvideos",

@@ -16,15 +16,9 @@ from core.tmdb import infoSod
 
 __channel__ = "altastreaming"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://altastreaming.cool"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -73,7 +67,6 @@ def categorias(item):
 
     for scrapedurl, scrapedtitle in matches:
         scrapedurl = host + scrapedurl
-        if DEBUG: logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -140,8 +133,6 @@ def peliculas(item):
         scrapedthumbnail = ""
         scrapedtitle = scrapertools.unescape(match.group(2))
         scrapedurl = urlparse.urljoin(item.url, match.group(1))
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -193,8 +184,6 @@ def peliculas_tv(item):
         scrapedthumbnail = ""
         scrapedtitle = scrapertools.unescape(match.group(2))
         scrapedurl = urlparse.urljoin(item.url, match.group(1))
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",

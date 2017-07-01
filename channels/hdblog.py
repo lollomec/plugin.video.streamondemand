@@ -7,18 +7,12 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "hdblog"
-
-DEBUG = config.get_setting("debug")
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -57,8 +51,6 @@ def categorias(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -85,8 +77,6 @@ def peliculas(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(Item(channel=__channel__, action="findvideos", fulltitle=scrapedtitle, show=scrapedtitle,
                              title=scrapedtitle, url=scrapedurl, thumbnail=scrapedthumbnail, plot=scrapedplot,
                              folder=True))

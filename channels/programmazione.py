@@ -7,20 +7,14 @@
 # ------------------------------------------------------------
 import re
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "programmazione"
 
-DEBUG = config.get_setting("debug")
-
 site = "https://www.youtube.com"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

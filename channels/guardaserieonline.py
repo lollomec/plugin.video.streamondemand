@@ -19,13 +19,7 @@ __channel__ = "guardaserieonline"
 
 host = "http://www.guardaserie.online"
 
-DEBUG = config.get_setting("debug")
-
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -148,8 +142,6 @@ def serietvaggiornate(item):
     matches = re.compile(patron, re.DOTALL).findall(blocco)
 
     for scrapedurl, scrapedthumbnail, scrapedep, scrapedtitle in matches:
-        if DEBUG: logger.info(
-            "Scrapedurl: " + scrapedurl + " | ScrapedThumbnail: " + scrapedthumbnail + " | ScrapedEp: " + scrapedep + " | ScrapedTitle: " + scrapedtitle)
         episode = re.compile(r'^(\d+)x(\d+)', re.DOTALL).findall(scrapedep)  # Prendo stagione ed episodio
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         title = "%s %s" % (scrapedtitle, scrapedep)

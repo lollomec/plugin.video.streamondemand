@@ -7,19 +7,14 @@
 # ------------------------------------------------------------
 import re
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "animevision"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.animevision.it"
-
-def isGeneric():
-    return True
 
 
 # -----------------------------------------------------------------
@@ -34,6 +29,8 @@ def mainlist(item):
                      fanart=CategoriaFanart)]
 
     return itemlist
+
+
 # =================================================================
 
 # -----------------------------------------------------------------
@@ -47,7 +44,7 @@ def lista_anime(item):
     patron = "<div class='epContainer' >[^=]+='imgEp'[^<]+<a href='(.*?)'>[^>]+><img src='(.*?)'[^<]+<[^>]+>(.*?)</div>"
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl,scrapedimg, scrapedtitle in matches:
+    for scrapedurl, scrapedimg, scrapedtitle in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedimg = host + "/" + scrapedimg
         scrapedurl = host + "/" + scrapedurl
@@ -64,20 +61,22 @@ def lista_anime(item):
                  viewmode="movie"))
 
     return itemlist
+
+
 # =================================================================
 
 # -----------------------------------------------------------------
 def episodi(item):
     logger.info("streamondemand.animevision episodi")
-    itemlist=[]
+    itemlist = []
 
     data = httptools.downloadpage(item.url).data
 
-    patron="epContainer'>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+><[^<]+<[^>]+>.*?href='(.*?)'[^>]+>(.*?)</a></div>"
+    patron = "epContainer'>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+><[^<]+<[^>]+>.*?href='(.*?)'[^>]+>(.*?)</a></div>"
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl,scrapedtitle  in matches:
-        scrapedtitle=scrapedtitle.split(';')[1]
+    for scrapedurl, scrapedtitle in matches:
+        scrapedtitle = scrapedtitle.split(';')[1]
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedurl = host + "/" + scrapedurl
 
@@ -91,8 +90,9 @@ def episodi(item):
                  thumbnail=item.thumbnail,
                  fanart=item.fanart))
 
-
     return itemlist
+
+
 # =================================================================
 
 # =================================================================

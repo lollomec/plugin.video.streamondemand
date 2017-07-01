@@ -16,13 +16,7 @@ from core.tmdb import infoSod
 
 __channel__ = "eurostreaming"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://eurostreaming.club"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -67,8 +61,6 @@ def serietv(item):
         num = scrapertools.find_single_match(scrapedurl, '(-\d+/)')
         if num:
             scrapedurl = scrapedurl.replace(num, "-episodi/")
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",

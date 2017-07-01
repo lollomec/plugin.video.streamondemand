@@ -15,16 +15,10 @@ from core.item import Item
 
 __channel__ = "animetubeita"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.animetubeita.com"
 hostlista = host + "/lista-anime/"
 hostgeneri = host + "/generi/"
 hostcorso = host + "/category/serie-in-corso/"
-
-
-def isGeneric():
-    return True
 
 
 # -----------------------------------------------------------------
@@ -337,7 +331,6 @@ def search(item, texto):
 def scrapedAll(url="", patron=""):
     matches = []
     data = httptools.downloadpage(url).data
-    if DEBUG: logger.info("data:" + data)
     MyPatron = patron
     matches = re.compile(MyPatron, re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
@@ -362,7 +355,7 @@ def scrapedSingle(url="", single="", patron=""):
 
 # -----------------------------------------------------------------
 def log(funzione="", stringa="", canale=__channel__):
-    if DEBUG: logger.info("[" + canale + "].[" + funzione + "] " + stringa)
+    logger.debug("[" + canale + "].[" + funzione + "] " + stringa)
 
 
 # =================================================================

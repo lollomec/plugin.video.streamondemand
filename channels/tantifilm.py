@@ -16,15 +16,9 @@ from core.tmdb import infoSod
 
 __channel__ = "tantifilm"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.tantifilm.me"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -346,8 +340,6 @@ def latest(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedtitle = scrapedtitle.replace("Permalink to ", "")
         scrapedtitle = scrapedtitle.replace("streaming", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",

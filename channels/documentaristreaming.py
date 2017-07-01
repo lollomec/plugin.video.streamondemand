@@ -8,7 +8,7 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
@@ -27,12 +27,6 @@ headers = [
     ['Upgrade-Insecure-Requests', '1'],
     ['Cache-Control', 'max-age=0']
 ]
-
-DEBUG = config.get_setting("debug")
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -100,8 +94,6 @@ def peliculas(item):
         scrapedtitle = scrapedtitle.lower()
         scrapedtitle = scrapedtitle.title()
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="findvideos",
@@ -162,8 +154,6 @@ def categorias(item):
         scrapedurl = urlparse.urljoin(item.url, url)
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",

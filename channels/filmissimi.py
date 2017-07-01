@@ -7,7 +7,7 @@ import re
 
 import xbmc
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
@@ -15,15 +15,9 @@ from core.tmdb import infoSod
 
 __channel__ = "filmissimi"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.filmissimi.net"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 # -------------------------------------------------------------------------------------------------------------------------------------------
@@ -112,7 +106,6 @@ def genere(item):
         scrapedplot = ""
         scrapedthumbnail = ""
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="elenco",

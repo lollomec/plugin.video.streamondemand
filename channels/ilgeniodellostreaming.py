@@ -16,15 +16,9 @@ from core.tmdb import infoSod
 
 __channel__ = "ilgeniodellostreaming"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://ilgeniodellostreaming.cc"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -178,8 +172,6 @@ def peliculas(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -230,8 +222,6 @@ def nuoviep(item):
     for scrapedthumbnail, scrapedtitle, scrapedurl in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="episodios",
@@ -263,8 +253,6 @@ def serie(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",

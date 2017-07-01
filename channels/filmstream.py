@@ -16,13 +16,7 @@ from core.tmdb import infoSod
 
 __channel__ = "filmstream"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://film-stream.biz"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -105,8 +99,6 @@ def categorias(item):
         scrapedthumbnail = ""
         scrapedplot = ""
         scrapedtitle = scrapedtitle.title()
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -223,8 +215,6 @@ def peliculas(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle.replace("(Miniserie Tv)", "{Miniserie Tv}"))
         if scrapedtitle.startswith("Permanent Link to "):
             scrapedtitle = scrapedtitle[18:]
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -287,8 +277,6 @@ def peliculas_tv(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle.replace("(Miniserie Tv)", "{Miniserie Tv}"))
         if scrapedtitle.startswith("Permanent Link to "):
             scrapedtitle = scrapedtitle[18:]
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",

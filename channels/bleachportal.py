@@ -8,22 +8,16 @@
 
 import re
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "bleachportal"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://bleachportal.it"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -58,7 +52,6 @@ def episodi(item):
     animetitle = "Bleach" if item.extra == "bleach" else "D.Gray Man"
     for scrapednumber, scrapedtitle, scrapedurl in matches:
         scrapedtitle = scrapedtitle.decode('latin1').encode('utf8')
-        if DEBUG: logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "], number=[" + scrapednumber + "]")
         itemlist.append(Item(channel=__channel__,
                              action="findvideos",
                              title="[COLOR azure]" + animetitle + " Ep: [/COLOR][COLOR deepskyblue] " + scrapednumber + " [/COLOR]",

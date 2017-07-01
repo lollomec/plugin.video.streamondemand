@@ -6,19 +6,13 @@
 # ------------------------------------------------------------
 import re
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core.item import Item
 
 __channel__ = "nikla"
 
-DEBUG = config.get_setting("debug")
-
 host = "https://www.nikla.net/categoria/youtube-film/lista-film-completi-liberamente-accessibili-su-youtube/"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

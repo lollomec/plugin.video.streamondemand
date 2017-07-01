@@ -7,7 +7,7 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,15 +16,9 @@ from core.tmdb import infoSod
 
 __channel__ = "cinemasubito"
 
-DEBUG = config.get_setting("debug")
-
 host = "https://www.cinemasubito.link"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

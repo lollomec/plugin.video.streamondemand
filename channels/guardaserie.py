@@ -18,10 +18,6 @@ __channel__ = "guardaserie"
 host = "http://www.guardaserie.club"
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
     logger.info("streamondemand.channels.guardaserie mainlist")
 

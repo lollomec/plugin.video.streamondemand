@@ -15,13 +15,7 @@ from core.tmdb import infoSod
 
 __channel__ = "filmsenzalimiti"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.filmsenzalimiti.cool"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -100,8 +94,6 @@ def categorias(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="novedades",
@@ -151,8 +143,6 @@ def novedades(item):
         scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         scrapedtitle = scrapertools.get_filename_from_url(scrapedurl).replace("-", " ").replace("/", "").replace(
             ".html", "").capitalize().strip()
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -202,8 +192,6 @@ def novedades_tv(item):
         scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         scrapedtitle = scrapertools.get_filename_from_url(scrapedurl).replace("-", " ").replace("/", "").replace(
             ".html", "").capitalize().strip()
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",

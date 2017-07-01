@@ -18,10 +18,6 @@ __channel__ = "vediserie"
 host = "http://www.vediserie.com"
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
     logger.info("[vediserie.py] mainlist")
 

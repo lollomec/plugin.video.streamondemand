@@ -17,14 +17,8 @@ from core.tmdb import infoSod
 
 __channel__ = "solostreaming"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://solo-streaming.com"
 result_per_page = 25
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

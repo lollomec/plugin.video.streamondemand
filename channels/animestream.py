@@ -17,14 +17,8 @@ from core.item import Item
 
 __channel__ = "animestream"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.animestream.it/"
 hostcategoria = "http://www.animestream.it/Ricerca-Tutti-pag1"
-
-
-def isGeneric():
-    return True
 
 
 # -----------------------------------------------------------------

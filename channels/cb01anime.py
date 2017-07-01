@@ -16,12 +16,6 @@ __channel__ = "cb01anime"
 
 host = "http://www.cineblog01.cc"
 
-DEBUG = config.get_setting("debug")
-
-
-def isGeneric():
-    return True
-
 
 # -----------------------------------------------------------------
 def mainlist(item):
@@ -82,8 +76,6 @@ def novita(item):
         scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         if scrapedplot.startswith(""):
             scrapedplot = scrapedplot[64:]
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
 
         ## ------------------------------------------------
         scrapedthumbnail = httptools.get_url_headers(scrapedthumbnail)
@@ -141,8 +133,6 @@ def genere(item):
 
     for scrapedurl, scrapedtitle in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="novita",
@@ -175,7 +165,6 @@ def alfabetico(item):
         scrapedurl = url
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="novita",
@@ -211,7 +200,6 @@ def listacompleta(item):
         scrapedurl = url
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="episodios",
@@ -337,7 +325,8 @@ def play(item):
                 # In alternativa, dato che a volte compare "Clicca qui per proseguire":
                 data = scrapertools.get_match(data, r'<a href="([^"]+)".*?class="btn-wrapper">.*?licca.*?</a>')
             except IndexError:
-                data = httptools.downloadpage(item.url, only_headers=True, follow_redirects=False).headers.get("location")
+                data = httptools.downloadpage(item.url, only_headers=True, follow_redirects=False).headers.get(
+                    "location")
         while 'vcrypt' in data:
             data = httptools.downloadpage(data, only_headers=True, follow_redirects=False).headers.get("location")
         logger.debug("##### play go.php data ##\n%s\n##" % data)

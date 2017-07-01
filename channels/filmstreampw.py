@@ -7,7 +7,7 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -17,12 +17,6 @@ from core.tmdb import infoSod
 __channel__ = "filmstreampw"
 
 host = 'http://beststreaming.info'
-
-DEBUG = config.get_setting("debug")
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -89,8 +83,6 @@ def categorias(item):
         scrapedurl = urlparse.urljoin(item.url, scrapedurl)
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -138,8 +130,6 @@ def peliculasx(item):
         scrapedplot = re.sub(r'<[^>]*>', '', scrapedplot)
         scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         scrapedtitle = scrapedtitle.strip()
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  extra=item.extra,
@@ -170,8 +160,6 @@ def peliculas(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedtitle = scrapedtitle.strip()
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  extra=item.extra,

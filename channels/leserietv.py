@@ -19,15 +19,9 @@ from core.tmdb import infoSod
 
 __channel__ = "leserietv"
 
-DEBUG = config.get_setting("debug")
-
 host = 'http://www.guardareserie.tv'
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 # -----------------------------------------------------------------
@@ -186,8 +180,6 @@ def categorias(item):
         scrapedurl = urlparse.urljoin(item.url, scrapedurl)
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="lista_serie",

@@ -21,10 +21,6 @@ host = "http://altadefinizione.pink"
 headers = [['Referer', host]]
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
     logger.info("[altadefinizioneclick.py] mainlist")
 

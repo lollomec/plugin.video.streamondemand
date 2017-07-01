@@ -15,15 +15,9 @@ from core.tmdb import infoSod
 
 __channel__ = "altadefinizionezone"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://altadefinizione.estate"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -72,7 +66,6 @@ def categorias(item):
         scrapedthumbnail = ""
         scrapedurl = host + scrapedurl
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -138,8 +131,6 @@ def peliculas(item):
         scrapedplot = ""
         scrapedthumbnail = host + scrapedthumbnail
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -191,8 +182,6 @@ def peliculas_tv(item):
         scrapedplot = ""
         scrapedthumbnail = host + scrapedthumbnail
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="seasons",

@@ -9,15 +9,12 @@ import datetime
 import json
 import urllib
 
-from core import config
 from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "saghe"
-
-DEBUG = config.get_setting("debug")
 
 tmdb_key = '6889f6089877fd092454d00edb44a84d'
 dttime = (datetime.datetime.utcnow() - datetime.timedelta(hours=5))
@@ -28,10 +25,6 @@ month2_date = (dttime - datetime.timedelta(days=60)).strftime('%Y-%m-%d')
 year_date = (dttime - datetime.timedelta(days=365)).strftime('%Y-%m-%d')
 tmdb_image = 'http://image.tmdb.org/t/p/original'
 tmdb_poster = 'http://image.tmdb.org/t/p/w500'
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

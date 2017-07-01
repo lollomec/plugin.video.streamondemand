@@ -19,10 +19,6 @@ __channel__ = "itafilmtv"
 host = "http://www.itafilm.tube"
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
     logger.info("[itafilmtv.py] mainlist")
 

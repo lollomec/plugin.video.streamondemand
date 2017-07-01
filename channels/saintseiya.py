@@ -6,7 +6,7 @@
 # ------------------------------------------------------------
 import re
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -18,13 +18,7 @@ __type__ = "generic"
 __title__ = "Saint Seiya"
 __language__ = "IT"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://archive.forumcommunity.net"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

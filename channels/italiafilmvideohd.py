@@ -21,10 +21,6 @@ host = "http://www.italiafilm.link"
 headers = [['Referer', host]]
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
     logger.info("[italiafilmvideohd.py] mainlist")
 

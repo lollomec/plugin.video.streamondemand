@@ -9,7 +9,7 @@
 import re
 import urllib
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
@@ -17,15 +17,9 @@ from core.tmdb import infoSod
 
 __channel__ = "umsfunsub"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://trackerums.altervista.org"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 # ----------------------------------------------------------------------------------------------------------------

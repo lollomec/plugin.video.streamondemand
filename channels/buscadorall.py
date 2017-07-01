@@ -38,8 +38,6 @@ __language__ = "IT"
 
 host = "http://www.ibs.it"
 
-DEBUG = config.get_setting("debug")
-
 TMDB_KEY = '6889f6089877fd092454d00edb44a84d'
 
 TMDB_URL_BASE = 'http://api.themoviedb.org/3/'
@@ -80,10 +78,6 @@ NLS_Info_Title = config.get_localized_string(30999)
 NLS_Info_Person = config.get_localized_string(30979)
 
 TMDb_genres = {}
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

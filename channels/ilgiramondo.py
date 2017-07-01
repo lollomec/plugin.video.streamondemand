@@ -7,18 +7,12 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "ilgiramondo"
-
-DEBUG = config.get_setting("debug")
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -56,8 +50,6 @@ def peliculas(item):
         scrapedtitle = re.sub(r'<[^>]*>', '', scrapedtitle)
         scrapedtitle = scrapedtitle.replace(" | Video Di Viaggi E Vacanze", "")
         # scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(Item(channel=__channel__, action="findvideos", fulltitle=scrapedtitle, show=scrapedtitle,
                              title=scrapedtitle, url=scrapedurl, thumbnail=scrapedthumbnail, plot=scrapedplot,
                              folder=True))

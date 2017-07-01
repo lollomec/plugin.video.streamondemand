@@ -16,13 +16,7 @@ from core.tmdb import infoSod
 
 __channel__ = "italiaserie"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.italiaserie.co"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

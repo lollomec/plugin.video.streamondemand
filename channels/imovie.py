@@ -7,7 +7,7 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
@@ -15,13 +15,7 @@ from core.tmdb import infoSod
 
 __channel__ = "imovie"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://imovie.name"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -92,7 +86,6 @@ def categorias(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedurl = host + scrapedurl
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -118,7 +111,6 @@ def anno(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedurl = host + scrapedurl
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -144,7 +136,6 @@ def paese(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedurl = host + scrapedurl
 
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -186,8 +177,6 @@ def peliculas(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedtitle = scrapedtitle.replace("<span>", "")
         scrapedtitle = scrapedtitle.replace("</span>", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",

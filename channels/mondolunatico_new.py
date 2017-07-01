@@ -7,7 +7,7 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
@@ -15,13 +15,7 @@ from core.tmdb import infoSod
 
 __channel__ = "mondolunatico_new"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://mondolunatico.org"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -58,7 +52,6 @@ def categorias(item):
     matches = re.compile(patron, re.DOTALL).findall(bloque)
 
     for scrapedurl, scrapedtitle in matches:
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",

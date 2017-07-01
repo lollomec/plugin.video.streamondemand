@@ -21,10 +21,6 @@ host = "http://ffilms.org/italiano"
 headers = [['Referer', host]]
 
 
-def isGeneric():
-    return True
-
-
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
     logger.info("[FFilms.py]==> mainlist")

@@ -26,10 +26,6 @@ headers = [
 ]
 
 
-def isGeneric():
-    return True
-
-
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
     logger.info("[AltadefinizioneHD.py]==> mainlist")

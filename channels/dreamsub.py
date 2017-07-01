@@ -15,13 +15,7 @@ from core.tmdb import infoSod
 
 __channel__ = "dreamsub"
 
-DEBUG = config.get_setting("debug")
-
 host = "https://www.dreamsub.it"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -110,8 +104,6 @@ def serietv(item):
         scrapedthumbnail = ""
         scrapedtitle = scrapedtitle.replace("Streaming", "")
         scrapedtitle = scrapedtitle.replace("Lista episodi ", "")
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodios",
@@ -169,8 +161,6 @@ def ultimiep(item):
         scrapedurl = host + scrapedurl
         scrapedplot = ""
         scrapedthumbnail = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",

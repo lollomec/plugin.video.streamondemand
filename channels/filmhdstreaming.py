@@ -6,11 +6,10 @@
 #  By Costaplus
 # ------------------------------------------------------------
 
-#   Import  sono importanti per il funzionamento del canale
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
@@ -19,8 +18,6 @@ from core.tmdb import infoSod
 __channel__ = "filmhdstreaming"
 
 # riferimento alla gestione del log
-DEBUG = config.get_setting("debug")
-
 host = "http://hdcineblog01.com"
 
 
@@ -132,8 +129,6 @@ def elenco(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedtitle = scrapedtitle.replace(" streaming ita", "")
         scrapedtitle = scrapedtitle.replace(" film streaming", "")
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -187,7 +182,6 @@ def elenco_genere(item):
 
     for scrapedurl, scrapedtitle in matches:
         scrapedtitle = scrapedtitle.replace("Film streaming ", "")
-        if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="elenco",

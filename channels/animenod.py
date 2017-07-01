@@ -19,10 +19,6 @@ host = "http://manganimenod.it"
 headers = [['Referer', host]]
 
 
-def isGeneric():
-    return True
-
-
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
     logger.info("[AnimeNOD.py]==> mainlist")

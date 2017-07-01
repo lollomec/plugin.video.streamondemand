@@ -21,8 +21,6 @@ from platformcode import platformtools
 
 logger.info("streamondemand.channels.buscador init")
 
-DEBUG = config.get_setting("debug")
-
 TIMEOUT_TOTAL = 75
 MAX_THREADS = 16
 

@@ -7,20 +7,14 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "fastsubita"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://fastsubita.tk"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -61,8 +55,6 @@ def serietv(item):
         scrapedplot = ""
         scrapedthumbnail = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="findvideos",
@@ -114,8 +106,6 @@ def all_quick(item):
         scrapedthumbnail = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         scrapedurl = "http:" + scrapedurl
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="serietv",

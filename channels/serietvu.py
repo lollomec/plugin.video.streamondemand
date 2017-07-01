@@ -22,10 +22,6 @@ host = "http://www.serietvu.com"
 headers = [['Referer', host]]
 
 
-def isGeneric():
-    return True
-
-
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
     logger.info("[SerieTVU.py]==> mainlist")

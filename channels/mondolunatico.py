@@ -19,17 +19,11 @@ from core.tmdb import infoSod
 
 __channel__ = "mondolunatico"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://mondolunatico.org"
 
 captcha_url = '%s/pass/CaptchaSecurityImages.php?width=100&height=40&characters=5' % host
 
 PERPAGE = 25
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -97,8 +91,6 @@ def categorias(item):
         scrapedurl = "http://mondolunatico.org/category/film-per-genere/" + scrapedtitle
         scrapedthumbnail = ""
         scrapedplot = ""
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  extra=item.extra,

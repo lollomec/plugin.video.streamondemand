@@ -15,13 +15,7 @@ from core.tmdb import infoSod
 
 __channel__ = "serietvsubita"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://serietvsubita.net"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -79,8 +73,6 @@ def episodios(item):
             continue
         if scrapedtitle.startswith("Link to "):
             scrapedtitle = scrapedtitle[8:]
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
@@ -125,7 +117,6 @@ def series(item):
         title = scrapedtitle.strip()
         url = urlparse.urljoin(item.url, scrapedurl)
 
-        if (DEBUG): logger.info("title=[" + title + "], url=[" + url + "], thumbnail=[" + thumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="episodiosearch",
@@ -161,8 +152,6 @@ def episodiosearch(item):
     for scrapedurl, scrapedtitle, scrapedthumbnail in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
-        if (DEBUG): logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="findvideos",

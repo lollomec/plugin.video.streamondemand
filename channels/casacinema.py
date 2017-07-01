@@ -21,10 +21,6 @@ host = 'http://www.casacinema.video'
 headers = [['Referer', '%s/genere/serie-tv' % host]]
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
     logger.info("streamondemand.casacinema mainlist")
 

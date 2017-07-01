@@ -20,12 +20,6 @@ host = "http://www.altadefinizione01.onl"
 
 headers = [['Referer', host]]
 
-DEBUG = config.get_setting("debug")
-
-
-def isGeneric():
-    return True
-
 
 def mainlist(item):
     logger.info("streamondemand.altadefinizione01 mainlist")
@@ -90,8 +84,6 @@ def peliculas(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle.replace("Streaming", ""))
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         ## ------------------------------------------------
         scrapedthumbnail = httptools.get_url_headers(scrapedthumbnail)
         ## ------------------------------------------------
@@ -151,8 +143,6 @@ def categorias(item):
         scrapedurl = urlparse.urljoin(item.url, url)
         scrapedthumbnail = ""
         scrapedplot = ""
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",

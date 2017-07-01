@@ -16,15 +16,9 @@ from core.tmdb import infoSod
 
 __channel__ = "streamblog"
 
-DEBUG = config.get_setting("debug")
-
 host = "https://www.streamblog.me"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):

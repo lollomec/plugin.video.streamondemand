@@ -7,7 +7,7 @@
 import re
 import urlparse
 
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -15,13 +15,7 @@ from core.item import Item
 
 __channel__ = "documentaristreamingdb"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.documentari-streaming-db.com"
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -79,7 +73,6 @@ def categorias(item):
     matches = re.compile(patron, re.DOTALL).findall(bloque)
 
     for scrapedurl, scrapedtitle in matches:
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
 
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle.replace("Documentari ", ""))
         if scrapedtitle.startswith("Tutte"):
@@ -138,8 +131,6 @@ def peliculas(item):
         scrapedtitle = scrapedtitle.replace("-streaming", "")
         scrapedtitle = scrapedtitle.replace("-", " ")
         scrapedtitle = scrapedtitle.title()
-        if DEBUG: logger.info(
-            "url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="findvideos",

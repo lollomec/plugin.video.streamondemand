@@ -22,10 +22,6 @@ host = "http://itastreaming.gratis"
 headers = [['Referer', host]]
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
     logger.info("[itastreaming.py] mainlist")
 

@@ -20,15 +20,9 @@ from servers.decrypters import adfly
 
 __channel__ = "animeforce"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://animeforce.org"
 
 headers = [['Referer', host]]
-
-
-def isGeneric():
-    return True
 
 
 # -----------------------------------------------------------------
@@ -340,7 +334,6 @@ def findvideos(item):
 # -----------------------------------------------------------------
 def scrapedAll(url="", patron=""):
     data = httptools.downloadpage(url).data
-    if DEBUG: logger.info("data:" + data)
     MyPatron = patron
     matches = re.compile(MyPatron, re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
@@ -375,7 +368,7 @@ def Crea_Url(pagina="1", azione="ricerca", categoria="", nome=""):
 
 # -----------------------------------------------------------------
 def log(funzione="", stringa="", canale=__channel__):
-    if DEBUG: logger.info("[" + canale + "].[" + funzione + "] " + stringa)
+    logger.debug("[" + canale + "].[" + funzione + "] " + stringa)
 
 
 # =================================================================

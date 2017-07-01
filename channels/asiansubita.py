@@ -19,10 +19,6 @@ __channel__ = "asiansubita"
 host = "http://asiansubita.altervista.org"
 
 
-def isGeneric():
-    return True
-
-
 def mainlist(item):
     logger.info("streamondemand.asiansubita mainlist")
 

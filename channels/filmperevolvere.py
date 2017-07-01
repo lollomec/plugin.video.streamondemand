@@ -8,7 +8,7 @@ import re
 import urlparse
 
 import lib.pyaes as aes
-from core import config, httptools
+from core import httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,8 +16,6 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmperevolvere"
-
-DEBUG = config.get_setting("debug")
 
 host = "https://filmperevolvere.it"
 
@@ -31,10 +29,6 @@ headers = [
     ['Upgrade-Insecure-Requests', '1'],
     ['Cache-Control', 'max-age=0']
 ]
-
-
-def isGeneric():
-    return True
 
 
 def mainlist(item):
@@ -120,7 +114,6 @@ def categorie(item):
         if scrapedtitle.startswith(("GENERI")):
             continue
 
-        if (DEBUG): logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "]")
         itemlist.append(
             Item(channel=__channel__,
                  action="peliculas",
@@ -152,8 +145,6 @@ def peliculas(item):
         scrapedtitle = scrapedtitle.title()
         txt = "Serie Tv"
         if txt in scrapedtitle: continue
-        if DEBUG: logger.info(
-            "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",

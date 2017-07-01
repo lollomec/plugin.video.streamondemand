@@ -17,13 +17,7 @@ from core.tmdb import infoSod
 
 __channel__ = "filmbelli"
 
-DEBUG = config.get_setting("debug")
-
 host = "http://www.filmbelli.gratis"
-
-
-def isGeneric():
-    return True
 
 
 # -------------------------------------------------------------------------------------------------------------------------------------------
