@@ -105,7 +105,7 @@ def find_and_set_infoLabels(item):
 
         elif index == 0:
             # Pregunta el titulo
-            title = platformtools.dialog_input(title, "Introduzca el nombre de la %s a buscar" % tipo_contenido)
+            title = platformtools.dialog_input(title, "Inserire il nome %s per ricerca" % tipo_contenido)
             if title:
                 if item.contentType == "movie":
                     item.contentTitle = title

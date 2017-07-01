@@ -890,12 +890,12 @@ def overwrite_tools(item):
     import library_service
     from core import library
 
-    seleccion = platformtools.dialog_yesno("Sobrescribir toda la biblioteca",
-                                           "Esto puede llevar algun tiempo.",
-                                           "¿Desea continuar?")
+    seleccion = platformtools.dialog_yesno("Sovrascrivere la libreria?",
+                                           "Richiede un certo tempo.",
+                                           "Continuare?")
     if seleccion == 1:
-        heading = 'Sobrescribiendo biblioteca....'
-        p_dialog = platformtools.dialog_progress_bg('pelisalacarta', heading)
+        heading = 'Sovrascrivo la libreria....'
+        p_dialog = platformtools.dialog_progress_bg('streamondemand', heading)
         p_dialog.update(0, '')
 
         import glob

@@ -193,7 +193,7 @@ def file_open(path, mode="r"):
     except:
         logger.error("ERROR al abrir el archivo: %s" % path)
         logger.error(traceback.format_exc())
-        platformtools.dialog_notification("Error al abrir", path)
+        platformtools.dialog_notification("Errore in apertura", path)
         return False
      
 
@@ -394,7 +394,7 @@ def remove(path):
     except:
         logger.error("ERROR al eliminar el archivo: %s" % path)
         logger.error(traceback.format_exc())
-        platformtools.dialog_notification("Error al eliminar el archivo", path)
+        platformtools.dialog_notification("Errore rimozione file", path)
         return False
     else:
         return True

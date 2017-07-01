@@ -141,7 +141,7 @@ def open_settings():
                 if settings_post['adult_aux_new_password1'] == settings_post['adult_aux_new_password2']:
                     adult_password = set_setting('adult_password', settings_post['adult_aux_new_password1'])
                 else:
-                    platformtools.dialog_ok("Canales para adultos", "Los campos 'Nueva contraseña' y 'Confirmar nueva contraseña' no coinciden.",
+                    platformtools.dialog_ok("Canale per adulti", "Los campos 'Nueva contraseña' y 'Confirmar nueva contraseña' no coinciden.",
                                             "Entre de nuevo en 'Preferencias' para cambiar la contraseña")
 
 
@@ -152,7 +152,7 @@ def open_settings():
             set_setting("adult_pin", adult_pin)
 
         else:
-            platformtools.dialog_ok("Canales para adultos", "La contraseña no es correcta.",
+            platformtools.dialog_ok("Canale per adulti", "La contraseña no es correcta.",
                                     "Los cambios realizados en esta sección no se guardaran.")
 
             # Deshacer cambios

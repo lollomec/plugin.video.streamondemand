@@ -440,8 +440,8 @@ if __name__ == "__main__":
 
     # Comprobar version de la bilbioteca y actualizar si es necesario
     if config.get_setting("library_version") != 'v4':
-        platformtools.dialog_ok(config.PLUGIN_NAME.capitalize(), "Se va a actualizar la biblioteca al nuevo formato",
-                                "Seleccione el nombre correcto de cada serie o película, si no está seguro pulse 'Cancelar'.")
+        platformtools.dialog_ok(config.PLUGIN_NAME.capitalize(), "Aggiornamento della libreria al nuovo formato",
+                                "Seleziona il nome corretto di serie o film, se non sicuro seleziona 'Cancel'.")
 
         if not convert_old_to_v4():
             platformtools.dialog_ok(config.PLUGIN_NAME.capitalize(),

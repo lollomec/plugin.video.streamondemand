@@ -287,7 +287,7 @@ def resolve_video_urls_for_playing(server, url, video_password="", muestra_dialo
         if server_parameters:
             # Muestra un diágo de progreso
             if muestra_dialogo:
-                progreso = platformtools.dialog_progress("pelisalacarta", "Conectando con %s" % server_parameters["name"])
+                progreso = platformtools.dialog_progress("streamondemand", "Connessione con %s" % server_parameters["name"])
 
             #Cuenta las opciones disponibles, para calcular el porcentaje
             
@@ -352,7 +352,7 @@ def resolve_video_urls_for_playing(server, url, video_password="", muestra_dialo
                 
                 #Muestra el progreso
                 if muestra_dialogo:
-                  progreso.update((100 / len(opciones)) * opciones.index(opcion)  , "Conectando con %s" % server_name)
+                  progreso.update((100 / len(opciones)) * opciones.index(opcion)  , "Connessione con %s" % server_name)
                 
                 #Modo free
                 if opcion == "free":
@@ -727,9 +727,9 @@ def filter_servers(servers_list):
             servers_list_filter = filter(lambda x: not config.get_setting("black_list",server=x), servers_list)
             
         # Si no hay enlaces despues de filtrarlos
-        if servers_list_filter or not platformtools.dialog_yesno("Filtrar servidores (Lista Negra)",
-                                                                  "Todos los enlaces disponibles pertenecen a servidores incluidos en su Lista Negra.",
-                                                                  "¿Desea mostrar estos enlaces?"):
+        if servers_list_filter or not platformtools.dialog_yesno("Filtra server (Black list)",
+                                                                  "Tutti i collegamenti disponibili appartengono ai server in black list",
+                                                                  "Mostro i collegamenti?"):
             servers_list = servers_list_filter
 
     return servers_list
