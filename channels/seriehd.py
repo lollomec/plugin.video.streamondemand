@@ -4,13 +4,11 @@
 # Canal para seriehd - based on guardaserie channel
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
-import re
-
 import base64
+import re
 import urlparse
 
-from core import config
-from core import httptools
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -18,20 +16,10 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "seriehd"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "Serie HD"
-__language__ = "IT"
 
 host = "http://www.seriehd.me"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host],
-    ['Cache-Control', 'max-age=0']
-]
+headers = [['Referer', host]]
 
 
 def isGeneric():
@@ -80,8 +68,7 @@ def sottomenu(item):
     logger.info("[seriehd.py] sottomenu")
     itemlist = []
 
-    # data = anti_cloudflare(item.url)
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<a href="([^"]+)">([^<]+)</a>'
 
@@ -104,7 +91,7 @@ def fichas(item):
     logger.info("[seriehd.py] fichas")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<h2>(.*?)</h2>\s*'
     patron += '<img src="([^"]+)" alt="[^"]*" />\s*'
@@ -140,12 +127,12 @@ def episodios(item):
     logger.info("[seriehd.py] episodios")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = r'<iframe width=".+?" height=".+?" src="([^"]+)" allowfullscreen frameborder="0">'
     url = scrapertools.find_single_match(data, patron).replace("?seriehd", "")
 
-    data = scrapertools.cache_page(url).replace('\n', '').replace(' class="active"', '')
+    data = httptools.downloadpage(url).data.replace('\n', '').replace(' class="active"', '')
 
     section_stagione = scrapertools.find_single_match(data, '<h3>STAGIONE</h3><ul>(.*?)</ul>')
     patron = '<li[^>]+><a href="([^"]+)">(\d+)<'
@@ -154,7 +141,7 @@ def episodios(item):
     for scrapedseason_url, scrapedseason in seasons:
 
         season_url = urlparse.urljoin(url, scrapedseason_url)
-        data = scrapertools.cache_page(season_url).replace('\n', '').replace(' class="active"', '')
+        data = httptools.downloadpage(season_url).data.replace('\n', '').replace(' class="active"', '')
 
         section_episodio = scrapertools.find_single_match(data, '<h3>EPISODIO</h3><ul>(.*?)</ul>')
         patron = '<li><a href="([^"]+)">(\d+)<'
@@ -183,7 +170,7 @@ def episodios(item):
                  action="add_serie_to_library",
                  extra="episodios",
                  show=item.show))
-        #itemlist.append(
+        # itemlist.append(
         #    Item(channel=__channel__,
         #         title="Scarica tutti gli episodi della serie",
         #         url=item.url,
@@ -192,19 +179,20 @@ def episodios(item):
         #         show=item.show))
     return itemlist
 
+
 def findvideos(item):
     logger.info("[seriehd.py] findvideos")
 
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.anti_cloudflare(item.url, headers).replace('\n', '')
+    data = httptools.downloadpage(item.url, headers=headers).data.replace('\n', '')
 
     patron = r'<iframe id="iframeVid" width=".+?" height=".+?" src="([^"]+)" allowfullscreen="">'
     url = scrapertools.find_single_match(data, patron)
 
     if 'hdpass' in url:
-        data = scrapertools.cache_page(url, headers=headers)
+        data = httptools.downloadpage(url, headers=headers).data
 
         start = data.find('<div class="row mobileRes">')
         end = data.find('<div id="playerFront">', start)
@@ -219,13 +207,13 @@ def findvideos(item):
         urls = []
         for res_url, res_video in scrapertools.find_multiple_matches(res, '<option.*?value="([^"]+?)">([^<]+?)</option>'):
 
-            data = scrapertools.cache_page(urlparse.urljoin(url, res_url), headers=headers).replace('\n', '')
+            data = httptools.downloadpage(urlparse.urljoin(url, res_url), headers=headers).data.replace('\n', '')
 
             mir = scrapertools.find_single_match(data, patron_mir)
 
             for mir_url in scrapertools.find_multiple_matches(mir, '<option.*?value="([^"]+?)">[^<]+?</value>'):
 
-                data = scrapertools.cache_page(urlparse.urljoin(url, mir_url), headers=headers).replace('\n', '')
+                data = httptools.downloadpage(urlparse.urljoin(url, mir_url), headers=headers).data.replace('\n', '')
 
                 for media_label, media_url in re.compile(patron_media).findall(data):
                     urls.append(url_decode(media_url))
@@ -240,6 +228,7 @@ def findvideos(item):
             videoitem.channel = __channel__
 
     return itemlist
+
 
 def url_decode(url_enc):
     lenght = len(url_enc)

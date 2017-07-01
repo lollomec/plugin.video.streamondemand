@@ -5,12 +5,11 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import time
 import urlparse
-
 from datetime import date
-from core import config
+
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -18,22 +17,13 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "italiafilm"
-__category__ = "F,S"
-__type__ = "generic"
-__title__ = "Italia-Film.co"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://www.italia-film.gratis"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host],
-    ['Cache-Control', 'max-age=0']
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
@@ -83,6 +73,7 @@ def mainlist(item):
                      thumbnail="http://dc467.4shared.com/img/fEbJqOum/s7/13feaf0c8c0/Search")]
     return itemlist
 
+
 def newest(categoria):
     logger.info("[italiafilm.py] newest" + categoria)
     itemlist = []
@@ -106,11 +97,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     logger.info("[italiafilm.py] categorias")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     data = scrapertools.find_single_match(data, '<a href=".">Categorie</a>(.*?)</div>')
 
     patron = '<li[^>]+><a href="([^"]+)">Film([^<]+)</a></li>'
@@ -162,7 +154,7 @@ def peliculas(item):
     logger.info("[italiafilm.py] peliculas")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<article(.*?)</article>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -211,20 +203,20 @@ def peliculas(item):
 
     return itemlist
 
+
 def findvid(item):
     logger.info("streamondemand.italiafilm findvid")
 
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas
     patron = '<iframe style="border: 0;" src="([^"]+)" width="[^"]*" height="[^"]*" scrolling="[^"]*" allowfullscreen="[^"]*">'
     matches = re.compile(patron, re.DOTALL).findall(data)
     for scrapedurl in matches:
-        data += scrapertools.cache_page(scrapedurl, headers=headers)
-
+        data += httptools.downloadpage(scrapedurl, headers=headers).data
 
     ### robalo fix obfuscator - start ####
 
@@ -234,7 +226,7 @@ def findvid(item):
         headers.append(['Cookie', 'flag[' + id + ']=1; defaults=1; nopopatall=' + str(int(time.time()))])
         headers.append(['Referer', keeplinks])
 
-        html = scrapertools.cache_page(keeplinks, headers=headers)
+        html = httptools.downloadpage(keeplinks, headers=headers).data
         data += str(scrapertools.find_multiple_matches(html, '<a href="([^"]+)" target="_blank"'))
 
     ### robalo fix obfuscator - end ####
@@ -250,11 +242,12 @@ def findvid(item):
 
     return itemlist
 
+
 def peliculas_tv(item):
     logger.info("[italiafilm.py] peliculas")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<article(.*?)</article>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -303,11 +296,12 @@ def peliculas_tv(item):
 
     return itemlist
 
+
 def pel_tv(item):
     logger.info("[italiafilm.py] peliculas")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<span class="tvseries_name">(.*?)</span>\s*<a href="([^"]+)"[^>]+><i class="icon-link"></i>(.*?)</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -353,6 +347,7 @@ def pel_tv(item):
 
     return itemlist
 
+
 def episodios(item):
     def load_episodios(html, item, itemlist, lang_title):
         for data in scrapertools.decodeHtmlentities(html).splitlines():
@@ -387,7 +382,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     start = data.find('id="pd_rating_holder')
     end = data.find('id="linkcorrotto-show"', start)
@@ -437,14 +432,14 @@ def episodios(item):
                  extra="episodios",
                  show=item.show))
 
-
     return itemlist
+
 
 def findvideos(item):
     logger.info("streamondemand.italiafilm findvideos")
 
     # Descarga la página
-    data = item.url 
+    data = item.url
 
     itemlist = servertools.find_video_items(data=data)
 
@@ -458,7 +453,7 @@ def findvideos(item):
 
     return itemlist
 
+
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
-

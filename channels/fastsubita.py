@@ -7,24 +7,21 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
-from core.tmdb import infoSod
 
 __channel__ = "fastsubita"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "fastsubita"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://fastsubita.tk"
 
+
 def isGeneric():
     return True
+
 
 def mainlist(item):
     logger.info("streamondemand.fastsubita mainlist")
@@ -48,12 +45,13 @@ def mainlist(item):
 
     return itemlist
 
+
 def serietv(item):
     logger.info("streamondemand.fastsubita peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<h2 class="entry-title"><a href="([^"]+)"[^r]+rel[^>]+>([^<]+)<'
@@ -99,12 +97,13 @@ def serietv(item):
 
     return itemlist
 
+
 def all_quick(item):
     logger.info("streamondemand.fastsubita peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<a href="([^"]+)" title=[^>]+>([^>]+)</a></td>'
@@ -131,6 +130,7 @@ def all_quick(item):
 
     return itemlist
 
+
 def search(item, texto):
     logger.info("[fastsubita.py] " + item.url + " search " + texto)
     item.url = "%s/?s=%s" % (host, texto)
@@ -143,7 +143,7 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
-

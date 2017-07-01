@@ -10,7 +10,7 @@ import urlparse
 
 import xbmc
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -19,20 +19,12 @@ from core.tmdb import infoSod
 from servers.decrypters import adfly
 
 __channel__ = "animeforce"
-__category__ = "A"
-__type__ = "generic"
-__title__ = "AnimeForce"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://animeforce.org"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:53.0) Gecko/20100101 Firefox/53.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
 
 
 def isGeneric():
@@ -92,6 +84,7 @@ def newest(categoria):
 
     return itemlist
 
+
 # =================================================================
 
 # -----------------------------------------------------------------
@@ -107,6 +100,7 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 # =================================================================
 
 # -----------------------------------------------------------------
@@ -114,7 +108,7 @@ def search_anime(item):
     log("search_anime", "search_anime")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<a href="([^"]+)"><img.*?src="([^"]+)".*?title="([^"]+)".*?/>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -124,12 +118,12 @@ def search_anime(item):
         if "Sub Ita Download & Streaming" in scrapedtitle or "Sub Ita Streaming":
             itemlist.append(
                 Item(channel=__channel__,
-                    action="episodios",
-                    title=scrapedtitle,
-                    url=scrapedurl,
-                    fulltitle=scrapedtitle,
-                    show=scrapedtitle,
-                    thumbnail=scrapedthumbnail))
+                     action="episodios",
+                     title=scrapedtitle,
+                     url=scrapedurl,
+                     fulltitle=scrapedtitle,
+                     show=scrapedtitle,
+                     thumbnail=scrapedthumbnail))
 
     return itemlist
 
@@ -141,9 +135,7 @@ def animeaggiornati(item):
     log("animeaggiornati", "animeaggiornati")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
-
-    blocco = scrapertools.get_match(data, r'<div class="main-loop-inner">(.*?)<br class="clearer"/>\s*</div>')
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = r'<img.*?src="([^"]+)"[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+><a href="([^"]+)">([^<]+)</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -160,12 +152,12 @@ def animeaggiornati(item):
             scrapedurl = re.sub(r'episodio?-?\d+-?(?:\d+-|)[oav]*', '', scrapedurl)
             itemlist.append(infoSod(
                 Item(channel=__channel__,
-                    action="episodios",
-                    title=cleantitle,
-                    url=scrapedurl,
-                    fulltitle=cleantitle,
-                    show=cleantitle,
-                    thumbnail=scrapedthumbnail), tipo="tv"))
+                     action="episodios",
+                     title=cleantitle,
+                     url=scrapedurl,
+                     fulltitle=cleantitle,
+                     show=cleantitle,
+                     thumbnail=scrapedthumbnail), tipo="tv"))
 
     return itemlist
 
@@ -177,7 +169,7 @@ def ultimiep(item):
     log("ultimiep", "ultimiep")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = r'<img.*?src="([^"]+)"[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+><a href="([^"]+)">([^<]+)</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -199,13 +191,13 @@ def ultimiep(item):
             print "EPISODIO: " + episodio + "\nTITLE: " + scrapedtitle + "\nExtra: " + extra + "\nURL: " + scrapedurl
             itemlist.append(infoSod(
                 Item(channel=__channel__,
-                    action="findvideos",
-                    title=scrapedtitle,
-                    url=scrapedurl,
-                    fulltitle=cleantitle,
-                    extra=extra,
-                    show=re.sub(r'Episodio\s*', '', scrapedtitle),
-                    thumbnail=scrapedthumbnail), tipo="tv"))
+                     action="findvideos",
+                     title=scrapedtitle,
+                     url=scrapedurl,
+                     fulltitle=cleantitle,
+                     extra=extra,
+                     show=re.sub(r'Episodio\s*', '', scrapedtitle),
+                     thumbnail=scrapedthumbnail), tipo="tv"))
 
     return itemlist
 
@@ -217,7 +209,7 @@ def lista_anime(item):
     log("lista_anime", "lista_anime")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<li>\s*<strong>\s*<a\s*href="([^"]+?)">([^<]+?)</a>\s*</strong>\s*</li>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -242,7 +234,7 @@ def lista_anime(item):
 def episodios(item):
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<td style="[^"]*?">\s*.*?<strong>(.*?)</strong>.*?\s*</td>\s*<td style="[^"]*?">\s*<a href="([^"]+?)"[^>]+>\s*<img.*?src="([^"]+?)".*?/>\s*</a>\s*</td>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -295,7 +287,7 @@ def findvideos(item):
     itemlist = []
 
     if item.extra:
-        data = scrapertools.cache_page(item.url, headers=headers)
+        data = httptools.downloadpage(item.url, headers=headers).data
 
         blocco = scrapertools.get_match(data, r'%s(.*?)</tr>' % item.extra)
         scrapedurl = scrapertools.find_single_match(blocco, r'<a href="([^"]+)"[^>]+>')
@@ -306,11 +298,11 @@ def findvideos(item):
     if 'adf.ly' in url:
         url = adfly.get_long_url(url)
     elif 'bit.ly' in url:
-        url = scrapertools.getLocationHeaderFromResponse(url)
+        url = httptools.downloadpage(url, only_headers=True, follow_redirects=False).headers.get("location")
 
     if 'animeforce' in url:
         headers.append(['Referer', item.url])
-        data = scrapertools.cache_page(url, headers=headers)
+        data = httptools.downloadpage(url, headers=headers).data
         itemlist.extend(servertools.find_video_items(data=data))
 
         for videoitem in itemlist:
@@ -321,12 +313,13 @@ def findvideos(item):
             videoitem.channel = __channel__
 
         url = url.split('&')[0]
-        data = scrapertools.cache_page(url, headers=headers)
+        data = httptools.downloadpage(url, headers=headers).data
         patron = """<source\s*src=(?:"|')([^"']+?)(?:"|')\s*type=(?:"|')video/mp4(?:"|')>"""
         matches = re.compile(patron, re.DOTALL).findall(data)
         headers.append(['Referer', url])
         for video in matches:
-            itemlist.append(Item(channel=__channel__, action="play", title=item.title, url=video + '|' + urllib.urlencode(dict(headers)), folder=False))
+            itemlist.append(Item(channel=__channel__, action="play", title=item.title,
+                                 url=video + '|' + urllib.urlencode(dict(headers)), folder=False))
     else:
         itemlist.extend(servertools.find_video_items(data=url))
 
@@ -346,7 +339,7 @@ def findvideos(item):
 # Funzioni di servizio
 # -----------------------------------------------------------------
 def scrapedAll(url="", patron=""):
-    data = scrapertools.cache_page(url)
+    data = httptools.downloadpage(url).data
     if DEBUG: logger.info("data:" + data)
     MyPatron = patron
     matches = re.compile(MyPatron, re.DOTALL).findall(data)
@@ -359,7 +352,7 @@ def scrapedAll(url="", patron=""):
 
 # -----------------------------------------------------------------
 def scrapedSingle(url="", single="", patron=""):
-    data = scrapertools.cache_page(url)
+    data = httptools.downloadpage(url).data
     paginazione = scrapertools.find_single_match(data, single)
     matches = re.compile(patron, re.DOTALL).findall(paginazione)
     scrapertools.printMatches(matches)

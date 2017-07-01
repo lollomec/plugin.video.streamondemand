@@ -5,11 +5,10 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import json
-
 import urllib
 from unicodedata import normalize
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -17,18 +16,16 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "solostreaming"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "solostreaming"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://solo-streaming.com"
 result_per_page = 25
 
+
 def isGeneric():
     return True
+
 
 def mainlist(item):
     logger.info("streamondemand.solostreaming mainlist")
@@ -58,7 +55,8 @@ def mainlist(item):
                 Item(channel=__channel__,
                      title="[B][COLOR springgreen][ANIME][/COLOR][/B] [B][COLOR deepskyblue]ULTIMI EPISODI AGGIORNATI[/COLOR][/B]",
                      action="updateserietv",
-                     url="%s/sod/api.php?get=anime&type=elenco&order=multi&days=30&start=0&end=%d" % (host, result_per_page),
+                     url="%s/sod/api.php?get=anime&type=elenco&order=multi&days=30&start=0&end=%d" % (
+                     host, result_per_page),
                      extra="anime",
                      thumbnail="http://solo-streaming.com/images/sod/anime1_225x330.jpg"),
                 Item(channel=__channel__,
@@ -151,7 +149,7 @@ def elencoserieletter(item):
 
 
 def cache_jsonpage(url):
-    return json.loads(scrapertools.cache_page(url))
+    return json.loads(httptools.downloadpage(url).data)
 
 
 def dailyupdateserietv(item):

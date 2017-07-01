@@ -17,8 +17,7 @@ from unicodedata import normalize
 
 import xbmc
 
-from core import channeltools
-from core import scrapertools
+from core import channeltools, httptools
 from lib.fuzzywuzzy import fuzz
 from platformcode import platformtools
 
@@ -557,7 +556,7 @@ def url_quote_plus(input_string):
 
 
 def get_json_response(url=""):
-    response = scrapertools.cache_page(url)
+    response = httptools.downloadpage(url).data
     try:
         results = json.loads(response)
     except:

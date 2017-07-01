@@ -7,24 +7,22 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "imovie"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "imovie (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://imovie.name"
 
+
 def isGeneric():
     return True
+
 
 def mainlist(item):
     logger.info("streamondemand.imovie mainlist")
@@ -56,6 +54,7 @@ def mainlist(item):
 
     return itemlist
 
+
 def newest(categoria):
     logger.info("[imovie.py] newest" + categoria)
     itemlist = []
@@ -78,11 +77,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<p class="title">Genere</p>(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -103,11 +103,12 @@ def categorias(item):
 
     return itemlist
 
+
 def anno(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<p class="title">Anno</p>(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -128,11 +129,12 @@ def anno(item):
 
     return itemlist
 
+
 def paese(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<p class="title">Paese</p>(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -153,6 +155,7 @@ def paese(item):
 
     return itemlist
 
+
 def search(item, texto):
     logger.info("[imovie.py] " + item.url + " search " + texto)
     item.url = host + "/?do=search&subaction=search&story=" + texto
@@ -171,7 +174,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="inform">\s*<p class="name_film"><a href="([^"]+)">(.*?)</a></p>'
@@ -217,6 +220,7 @@ def peliculas(item):
                  folder=True))
 
     return itemlist
+
 
 def HomePage(item):
     import xbmc

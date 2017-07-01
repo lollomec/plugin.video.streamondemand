@@ -5,11 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import httptools
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -72,7 +70,7 @@ def peliculas(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle).strip()
         try:
-            daa = scrapertools.cache_page(scrapedurl)
+            daa = httptools.downloadpage(scrapedurl).data
             da = daa.split('justify;">')
             da = da[1].split('</p>')
             scrapedplot = scrapertools.htmlclean(da[0]).strip()
@@ -126,7 +124,7 @@ def peliculas_tv(item):
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle).strip()
         try:
-            daa = scrapertools.cache_page(scrapedurl)
+            daa = httptools.downloadpage(scrapedurl).data
             da = daa.split('justify;">')
             da = da[1].split('</p>')
             scrapedplot = scrapertools.htmlclean(da[0]).strip()

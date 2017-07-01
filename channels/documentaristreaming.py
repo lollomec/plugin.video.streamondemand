@@ -8,18 +8,14 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "documentaristreaming"
-__category__ = "F,D"
-__type__ = "generic"
-__title__ = "documentaristreaming (TV)"
-__language__ = "IT"
 
-sito = "https://www.documentaristreaming.net/"
+host = "https://www.documentaristreaming.net/"
 
 headers = [
     ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
@@ -41,15 +37,16 @@ def isGeneric():
 
 def mainlist(item):
     logger.info("streamondemand.documentaristreaming mainlist")
+    host = "https://www.documentaristreaming.net/"
     itemlist = [Item(channel=__channel__,
                      title="[COLOR azure]Aggiornamenti[/COLOR]",
                      action="peliculas",
-                     url="https://www.documentaristreaming.net/page/1/",
+                     url="%spage/1/" % host,
                      thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
                 Item(channel=__channel__,
                      title="[COLOR azure]Categorie[/COLOR]",
                      action="categorias",
-                     url=sito,
+                     url=host,
                      thumbnail="http://orig03.deviantart.net/6889/f/2014/079/7/b/movies_and_popcorn_folder_icon_by_matheusgrilo-d7ay4tw.png"),
                 Item(channel=__channel__,
                      title="[COLOR yellow]Cerca...[/COLOR]",
@@ -81,14 +78,15 @@ def newest(categoria):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.documentaristreaming peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
-    bloque = scrapertools.get_match(data, '<h2 class="vwspc-section-title">(.*?)<nav class="vw-page-navigation clearfix">')
-
+    data = httptools.downloadpage(item.url, headers=headers).data
+    bloque = scrapertools.get_match(data,
+                                    '<h2 class="vwspc-section-title">(.*?)<nav class="vw-page-navigation clearfix">')
 
     # Extrae las entradas (carpetas)
     patron = '<a class="vw-post-box-thumbnail" href="([^"]+)"[^>]+>\s*<img[^s]+src="([^"]+)"'
@@ -96,9 +94,9 @@ def peliculas(item):
 
     for scrapedurl, scrapedthumbnail in matches:
         scrapedtitle = scrapedurl
-        scrapedtitle = scrapedtitle.replace("https://www.documentaristreaming.net/","")
-        scrapedtitle = scrapedtitle.replace("-"," ")
-        scrapedtitle = scrapedtitle.replace("/","")
+        scrapedtitle = scrapedtitle.replace("https://www.documentaristreaming.net/", "")
+        scrapedtitle = scrapedtitle.replace("-", " ")
+        scrapedtitle = scrapedtitle.replace("/", "")
         scrapedtitle = scrapedtitle.lower()
         scrapedtitle = scrapedtitle.title()
         scrapedplot = ""
@@ -137,15 +135,17 @@ def peliculas(item):
 
     return itemlist
 
+
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
+
 
 def categorias(item):
     logger.info("streamondemand.documentaristreaming categorias")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     logger.info(data)
 
     # Narrow search by selecting only the combo
@@ -174,14 +174,15 @@ def categorias(item):
 
     return itemlist
 
-def search(item,texto):
-    logger.info("[documentaristreaming.py] "+item.url+" search "+texto)
-    item.url = "http://documentaristreaming.net/?s="+texto
+
+def search(item, texto):
+    logger.info("[documentaristreaming.py] " + item.url + " search " + texto)
+    item.url = host + "?s=" + texto
     try:
         return peliculas(item)
     # Se captura la excepción, para no interrumpir al buscador global si un canal falla
     except:
         import sys
         for line in sys.exc_info():
-            logger.error( "%s" % line )
+            logger.error("%s" % line)
         return []

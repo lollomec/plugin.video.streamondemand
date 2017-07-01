@@ -7,7 +7,7 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -15,15 +15,6 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmstreampw"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "Fimstream.pw (IT)"
-__language__ = "IT"
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
 
 host = 'http://beststreaming.info'
 
@@ -79,11 +70,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     logger.info("streamondemand.filmstreampw categorias")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Narrow search by selecting only the combo
     patron = '<ul class="box-bg right-navi clearfix">([^?]+)</select>'
@@ -118,8 +110,6 @@ def search(item, texto):
     try:
         if item.extra == "movie":
             return peliculasx(item)
-        if item.extra == "serie":
-            return peliculasx_tv(item)
 
     # Se captura la excepción, para no interrumpir al buscador global si un canal falla
     except:
@@ -134,14 +124,14 @@ def peliculasx(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="news2 float">.*?<div class="boxgrid2 caption2">.*?<a href="([^"]+)">.*?<img.*?src="([^"]+)"/>.*?<div class="cover2 boxcaption2">.*?<div class="boxgridtext">(.*?)</div>.*?<br>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
-        html = scrapertools.cache_page(scrapedurl, headers=headers)
+        html = httptools.downloadpage(scrapedurl).data
         start = html.find("<li class=\"current\" style=\"font-size: 15px; line-height: 18px;\">")
         end = html.find("</div></li>", start)
         scrapedplot = html[start:end]
@@ -171,7 +161,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="boxgrid2[^>]+>[^<]+<a href="([^"]+)">[^<]+<img.*?[^"]+"[^"]+" src="([^"]+)"[^>]+>[^>]+>[^>]+>([^<]+)<br>'
@@ -217,7 +207,6 @@ def peliculas(item):
     return itemlist
 
 
-
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
@@ -226,7 +215,7 @@ def HomePage(item):
 def findvideos(item):
     logger.info("streamondemand.filmstreampw findvideos")
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     itemlist = servertools.find_video_items(data=data.replace(r'\/', '/'))
 

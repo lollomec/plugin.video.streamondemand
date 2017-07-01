@@ -8,26 +8,20 @@
 
 import re
 
-from core import logger
+from core import logger, httptools
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "animenod"
-__category__ = "A"
-__type__ = "generic"
-__title__ = "AnimeNOD"
-__language__ = "IT"
 
 host = "http://manganimenod.it"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:52.0) Gecko/20100101 Firefox/52.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
+
 
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
@@ -65,6 +59,7 @@ def mainlist(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -72,7 +67,7 @@ def episodi(item):
     logger.info("[AnimeNOD.py]==> episodi")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<div class="ep"><a href="([^"]+)"><.*?url\(\'(.*?)\'\).*?>[^>]+>[^>]+>[^>]+>'
     patron += '[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+><a .*?title="([^"]+)">'
@@ -92,10 +87,11 @@ def episodi(item):
                  folder=True))
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
 def color(text, color):
-    return "[COLOR "+color+"]"+text+"[/COLOR]"
+    return "[COLOR " + color + "]" + text + "[/COLOR]"
 
 # ================================================================================================================

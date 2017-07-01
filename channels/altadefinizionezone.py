@@ -7,29 +7,19 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "altadefinizionezone"
-__category__ = "F,S"
-__type__ = "generic"
-__title__ = "altadefinizionezone (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://altadefinizione.estate"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host],
-    ['Cache-Control', 'max-age=0']
-]
+headers = [['Referer', host]]
 
 
 def isGeneric():
@@ -70,7 +60,7 @@ def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     bloque = scrapertools.find_single_match(data, '<ul class="dropdown-menu">(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -136,7 +126,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<div id="mainbar" class="container margin-b40">(.*?)<div class="margin-b20 accordion accordion-violet" >'
     data = scrapertools.find_single_match(data, patron)
 
@@ -189,7 +179,7 @@ def peliculas_tv(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<div id="mainbar" class="container margin-b40">(.*?)<div class="margin-b20 accordion accordion-violet" >'
     data = scrapertools.find_single_match(data, patron)
 
@@ -241,7 +231,7 @@ def seasons(item):
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<a href="([^"]+)" role="tab" data-toggle="tab">(.*?)</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -271,7 +261,7 @@ def episodios(item):
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<div class="tab-pane fade" id="%s">(.*?)</ul>' % item.url.split('#')[1]
     bloque = scrapertools.find_single_match(data, patron)
 
@@ -299,7 +289,7 @@ def episodios(item):
 
 def findvideos_tv(item):
     itemlist = []
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     elemento = scrapertools.find_single_match(data, 'file: "(.*?)",')
 

@@ -5,10 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,24 +15,17 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "streamblog"
-__category__ = "F,S"
-__type__ = "generic"
-__title__ = "streamblog (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "https://www.streamblog.me"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
+
 
 def mainlist(item):
     logger.info("streamondemand.istreaming mainlist")
@@ -91,11 +83,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     bloque = scrapertools.get_match(data, '<div class="nav">(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -131,28 +124,30 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 def pelis_movie_src(item):
     logger.info("streamondemand.streamblog peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<a href="([^"]+)"><div class="form-group">[^>]+><img src="([^"]+)"[^=]+=[^=]+="(.*?)"[^>]+>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl, scrapedthumbnail, scrapedtitle  in matches:
+    for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedthumbnail = host + scrapedthumbnail
         scrapedplot = ""
-        html = scrapertools.cache_page(scrapedurl)
+        html = httptools.downloadpage(scrapedurl).data
         patron = 'webkitallowfullscreen="true" (.*?)="true">'
         matches = re.compile(patron, re.DOTALL).findall(html)
 
         for url in matches:
             if url is not None:
-                   scrapedurl = scrapedurl
-            else: continue
+                scrapedurl = scrapedurl
+            else:
+                continue
 
         if DEBUG: logger.info(
             "title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
@@ -169,18 +164,19 @@ def pelis_movie_src(item):
 
     return itemlist
 
+
 def pelis_tv_src(item):
     logger.info("streamondemand.streamblog peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<a href="([^"]+)"><div class="form-group">[^>]+><img src="([^"]+)"[^=]+=[^=]+="(.*?)"[^>]+>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl, scrapedthumbnail, scrapedtitle  in matches:
+    for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedthumbnail = host + scrapedthumbnail
         if DEBUG: logger.info(
@@ -198,28 +194,30 @@ def pelis_tv_src(item):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.streamblog peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="blvideo">\s*<div class="poster"><a href="([^"]+)"[^<]+<img src="([^"]+)" alt="(.*?)"[^>]+>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl, scrapedthumbnail, scrapedtitle  in matches:
+    for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedthumbnail = host + scrapedthumbnail
         scrapedplot = ""
-        html = scrapertools.cache_page(scrapedurl)
+        html = httptools.downloadpage(scrapedurl).data
         patron = 'webkitallowfullscreen="true" (.*?)="true">'
         matches = re.compile(patron, re.DOTALL).findall(html)
 
         for url in matches:
             if url is not None:
-                   scrapedurl = scrapedurl
-            else: continue
+                scrapedurl = scrapedurl
+            else:
+                continue
 
             itemlist.append(infoSod(
                 Item(channel=__channel__,
@@ -254,18 +252,19 @@ def peliculas(item):
 
     return itemlist
 
+
 def peliculas_tv(item):
     logger.info("streamondemand.streamblog peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="blvideo">\s*<div class="poster"><a href="([^"]+)"[^<]+<img src="([^"]+)" alt="(.*?)"[^>]+>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl, scrapedthumbnail, scrapedtitle  in matches:
+    for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
         scrapedplot = ""
         scrapedthumbnail = host + scrapedthumbnail
         if DEBUG: logger.info(
@@ -302,6 +301,7 @@ def peliculas_tv(item):
 
     return itemlist
 
+
 def episodios(item):
     def load_episodios(html, item, itemlist, lang_title):
         patron = '(?:.*?<a href="[^"]+"[^_]+_blank[^>]+>[^>]+>.*?<br \/>)'
@@ -328,7 +328,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url, headers=headers).data
     data = scrapertools.decodeHtmlentities(data)
     data = scrapertools.get_match(data, '<left>(.*?)</left>')
 
@@ -367,6 +367,7 @@ def episodios(item):
 
     return itemlist
 
+
 def findvideos_tv(item):
     logger.info("streamondemand.streamblog findvideos_tv")
 
@@ -383,7 +384,7 @@ def findvideos_tv(item):
 
     return itemlist
 
+
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
-

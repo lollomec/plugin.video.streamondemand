@@ -8,29 +8,23 @@
 
 import re
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "bleachportal"
-__category__ = "A"
-__type__ = "generic"
-__title__ = "BleachPortal"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://bleachportal.it"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; rv:51.0) Gecko/20100101 Firefox/51.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
+
 
 def mainlist(item):
     logger.info("[BleachPortal.py]==> mainlist")
@@ -52,11 +46,12 @@ def mainlist(item):
 
     return itemlist
 
+
 def episodi(item):
     logger.info("[BleachPortal.py]==> episodi")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<td>?[<span\s|<width="\d+%"\s]+?class="[^"]+">\D+([\d\-]+)\s?<[^<]+<[^<]+<[^<]+<[^<]+<.*?\s+?.*?<span style="[^"]+">([^<]+).*?\s?.*?<a href="\.*(/?[^"]+)">'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -65,15 +60,15 @@ def episodi(item):
         scrapedtitle = scrapedtitle.decode('latin1').encode('utf8')
         if DEBUG: logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "], number=[" + scrapednumber + "]")
         itemlist.append(Item(channel=__channel__,
-                            action="findvideos",
-                            title="[COLOR azure]" + animetitle + " Ep: [/COLOR][COLOR deepskyblue] " + scrapednumber + " [/COLOR]",
-                            url=item.url.replace("stream_bleach.htm", scrapedurl) if "stream_bleach.htm" in item.url else item.url.replace("stream_dgray-man.htm", scrapedurl),
-                            plot=scrapedtitle,
-                            extra=item.extra,
-                            thumbnail=item.thumbnail,
-                            fanart=item.fanart,
-                            fulltitle="[COLOR red]" + animetitle + " Ep: " + scrapednumber + "[/COLOR] | [COLOR deepskyblue]" + scrapedtitle + "[/COLOR]",
-                            show=animetitle))
+                             action="findvideos",
+                             title="[COLOR azure]" + animetitle + " Ep: [/COLOR][COLOR deepskyblue] " + scrapednumber + " [/COLOR]",
+                             url=item.url.replace("stream_bleach.htm",scrapedurl) if "stream_bleach.htm" in item.url else item.url.replace("stream_dgray-man.htm", scrapedurl),
+                             plot=scrapedtitle,
+                             extra=item.extra,
+                             thumbnail=item.thumbnail,
+                             fanart=item.fanart,
+                             fulltitle="[COLOR red]" + animetitle + " Ep: " + scrapednumber + "[/COLOR] | [COLOR deepskyblue]" + scrapedtitle + "[/COLOR]",
+                             show=animetitle))
 
     if item.extra == "bleach":
         itemlist.append(Item(channel=__channel__,
@@ -83,15 +78,16 @@ def episodi(item):
                              extra=item.extra,
                              thumbnail=item.thumbnail,
                              fanart=item.fanart
-                            ))
+                             ))
 
     return list(reversed(itemlist))
+
 
 def oav(item):
     logger.info("[BleachPortal.py]==> oav")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<td>?[<span\s|<width="\d+%"\s]+?class="[^"]+">-\s+(.*?)<[^<]+<[^<]+<[^<]+<[^<]+<.*?\s+?.*?<span style="[^"]+">([^<]+).*?\s?.*?<a href="\.*(/?[^"]+)">'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -108,6 +104,7 @@ def oav(item):
 
     return list(reversed(itemlist))
 
+
 def findvideos(item):
     logger.info("[BleachPortal.py]==> findvideos")
     itemlist = []
@@ -117,7 +114,7 @@ def findvideos(item):
     else:
         newurl = item.url
 
-    data = scrapertools.cache_page(newurl)
+    data = httptools.downloadpage(newurl).data
 
     if "bleach" in item.extra:
         video = scrapertools.find_single_match(data, 'file: "(.*?)",')

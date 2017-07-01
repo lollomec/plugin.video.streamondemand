@@ -8,28 +8,22 @@
 
 import re
 
-from core import logger
-from core import servertools
+from core import logger, httptools
 from core import scrapertools
+from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "ffilms"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "FFilms"
-__language__ = "IT"
 
 host = "http://ffilms.org/italiano"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
+
 
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
@@ -59,6 +53,7 @@ def mainlist(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -68,9 +63,9 @@ def newest(categoria):
     item = Item()
     try:
         if categoria == "peliculas":
-            item.url = "http://ffilms.org/italiano"
+            item.url = host
             item.action = "peliculas"
-            item.extra=" Ultimi video"
+            item.extra = " Ultimi video"
             itemlist = peliculas(item)
 
             if itemlist[-1].action == "peliculas":
@@ -84,6 +79,7 @@ def newest(categoria):
         return []
 
     return itemlist
+
 
 # ================================================================================================================
 
@@ -100,6 +96,7 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -107,8 +104,9 @@ def peliculas_search(item):
     logger.info("[FFilms.py]==> peliculas_search")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
-    blocco = scrapertools.get_match(data, r'<h3>About \d+ (?:result|results)</h3>(.*?)</span>\s*</div>\s*</div>\s*</div>')
+    data = httptools.downloadpage(item.url, headers=headers).data
+    blocco = scrapertools.get_match(data,
+                                    r'<h3>About \d+ (?:result|results)</h3>(.*?)</span>\s*</div>\s*</div>\s*</div>')
     patron = r'<a href="([^"]+)"><img.*?src="([^"]+)".*?/>[^>]+>[^>]+>[^>]+>'
     patron += r'[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>(.*?)</a></h3>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
@@ -147,6 +145,7 @@ def peliculas_search(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -154,8 +153,9 @@ def peliculas(item):
     logger.info("[FFilms.py]==> peliculas")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
-    blocco = scrapertools.get_match(data, r'<h3><i class="fa fa-play"></i>%s</h3>(.*?)</div>\s*</div>\s*</div>' % item.extra)
+    data = httptools.downloadpage(item.url, headers=headers).data
+    blocco = scrapertools.get_match(data,
+                                    r'<h3><i class="fa fa-play"></i>%s</h3>(.*?)</div>\s*</div>\s*</div>' % item.extra)
     patron = r'<a title="([^"]+)" href="([^"]+)"><img.*?src="([^"]+)".*?/>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
 
@@ -174,6 +174,7 @@ def peliculas(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -181,14 +182,14 @@ def findvideos(item):
     logger.info("[FFilms.py]==> findvideos")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     blocco = scrapertools.get_match(data, r'<div class="player player-small(.*?)(?:</li></ul>|\s*</iframe>\s*<div)')
     patron = r'<li(?: class="active"| )><a href="([^"]+)">\d+</a></li>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
 
     for scrapedurl in matches:
-        data = scrapertools.anti_cloudflare(scrapedurl, headers)
+        data = httptools.downloadpage(scrapedurl, headers=headers).data
         videos = servertools.find_video_items(data=data)
         for video in videos:
             itemlist.append(video)
@@ -202,12 +203,14 @@ def findvideos(item):
         videoitem.channel = __channel__
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
 def color(text, color):
-    return "[COLOR "+color+"]"+text+"[/COLOR]"
-    
+    return "[COLOR " + color + "]" + text + "[/COLOR]"
+
+
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand/)")

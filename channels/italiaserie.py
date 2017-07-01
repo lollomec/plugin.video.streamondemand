@@ -5,10 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,14 +15,11 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "italiaserie"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "italiaserie"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://www.italiaserie.co"
+
 
 def isGeneric():
     return True
@@ -49,7 +45,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="post-thumb">\s*<a href="([^"]+)" title="([^"]+)">\s*<img src="([^"]+)"[^>]+>'
@@ -99,7 +95,6 @@ def HomePage(item):
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
 
 
-
 def search(item, texto):
     logger.info("[italiaserie.py] " + item.url + " search " + texto)
     item.url = host + "/?s=" + texto
@@ -111,6 +106,7 @@ def search(item, texto):
         for line in sys.exc_info():
             logger.error("%s" % line)
         return []
+
 
 def episodios(item):
     def load_episodios(html, item, itemlist, lang_title):
@@ -139,7 +135,7 @@ def episodios(item):
     itemlist = []
 
     # Download pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     data = scrapertools.decodeHtmlentities(data)
     data = scrapertools.get_match(data, '<div class="su-spoiler-title">(.*?)<span style="color: #e0e0e0;">')
 
@@ -178,11 +174,12 @@ def episodios(item):
 
     return itemlist
 
+
 def findvideos(item):
     logger.info("streamondemand.italiaserie findvideos")
 
     # Descarga la página
-    data = item.url 
+    data = item.url
 
     itemlist = servertools.find_video_items(data=data)
 

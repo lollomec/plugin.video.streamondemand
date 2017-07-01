@@ -8,28 +8,22 @@
 
 import re
 
-from core import logger
-from core import servertools
+from core import logger, httptools
 from core import scrapertools
+from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "bleachanimemanga"
-__category__ = "A"
-__type__ = "generic"
-__title__ = "BleachAnimeManga"
-__language__ = "IT"
 
 host = "http://bam.forumcommunity.net"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
+
 
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
@@ -42,6 +36,7 @@ def mainlist(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -49,7 +44,7 @@ def perlettere(item):
     logger.info("[BleachAnimeManga.py]==> perlettere")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = r'<option value="(\d+)">-\s*&nbsp;(\.?[A-Z\-1-9]+)</option>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -64,6 +59,7 @@ def perlettere(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -71,7 +67,7 @@ def lista_anime(item):
     logger.info("[BleachAnimeManga.py]==> lista_anime")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<a HREF="([^"]+)".*?>([^<]+)</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -86,36 +82,37 @@ def lista_anime(item):
             thumbnail = "http://www.animeclick.it/images/serie/%s/%s-cover.jpg" % (covertitle, covertitle)
             itemlist.append(infoSod(
                 Item(channel=__channel__,
-                    action="episodi",
-                    title="%s (%s)" % (scrapedtitle, color(lang, "red")),
-                    fulltitle=scrapedtitle,
-                    url=scrapedurl,
-                    thumbnail=thumbnail,
-                    show=scrapedtitle,
-                    folder=True), tipo="tv"))
+                     action="episodi",
+                     title="%s (%s)" % (scrapedtitle, color(lang, "red")),
+                     fulltitle=scrapedtitle,
+                     url=scrapedurl,
+                     thumbnail=thumbnail,
+                     show=scrapedtitle,
+                     folder=True), tipo="tv"))
 
     # Gestione pagine ------------------------------------------------------------------------------
     patron = r'<a href="javascript:page_jump\(\'[^\']+\',(\d+),30\)" rel="nofollow">'
     pgNumbers = scrapertools.find_single_match(data, patron)
     if pgNumbers:
         pgNumbers = int(pgNumbers)
-        lastPGNumber = 30*(pgNumbers-1)
+        lastPGNumber = 30 * (pgNumbers - 1)
         currentpagenumber = int(item.url.split('=')[-1])
         if pgNumbers > 0 and currentpagenumber < lastPGNumber:
-            url = "%s&st=%s" % (item.url, currentpagenumber+30)
+            url = "%s&st=%s" % (item.url, currentpagenumber + 30)
             itemlist.append(
                 Item(channel=__channel__,
-                    action="HomePage",
-                    title=color("Torna Home", "yellow"),
-                    folder=True))
+                     action="HomePage",
+                     title=color("Torna Home", "yellow"),
+                     folder=True))
             itemlist.append(
                 Item(channel=__channel__,
-                    action="lista_anime",
-                    title=color("Successivo >>", "orange"),
-                    url=url,
-                    thumbnail="http://2.bp.blogspot.com/-fE9tzwmjaeQ/UcM2apxDtjI/AAAAAAAAeeg/WKSGM2TADLM/s1600/pager+old.png",
-                    folder=True))
+                     action="lista_anime",
+                     title=color("Successivo >>", "orange"),
+                     url=url,
+                     thumbnail="http://2.bp.blogspot.com/-fE9tzwmjaeQ/UcM2apxDtjI/AAAAAAAAeeg/WKSGM2TADLM/s1600/pager+old.png",
+                     folder=True))
     return itemlist
+
 
 # ================================================================================================================
 
@@ -124,7 +121,7 @@ def episodi(item):
     logger.info("[BleachAnimeManga.py]==> episodi")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     blocco = scrapertools.find_single_match(data, r'</div>\s*<td class="right Item" width="\d+%">(.*?)</table>')
 
@@ -133,10 +130,10 @@ def episodi(item):
 
     index = 0
     for scrapedhtml, scrapedtitle in matches:
-        if ("Special" in scrapedtitle) or ("OAV" in scrapedtitle): continue # Salto gli OAV e i movies
+        if ("Special" in scrapedtitle) or ("OAV" in scrapedtitle): continue  # Salto gli OAV e i movies
         if len(itemlist) > 0:
-            if "Streaming" in scrapedtitle: # Se c'è un link alternativo dello stesso episodio unisco la sua parte HTML con quella dell'item precedente e continuo senza aggiungere l'item
-                itemlist[index-1].url = itemlist[index-1].url + scrapedhtml
+            if "Streaming" in scrapedtitle:  # Se c'è un link alternativo dello stesso episodio unisco la sua parte HTML con quella dell'item precedente e continuo senza aggiungere l'item
+                itemlist[index - 1].url = itemlist[index - 1].url + scrapedhtml
                 continue
         itemlist.append(
             Item(channel=__channel__,
@@ -150,6 +147,7 @@ def episodi(item):
         index += 1
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -158,7 +156,7 @@ def findvideos(item):
 
     if 'animehdita' in item.url:
         item.url = scrapertools.find_single_match(item.url, r'<a href="([^"]+)"[^>]+>')
-        item.url = scrapertools.cache_page(item.url, headers=headers)
+        item.url = httptools.downloadpage(item.url, headers=headers).data
     itemlist = servertools.find_video_items(data=item.url)
 
     for videoitem in itemlist:
@@ -170,11 +168,13 @@ def findvideos(item):
         videoitem.channel = __channel__
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
 def color(text, color):
-    return "[COLOR "+color+"]"+text+"[/COLOR]"
+    return "[COLOR " + color + "]" + text + "[/COLOR]"
+
 
 def HomePage(item):
     import xbmc

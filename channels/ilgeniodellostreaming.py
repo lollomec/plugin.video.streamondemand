@@ -5,10 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,22 +15,13 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "ilgeniodellostreaming"
-__category__ = "F,S,A"
-__type__ = "generic"
-__title__ = "ilgeniodellostreaming (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://ilgeniodellostreaming.cc"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host],
-    ['Cache-Control', 'max-age=0']
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
@@ -94,12 +84,13 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     logger.info("streamondemand.ilgeniodellostreaming categorias")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     bloque = scrapertools.get_match(data, '<ul class="genres scrolling">(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -118,6 +109,7 @@ def categorias(item):
 
     return itemlist
 
+
 def search(item, texto):
     logger.info("[ilgeniodellostreaming.py] " + item.url + " search " + texto)
     item.url = "http://ilgeniodellostreaming.cc/?s=" + texto
@@ -132,12 +124,13 @@ def search(item, texto):
 
     return []
 
+
 def peliculas_src(item):
     logger.info("streamondemand.ilgeniodellostreaming peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<div class="thumbnail animation-2"><a href="(.*?)"><img src="(.*?)" alt="(.*?)" />[^>]+>(.*?)</span>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -146,7 +139,7 @@ def peliculas_src(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         logger.info("title=[" + scrapedtitle + "], url=[" + scrapedurl + "], thumbnail=[" + scrapedthumbnail + "]")
 
-        if scrapedtipo=="TV":
+        if scrapedtipo == "TV":
             itemlist.append(infoSod(
                 Item(channel=__channel__,
                      action="episodios",
@@ -170,12 +163,13 @@ def peliculas_src(item):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.ilgeniodellostreaming peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="poster">\s*<a href="([^"]+)"><img src="([^"]+)" alt="([^"]+)"></a>'
@@ -219,13 +213,15 @@ def peliculas(item):
 
     return itemlist
 
+
 def nuoviep(item):
     logger.info("streamondemand.ilgeniodellostreaming nuoviep")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
-    blocco = scrapertools.get_match(data, r'<div class="items" style="margin-bottom:0px!important">(.*?)<div class="items" style="margin-bottom:0px!important">')
+    data = httptools.downloadpage(item.url, headers=headers).data
+    blocco = scrapertools.get_match(data,
+                                    r'<div class="items" style="margin-bottom:0px!important">(.*?)<div class="items" style="margin-bottom:0px!important">')
 
     # Extrae las entradas (carpetas)
     patron = r'<div class="poster"><img src="([^"]+)" alt="([^"]+)">[^>]+><a href="([^"]+)">'
@@ -252,12 +248,13 @@ def nuoviep(item):
                  title="[COLOR red]Nessun nuovo episodio per oggi[/COLOR]"))
     return itemlist
 
+
 def serie(item):
     logger.info("streamondemand.ilgeniodellostreaming peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="poster">\s*<a href="([^"]+)"><img src="([^"]+)" alt="([^"]+)"></a>'
@@ -300,31 +297,31 @@ def serie(item):
 
     return itemlist
 
+
 def episodios(item):
     logger.info("streamondemand.ilgeniodellostreaming episodios")
     itemlist = []
 
+    patron = '<ul class="episodios">.*?</ul>'
 
-    patron='<ul class="episodios">.*?</ul>'
-
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for match in matches:
 
-        patron='<li><div class="imagen"><a href="(.*?)">[^>]+>[^>]+>[^>]+><.*?numerando">(.*?)<[^>]+>[^>]+>[^>]+>(.*?)</a>'
+        patron = '<li><div class="imagen"><a href="(.*?)">[^>]+>[^>]+>[^>]+><.*?numerando">(.*?)<[^>]+>[^>]+>[^>]+>(.*?)</a>'
         episodi = re.compile(patron, re.DOTALL).findall(match)
 
-        for scrapedurl,scrapednumber,scrapedtitle in episodi:
-            n0 = scrapednumber.replace(" ","")
-            n1 = n0.replace("-","x")
+        for scrapedurl, scrapednumber, scrapedtitle in episodi:
+            n0 = scrapednumber.replace(" ", "")
+            n1 = n0.replace("-", "x")
 
             itemlist.append(Item(channel=__channel__,
                                  action="findvideos",
                                  contentType="episode",
                                  fulltitle=n1 + " " + scrapedtitle,
                                  show=n1 + " " + scrapedtitle,
-                                 title= n1 + " [COLOR orange] " + scrapedtitle + "[/COLOR]",
+                                 title=n1 + " [COLOR orange] " + scrapedtitle + "[/COLOR]",
                                  url=scrapedurl,
                                  thumbnail=item.thumbnail,
                                  plot=item.plot,
@@ -341,15 +338,16 @@ def episodios(item):
 
     return itemlist
 
+
 def findvideos(item):
     logger.info("[streaminglove.py] play")
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<td><a class="link_a" href="(.*?)" target="_blank">'
     matches = re.compile(patron, re.DOTALL).findall(data)
     for url in matches:
-        html = scrapertools.cache_page(url, headers=headers)
+        html = httptools.downloadpage(url, headers=headers).data
         data += str(scrapertools.find_multiple_matches(html, 'window.location.href=\'(.*?)\''))
 
     itemlist = servertools.find_video_items(data=data)
@@ -362,6 +360,7 @@ def findvideos(item):
         videoitem.channel = __channel__
 
     return itemlist
+
 
 def HomePage(item):
     import xbmc

@@ -5,10 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,17 +15,8 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "itafilmtv"
-__category__ = "F,S"
-__type__ = "generic"
-__title__ = "ITA Film TV"
-__language__ = "IT"
 
 host = "http://www.itafilm.tube"
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:39.0) Gecko/20100101 Firefox/39.0'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
 
 
 def isGeneric():
@@ -97,7 +87,8 @@ def newest(categoria):
 
     return itemlist
 
-#disabled from global search
+
+# disabled from global search
 
 # Al llamarse "search" la función, el launcher pide un texto a buscar y lo añade como parámetro
 def search(item, texto):
@@ -125,7 +116,7 @@ def fichas(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     action = "findvideos"
 
@@ -170,7 +161,7 @@ def serietv(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las datos
     patron = '<div class="main-news">.*?'
@@ -209,7 +200,7 @@ def genere(item):
     logger.info("[itafilmtv.py] genere")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<div class="menu2">(.*?)<div class="left-wrap">'
     data = scrapertools.find_single_match(data, patron)
@@ -232,7 +223,7 @@ def nazione(item):
     logger.info("[itafilmtv.py] genere")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<div class="menu-block-content">(.*?)<div style="clear: both;"></div>'
     data = scrapertools.find_single_match(data, patron)
@@ -255,7 +246,7 @@ def anno(item):
     logger.info("[itafilmtv.py] genere")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     data = scrapertools.find_single_match(data, '<div class="menu-col fixcol2">(.*?)<div style="clear: both;"></div>')
 
@@ -280,7 +271,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<div class="main-news-text main-news-text2">(.*?)</div>'
     plot = scrapertools.find_single_match(data, patron)
@@ -352,7 +343,7 @@ def findvideos(item):
     # Extrae las datos
     if "|" not in item.url:
         # Descarga la página
-        data = scrapertools.cache_page(item.url, headers=headers)
+        data = httptools.downloadpage(item.url).data
 
         sources = scrapertools.get_match(data, '(<noindex> <div class="video-player-plugin">.*?</noindex>)')
 

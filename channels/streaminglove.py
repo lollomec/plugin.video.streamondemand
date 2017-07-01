@@ -7,7 +7,7 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -15,22 +15,13 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "streaminglove"
-__category__ = "F,VOS"
-__type__ = "generic"
-__title__ = "streaminglove (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://www.streaminglove.tv"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host],
-    ['Cache-Control', 'max-age=0']
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
@@ -66,6 +57,7 @@ def mainlist(item):
 
     return itemlist
 
+
 def newest(categoria):
     logger.info("streamondemand.streaminglove newest" + categoria)
     itemlist = []
@@ -88,11 +80,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     bloque = scrapertools.get_match(data, '<ul class="genres scrolling">(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -100,9 +93,7 @@ def categorias(item):
     matches = re.compile(patron, re.DOTALL).findall(bloque)
 
     for scrapedurl, scrapedtitle in matches:
-        scrapedplot = ""
-        scrapedthumbnail = ""
- 
+
         if DEBUG: logger.info("title=[" + scrapedtitle + "]")
         itemlist.append(
             Item(channel=__channel__,
@@ -113,6 +104,7 @@ def categorias(item):
                  folder=True))
 
     return itemlist
+
 
 def search(item, texto):
     logger.info("[playcinema.py] " + item.url + " search " + texto)
@@ -126,12 +118,13 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 def peliculas_src(item):
     logger.info("streamondemand.streaminglove peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="thumbnail animation-2">\s*<a href="(.*?)"[^>]+>\s*<img src="(.*?)" alt="(.*?)" />'
@@ -156,12 +149,13 @@ def peliculas_src(item):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.streaminglove peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="poster">\s*<a href="([^"]+)"><img src="([^"]+)" alt="([^"]+)"></a>'
@@ -208,12 +202,12 @@ def peliculas(item):
 def findvideos(item):
     logger.info("[streaminglove.py] play")
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<td><a class="link_a" href="(.*?)" target="_blank">'
     matches = re.compile(patron, re.DOTALL).findall(data)
     for url in matches:
-        html = scrapertools.cache_page(url, headers=headers)
+        html = httptools.downloadpage(url, headers=headers).data
         data += str(scrapertools.find_multiple_matches(html, 'window.location.href=\'(.*?)\''))
 
     itemlist = servertools.find_video_items(data=data)
@@ -226,6 +220,7 @@ def findvideos(item):
         videoitem.channel = __channel__
 
     return itemlist
+
 
 def HomePage(item):
     import xbmc

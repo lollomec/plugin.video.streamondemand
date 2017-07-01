@@ -7,17 +7,13 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "serietvsubita"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "serietvsubita"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
@@ -70,7 +66,7 @@ def episodios(item):
     logger.info("streamondemand.channels.serietvsubita episodios")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # patron  = '</div><div class="clear"></div>.*?'
     patron = '<h2><a href="([^"]+)".*?title="([^"]+)".*?<p><a href.*?<img.*?src="([^"]+)"'
@@ -115,7 +111,7 @@ def series(item):
     logger.info("streamondemand.channels.serietvsubita series")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<li id="widget_categories" class="widget png_scale"><h2 class="blocktitle"><span>Serie</span>(.*?)</ul>'
     data = scrapertools.find_single_match(data, patron)
@@ -157,7 +153,7 @@ def episodiosearch(item):
     logger.info("streamondemand.channels.serietvsubita episodios")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = '<div class="post-meta">.*?<a href="([^"]+)" title="([^"]+)".*?<img.*?src="([^"]+)"'
     matches = re.compile(patron, re.DOTALL).findall(data)

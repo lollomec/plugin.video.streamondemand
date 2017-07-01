@@ -7,30 +7,22 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "dreamsub"
-__category__ = "S,A"
-__type__ = "generic"
-__title__ = "dreamsub"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "https://www.dreamsub.it"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
 
 def isGeneric():
     return True
+
 
 def mainlist(item):
     logger.info("streamondemand.dreamsub mainlist")
@@ -66,6 +58,7 @@ def mainlist(item):
 
     return itemlist
 
+
 def newest(categoria):
     logger.info("streamondemand.altadefinizione01 newest" + categoria)
     itemlist = []
@@ -79,7 +72,7 @@ def newest(categoria):
 
             if itemlist[-1].action == "ultimiep":
                 itemlist.pop()
-        
+
         if categoria == "anime":
             item.url = "https://www.dreamsub.it"
             item.action = "ultimiep"
@@ -97,13 +90,15 @@ def newest(categoria):
 
     return itemlist
 
+
 def serietv(item):
     logger.info("streamondemand.dreamsub peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
-    bloque = scrapertools.get_match(data, '<input type="submit" value="Vai!" class="blueButton">(.*?)<div class="footer">')
+    data = httptools.downloadpage(item.url).data
+    bloque = scrapertools.get_match(data,
+                                    '<input type="submit" value="Vai!" class="blueButton">(.*?)<div class="footer">')
 
     # Extrae las entradas (carpetas)
     patron = 'Lingua[^<]+<br>\s*<a href="([^"]+)" title="([^"]+)">'
@@ -151,12 +146,13 @@ def serietv(item):
 
     return itemlist
 
+
 def ultimiep(item):
     logger.info("streamondemand.dreamsub ultimiep")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     if 'anime' in item.extra:
         bloque = scrapertools.get_match(data, '<ul class="last" id="recentAddedEpisodesAnimeDDM">(.*?)</ul>')
     elif 'serie' in item.extra:
@@ -178,7 +174,8 @@ def ultimiep(item):
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="findvideos",
-                 fulltitle=(re.sub(r'\d*-?\d+$', '', scrapedtitle) if 'anime' in item.extra else re.sub(r'\d+x\d+$', '', scrapedtitle)).strip(),
+                 fulltitle=(re.sub(r'\d*-?\d+$', '', scrapedtitle) if 'anime' in item.extra else re.sub(r'\d+x\d+$', '',
+                                                                                                        scrapedtitle)).strip(),
                  show=scrapedtitle,
                  title=scrapedtitle,
                  url=scrapedurl,
@@ -187,6 +184,7 @@ def ultimiep(item):
                  extra=item.extra,
                  folder=True), tipo='tv'))
     return itemlist
+
 
 def HomePage(item):
     import xbmc
@@ -211,13 +209,13 @@ def episodios(item):
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<div class="seasonEp">(.*?)<div class="footer">')
 
     patron = '<li><a href="([^"]+)"[^<]+<b>(.*?)<\/b>[^>]+>([^<]+)<\/i>(.*?)<'
     matches = re.compile(patron, re.DOTALL).findall(bloque)
 
-    for scrapedurl, title1, title2, title3  in matches:
+    for scrapedurl, title1, title2, title3 in matches:
         scrapedurl = host + scrapedurl
         scrapedtitle = title1 + " " + title2 + title3
         scrapedtitle = scrapedtitle.replace("Download", "")
@@ -245,4 +243,3 @@ def episodios(item):
                  show=item.show))
 
     return itemlist
-

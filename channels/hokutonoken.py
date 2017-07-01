@@ -6,17 +6,13 @@
 # ------------------------------------------------------------
 import re
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
 from core.item import Item
 
 __channel__ = "hokutonoken"
-__category__ = "A"
-__type__ = "generic"
-__title__ = "Hokuto no Ken"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
@@ -50,7 +46,7 @@ def episodi(item):
     itemlist = []
 
     # Downloads page
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     # Extracts the entries
     patron = '>&lt;br&gt;(.*?)&lt;a href=&quot;(.*?)&quot; target=&quot;_blank&quot;&gt;'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -58,11 +54,11 @@ def episodi(item):
     for scrapedtitle, scrapedurl in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         itemlist.append(
-                Item(channel=__channel__,
-                     action="findvid",
-                     title=scrapedtitle,
-                     thumbnail=item.thumbnail,
-                     url=scrapedurl))
+            Item(channel=__channel__,
+                 action="findvid",
+                 title=scrapedtitle,
+                 thumbnail=item.thumbnail,
+                 url=scrapedurl))
 
     return itemlist
 

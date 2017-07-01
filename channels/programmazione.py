@@ -7,16 +7,12 @@
 # ------------------------------------------------------------
 import re
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "programmazione"
-__category__ = "D"
-__type__ = "generic"
-__title__ = "programmazione(IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
@@ -53,7 +49,7 @@ def corsi(item):
     itemlist = []
 
     # scarrico il canale
-    html = scrapertools.cache_page(item.url)
+    html = httptools.downloadpage(item.url).data
 
     # Estraggo l'elenco dei video e titoli
     patron = '<a class="pl-video-title-link.*?href="(.*?)"[^>]+>(.*?)</a>'

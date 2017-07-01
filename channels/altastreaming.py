@@ -7,7 +7,7 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -15,23 +15,17 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "altastreaming"
-__category__ = "F,S"
-__type__ = "generic"
-__title__ = "altastreaming (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://altastreaming.cool"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:52.0) Gecko/20100101 Firefox/52.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
+
 
 def mainlist(item):
     logger.info("streamondemand.altastreaming mainlist")
@@ -70,7 +64,7 @@ def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     bloque = scrapertools.get_match(data, '<ul>(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -106,6 +100,7 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 def newest(categoria):
     logger.info("streamondemand.altadefinizione01 newest" + categoria)
     itemlist = []
@@ -128,12 +123,13 @@ def newest(categoria):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.altastreaming peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<h3 class="fl-title"> <a href="([^"]+)"[^t]+title="([^"]+)">'
@@ -179,12 +175,13 @@ def peliculas(item):
 
     return itemlist
 
+
 def peliculas_tv(item):
     logger.info("streamondemand.altastreaming peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     bloque = scrapertools.get_match(data, '<div class="container margin-block">(.*?)<footer class="footer">')
 
     # Extrae las entradas (carpetas)
@@ -230,17 +227,18 @@ def peliculas_tv(item):
 
     return itemlist
 
+
 def episodios(item):
     logger.info("streamondemand.channels.altastreaming episodios")
 
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<li id="serie-[^-]+-title="([^"]+)">\s*<span[^<]+<\/span>\s*<span[^<]+<\/span>\s*<a[^=]+=[^=]+=[^=]+=[^=]+=[^=]+="([^"]+)">'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedtitle, scrapedurl  in matches:
+    for scrapedtitle, scrapedurl in matches:
         scrapedplot = ""
         scrapedthumbnail = ""
         scrapedtitle = scrapedtitle.replace('Stai guardando: ', '')
@@ -268,9 +266,10 @@ def episodios(item):
 
     return itemlist
 
+
 def findvideos_tv(item):
-    itemlist=[]
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    itemlist = []
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     elemento = scrapertools.find_single_match(data, 'file: "(.*?)",')
 
@@ -283,9 +282,9 @@ def findvideos_tv(item):
                          show=item.fulltitle))
     return itemlist
 
-def findvideos(item):
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+def findvideos(item):
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     itemlist = servertools.find_video_items(data=data)
 
@@ -298,7 +297,7 @@ def findvideos(item):
 
     return itemlist
 
+
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
-

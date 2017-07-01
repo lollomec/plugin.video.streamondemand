@@ -8,7 +8,7 @@ import re
 import urlparse
 
 import lib.pyaes as aes
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,10 +16,6 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmperevolvere"
-__category__ = "F,C"
-__type__ = "generic"
-__title__ = "filmperevolvere (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
@@ -61,6 +57,7 @@ def mainlist(item):
 
     return itemlist
 
+
 def newest(categoria):
     logger.info("[filmperevolvere.py] newest" + categoria)
     itemlist = []
@@ -82,6 +79,7 @@ def newest(categoria):
         return []
 
     return itemlist
+
 
 def search(item, texto):
     logger.info("[filmperevolvere.py] " + item.url + " search " + texto)
@@ -105,8 +103,9 @@ def categorie(item):
     if c: headers.append(['Cookie', c])
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
-    bloque = scrapertools.get_match(data, '<nav class="nav-container group desktop-menu " id="nav-header" data-menu-id="header-2">(.*?)</ul>')
+    data = httptools.downloadpage(item.url, headers=headers).data
+    bloque = scrapertools.get_match(data,
+                                    '<nav class="nav-container group desktop-menu " id="nav-header" data-menu-id="header-2">(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
     patron = '<a href="(.*?)">(.*?)</a>'
@@ -132,6 +131,7 @@ def categorie(item):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.filmperevolvere peliculas")
     itemlist = []
@@ -140,7 +140,7 @@ def peliculas(item):
     if c: headers.append(['Cookie', c])
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="post-thumbnail">\s*<a href="([^"]+)" title="([^"]+)">\s*<img width="520"'
@@ -194,7 +194,7 @@ def findvideos(item):
     if c: headers.append(['Cookie', c])
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     itemlist = servertools.find_video_items(data=data)
 
@@ -214,7 +214,7 @@ def HomePage(item):
 
 
 def get_test_cookie(url):
-    data = scrapertools.cache_page(url, headers=headers)
+    data = httptools.downloadpage(url, headers=headers).data
     a = scrapertools.find_single_match(data, 'a=toNumbers\("([^"]+)"\)')
     if a:
         b = scrapertools.find_single_match(data, 'b=toNumbers\("([^"]+)"\)')

@@ -5,10 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,20 +15,13 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "tantifilm"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "Tantifilm.net (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://www.tantifilm.me"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
@@ -99,11 +91,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     bloque = scrapertools.get_match(data,
                                     '<select class="select_join" onchange="location.href = this.value" size="1" name="linkIole2">(.*?)</select>')
 
@@ -147,14 +140,14 @@ def search_peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<a href="([^"]+)" title="([^"]+)" rel="[^"]+">\s*<img width="[^"]+" height="[^"]+" src="([^"]+)" class="[^"]+" alt="[^"]+" srcset="[^"]+" sizes="[^"]+" />'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedtitle, scrapedthumbnail in matches:
-        html = scrapertools.cache_page(scrapedurl, headers=headers)
+        html = httptools.downloadpage(scrapedurl, headers=headers).data
         start = html.find("<div class=\"content-left-film\">")
         end = html.find("</div>", start)
         scrapedplot = html[start:end]
@@ -183,14 +176,14 @@ def search_peliculas_tv(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<a href="([^"]+)" title="([^"]+)" rel="[^"]+">\s*<img width="[^"]+" height="[^"]+" src="([^"]+)" class="[^"]+" alt="[^"]+" srcset="[^"]+" sizes="[^"]+" />'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedtitle, scrapedthumbnail in matches:
-        html = scrapertools.cache_page(scrapedurl, headers=headers)
+        html = httptools.downloadpage(scrapedurl, headers=headers).data
         start = html.find("<div class=\"content-left-film\">")
         end = html.find("</div>", start)
         scrapedplot = html[start:end]
@@ -219,14 +212,14 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="media3">[^>]+><a href="([^"]+)"><img[^s]+src="([^"]+)"[^>]+></a><[^>]+><a[^>]+><p>(.*?)</p></a></div>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
-        html = scrapertools.cache_page(scrapedurl, headers=headers)
+        html = httptools.downloadpage(scrapedurl, headers=headers).data
         start = html.find("<div class=\"content-left-film\">")
         end = html.find("</div>", start)
         scrapedplot = html[start:end]
@@ -274,14 +267,14 @@ def peliculas_tv(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="media3">[^>]+><a href="([^"]+)"><img[^s]+src="([^"]+)"[^>]+></a><[^>]+><a[^>]+><p>(.*?)</p></a></div>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedthumbnail, scrapedtitle in matches:
-        html = scrapertools.cache_page(scrapedurl, headers=headers)
+        html = httptools.downloadpage(scrapedurl, headers=headers).data
         start = html.find("<div class=\"content-left-film\">")
         end = html.find("</div>", start)
         scrapedplot = html[start:end]
@@ -335,7 +328,7 @@ def latest(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="mediaWrap mediaWrapAlt">\s*'
@@ -344,7 +337,7 @@ def latest(item):
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedtitle, scrapedthumbnail in matches:
-        html = scrapertools.cache_page(scrapedurl, headers=headers)
+        html = httptools.downloadpage(scrapedurl, headers=headers).data
         start = html.find("<div class=\"content-left-film\">")
         end = html.find("</div>", start)
         scrapedplot = html[start:end]
@@ -418,7 +411,7 @@ def episodios(item):
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     data = scrapertools.decodeHtmlentities(data)
 
     start = data.find('<div class="sp-wrap sp-wrap-blue">')
@@ -484,7 +477,7 @@ def findvideos(item):
     logger.info("streamondemand.tantifilm findvideos")
 
     # Descarga la página
-    data = item.extra if item.extra != '' else scrapertools.cache_page(item.url, headers=headers)
+    data = item.extra if item.extra != '' else httptools.downloadpage(item.url, headers=headers).data
 
     itemlist = servertools.find_video_items(data=data)
     for videoitem in itemlist:

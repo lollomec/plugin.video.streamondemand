@@ -8,28 +8,22 @@
 
 import re
 
-from core import logger
-from core import servertools
+from core import logger, httptools
 from core import scrapertools
+from core import servertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmstreaminggratis"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "FilmStreamingGratis"
-__language__ = "IT"
 
 host = "http://www.filmstreaminggratis.org"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:51.0) Gecko/20100101 Firefox/51.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
+
 
 # ----------------------------------------------------------------------------------------------------------------
 def mainlist(item):
@@ -51,6 +45,7 @@ def mainlist(item):
                 ]
 
     return itemlist
+
 
 # ================================================================================================================
 
@@ -77,6 +72,7 @@ def newest(categoria):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -100,7 +96,7 @@ def ultimifilm(item):
     logger.info("[FilmStreamingGratis.py]==> ultimifilm")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     blocco = scrapertools.get_match(data, '<div class="es-carousel">(.*?)</div></li></ul>')
     patron = '<h5><a href="(.*?)".*?>(.*?)</a></h5>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
@@ -120,6 +116,7 @@ def ultimifilm(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -127,13 +124,13 @@ def categorie(item):
     logger.info("[FilmStreamingGratis.py]==> categorie")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     blocco = scrapertools.get_match(data, '<div class="list styled custom-list"><ul>(.*?)</ul></div>')
     patron = '<li><a href="([^"]+)" title=".*?" >(.*?)</a></li>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
 
     for scrapedurl, scrapedtitle in matches:
-        if "Serie TV" not in scrapedtitle: # Il sito non ha una buona gestione per le Serie TV
+        if "Serie TV" not in scrapedtitle:  # Il sito non ha una buona gestione per le Serie TV
             itemlist.append(
                 Item(channel=__channel__,
                      action="loadfilms",
@@ -145,6 +142,7 @@ def categorie(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -152,7 +150,7 @@ def loadfilms(item):
     logger.info("[FilmStreamingGratis.py]==> loadfilms")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<h2 class="post-title"><a href="(.*?)" title=".*?">'
     patron += '(.*?)</a></h2>[^>]+>[^>]+>[^>]+><.*?data-src="(.*?)"'
@@ -192,13 +190,14 @@ def loadfilms(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
 def findvideos(item):
     logger.info("[FilmStreamingGratis.py]==> findvideos")
 
-    data = scrapertools.anti_cloudflare(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     itemlist = servertools.find_video_items(data=data)
 
     for videoitem in itemlist:
@@ -210,11 +209,13 @@ def findvideos(item):
         videoitem.channel = __channel__
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
 def color(text, color):
-    return "[COLOR "+color+"]"+text+"[/COLOR]"
+    return "[COLOR " + color + "]" + text + "[/COLOR]"
+
 
 def HomePage(item):
     import xbmc

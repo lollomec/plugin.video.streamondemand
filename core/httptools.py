@@ -45,7 +45,7 @@ ficherocookies = os.path.join(config.get_data_path(), "cookies.dat")
 
 # Headers por defecto, si no se especifica nada
 default_headers = dict()
-default_headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0"
+default_headers["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0"
 default_headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
 default_headers["Accept-Language"] = "it-IT,it;q=0.8,en-US;q=0.5,en;q=0.3"
 default_headers["Accept-Charset"] = "UTF-8"
@@ -53,28 +53,29 @@ default_headers["Accept-Encoding"] = "gzip"
 
 
 def get_url_headers(url):
-  domain_cookies = cj._cookies.get("."+urlparse.urlparse(url)[1],{}).get("/",{})
-  
-  if "|" in url or not "cf_clearance" in domain_cookies:
-    return url
+    domain_cookies = cj._cookies.get("." + urlparse.urlparse(url)[1], {}).get("/", {})
 
-  headers = dict()
-  headers["User-Agent"] = default_headers["User-Agent"]
-  headers["Cookie"] = "; ".join(["%s=%s" % (c.name, c.value)  for c in domain_cookies.values()])
-    
-  return url + "|"+"&".join(["%s=%s" %(h, headers[h]) for h in headers])
+    if "|" in url or not "cf_clearance" in domain_cookies:
+        return url
+
+    headers = dict()
+    headers["User-Agent"] = default_headers["User-Agent"]
+    headers["Cookie"] = "; ".join(["%s=%s" % (c.name, c.value) for c in domain_cookies.values()])
+
+    return url + "|" + "&".join(["%s=%s" % (h, headers[h]) for h in headers])
 
 
 def load_cookies():
-  cookies_lock.acquire()
-  if os.path.isfile(ficherocookies):
-      logger.info("Leyendo fichero cookies")
-      try:
-          cj.load(ficherocookies, ignore_discard=True)
-      except:
-          logger.info("El fichero de cookies existe pero es ilegible, se borra")
-          os.remove(ficherocookies)
-  cookies_lock.release()
+    cookies_lock.acquire()
+    if os.path.isfile(ficherocookies):
+        logger.info("Leyendo fichero cookies")
+        try:
+            cj.load(ficherocookies, ignore_discard=True)
+        except:
+            logger.info("El fichero de cookies existe pero es ilegible, se borra")
+            os.remove(ficherocookies)
+    cookies_lock.release()
+
 
 def save_cookies():
     cookies_lock.acquire()
@@ -82,9 +83,12 @@ def save_cookies():
     cj.save(ficherocookies, ignore_discard=True)
     cookies_lock.release()
 
+
 load_cookies()
 
-def downloadpage(url, post=None, headers=None, timeout=None, follow_redirects=True, cookies=True, replace_headers=False, add_referer=False, only_headers=False, bypass_cloudflare=True):
+
+def downloadpage(url, post=None, headers=None, timeout=None, follow_redirects=True, cookies=True, replace_headers=False,
+                 add_referer=False, only_headers=False, bypass_cloudflare=True):
     """
     Abre una url y retorna los datos obtenidos
 
@@ -132,10 +136,10 @@ def downloadpage(url, post=None, headers=None, timeout=None, follow_redirects=Tr
             request_headers.update(dict(headers))
         else:
             request_headers = dict(headers)
-    
+
     if add_referer:
-      request_headers["Referer"] = "/".join(url.split("/")[:3])
-    
+        request_headers["Referer"] = "/".join(url.split("/")[:3])
+
     url = urllib.quote(url, safe="%/:=&?~#+!$,;'@()*[]")
 
     logger.info("----------------------------------------------")
@@ -161,9 +165,8 @@ def downloadpage(url, post=None, headers=None, timeout=None, follow_redirects=Tr
     if not follow_redirects:
         handlers.append(NoRedirectHandler())
 
-
     if cookies:
-      handlers.append(urllib2.HTTPCookieProcessor(cj))
+        handlers.append(urllib2.HTTPCookieProcessor(cj))
 
     opener = urllib2.build_opener(*handlers)
 
@@ -191,15 +194,15 @@ def downloadpage(url, post=None, headers=None, timeout=None, follow_redirects=Tr
         response["error"] = handle.__dict__.get("reason", str(handle))
         response["headers"] = handle.headers.dict
         if not only_headers:
-          response["data"] = handle.read()
+            response["data"] = handle.read()
         else:
-          response["data"] = ""
+            response["data"] = ""
         response["time"] = time.time() - inicio
         response["url"] = handle.geturl()
 
     except Exception, e:
         response["sucess"] = False
-        response["code"] = e.__dict__.get("errno",  e.__dict__.get("code", str(e)))
+        response["code"] = e.__dict__.get("errno", e.__dict__.get("code", str(e)))
         response["error"] = e.__dict__.get("reason", str(e))
         response["headers"] = {}
         response["data"] = ""
@@ -212,9 +215,9 @@ def downloadpage(url, post=None, headers=None, timeout=None, follow_redirects=Tr
         response["error"] = None
         response["headers"] = handle.headers.dict
         if not only_headers:
-          response["data"] = handle.read()
+            response["data"] = handle.read()
         else:
-          response["data"] = ""
+            response["data"] = ""
         response["time"] = time.time() - inicio
         response["url"] = handle.geturl()
 
@@ -242,30 +245,30 @@ def downloadpage(url, post=None, headers=None, timeout=None, follow_redirects=Tr
 
     # Anti Cloudflare
     if bypass_cloudflare:
-      cf = Cloudflare(response)
-      if cf.is_cloudflare: 
-        logger.info("cloudflare detectado, esperando %s segundos..." % cf.wait_time)
-        auth_url = cf.get_url()
-        logger.info("Autorizando... url: %s" % auth_url)
-        if downloadpage(auth_url, headers=request_headers, replace_headers = True).sucess:
-            logger.info("Autorización correcta, descargando página")
-            resp = downloadpage(url=response["url"], post=post, headers=headers, timeout=timeout, follow_redirects=follow_redirects,
-                                cookies=cookies, replace_headers=replace_headers, add_referer=add_referer)
-            response["sucess"] = resp.sucess
-            response["code"] = resp.code
-            response["error"] = resp.error
-            response["headers"] = resp.headers
-            response["data"] = resp.data
-            response["time"] = resp.time
-            response["url"] = resp.url
-        else:
-            logger.info("No se ha podido autorizar")
-            
+        cf = Cloudflare(response)
+        if cf.is_cloudflare:
+            logger.info("cloudflare detectado, esperando %s segundos..." % cf.wait_time)
+            auth_url = cf.get_url()
+            logger.info("Autorizando... url: %s" % auth_url)
+            if downloadpage(auth_url, headers=request_headers, replace_headers=True).sucess:
+                logger.info("Autorización correcta, descargando página")
+                resp = downloadpage(url=response["url"], post=post, headers=headers, timeout=timeout,
+                                    follow_redirects=follow_redirects,
+                                    cookies=cookies, replace_headers=replace_headers, add_referer=add_referer)
+                response["sucess"] = resp.sucess
+                response["code"] = resp.code
+                response["error"] = resp.error
+                response["headers"] = resp.headers
+                response["data"] = resp.data
+                response["time"] = resp.time
+                response["url"] = resp.url
+            else:
+                logger.info("No se ha podido autorizar")
+
     return type('HTTPResponse', (), response)
 
 
 class NoRedirectHandler(urllib2.HTTPRedirectHandler):
-
     def http_error_302(self, req, fp, code, msg, headers):
         infourl = urllib.addinfourl(fp, headers, req.get_full_url())
         infourl.status = code

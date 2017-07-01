@@ -8,17 +8,13 @@ import re
 
 import xbmc
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "altadefinizioneclub"
-__category__ = "F,S,A"
-__type__ = "generic"
-__title__ = "AltaDefinizioneclub"
-__language__ = "IT"
 
 host = "http://altadefinizione.bid"
 
@@ -106,7 +102,7 @@ def HomePage(item):
 # Funzioni di servizio
 # -----------------------------------------------------------------
 def scrapedAll(url="", patron=""):
-    data = scrapertools.cache_page(url)
+    data = httptools.downloadpage(url).data
     data=data.replace('<span class="hdbox">HD</span>',"")
     MyPatron = patron
     matches = re.compile(MyPatron, re.DOTALL).findall(data)
@@ -116,7 +112,7 @@ def scrapedAll(url="", patron=""):
 
 # -----------------------------------------------------------------
 def scrapedSingle(url="", single="", patron=""):
-    data = scrapertools.cache_page(url)
+    data = httptools.downloadpage(url).data
     elemento = scrapertools.find_single_match(data, single)
     logger.info("elemento ->" + elemento)
     matches = re.compile(patron, re.DOTALL).findall(elemento)

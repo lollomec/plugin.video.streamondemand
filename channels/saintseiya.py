@@ -6,7 +6,7 @@
 # ------------------------------------------------------------
 import re
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -19,11 +19,6 @@ __title__ = "Saint Seiya"
 __language__ = "IT"
 
 DEBUG = config.get_setting("debug")
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
 
 host = "http://archive.forumcommunity.net"
 
@@ -75,7 +70,7 @@ def episodi(item):
     itemlist = []
 
     # Downloads page
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extracts the entries
     patron = "Saga della Guerra Galattica</span></b><br>(.*?)<br></p><br><br><span class="
@@ -89,12 +84,12 @@ def episodi(item):
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle.replace("<b>", ""))
         scrapedtitle = scrapertools.htmlclean(scrapedtitle).strip()
         itemlist.append(
-                Item(channel=__channel__,
-                     action="findvid",
-                     title=scrapedtitle,
-                     url=scrapedurl,
-                     fanart="http://wfiles.brothersoft.com/s/saint-seiya-wallpaper_153109-1280x720.jpg",
-                     thumbnail="http://www.toei-animation.com/files/visuels/Saint_Seiya.jpg"))
+            Item(channel=__channel__,
+                 action="findvid",
+                 title=scrapedtitle,
+                 url=scrapedurl,
+                 fanart="http://wfiles.brothersoft.com/s/saint-seiya-wallpaper_153109-1280x720.jpg",
+                 thumbnail="http://www.toei-animation.com/files/visuels/Saint_Seiya.jpg"))
 
     return itemlist
 
@@ -105,7 +100,7 @@ def episodihades(item):
     itemlist = []
 
     # Downloads page
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extracts the entries
     patron = "<b>SANTUARIO:</b></span><br>(.*?)<br></p><br><br><span class="
@@ -117,12 +112,12 @@ def episodihades(item):
     for scrapedurl, scrapedtitle in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         itemlist.append(
-                Item(channel=__channel__,
-                     action="findvid",
-                     title=scrapedtitle,
-                     url=scrapedurl,
-                     fanart="http://wfiles.brothersoft.com/s/saint-seiya-wallpaper_153109-1280x720.jpg",
-                     thumbnail="http://www.animeemanga.it/wp-content/uploads/2012/02/I-Cavalieri-dello-Zodicao-Hades-Chapter-Inferno-Pegasus-Sirio-Crystal-Andromeda-Phoenix-Hades-Pandora-Radamantis-Minosse-Eaco.jpg"))
+            Item(channel=__channel__,
+                 action="findvid",
+                 title=scrapedtitle,
+                 url=scrapedurl,
+                 fanart="http://wfiles.brothersoft.com/s/saint-seiya-wallpaper_153109-1280x720.jpg",
+                 thumbnail="http://www.animeemanga.it/wp-content/uploads/2012/02/I-Cavalieri-dello-Zodicao-Hades-Chapter-Inferno-Pegasus-Sirio-Crystal-Andromeda-Phoenix-Hades-Pandora-Radamantis-Minosse-Eaco.jpg"))
 
     return itemlist
 
@@ -133,7 +128,7 @@ def episodiomega(item):
     itemlist = []
 
     # Downloads page
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extracts the entries
     patron = "<i>Episodi Saint Seya Omega Streming </i></span></b></span><br><br>(.*?)<br><br><br><br><br>Si Ringrazia"
@@ -146,12 +141,12 @@ def episodiomega(item):
         scrapedtitle = tit1 + tit2
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         itemlist.append(
-                Item(channel=__channel__,
-                     action="findvid",
-                     title=scrapedtitle,
-                     url=scrapedurl,
-                     fanart="http://wfiles.brothersoft.com/s/saint-seiya-wallpaper_153109-1280x720.jpg",
-                     thumbnail="http://www.toei-animation.com/files/visuels/Saint_Seiya.jpg"))
+            Item(channel=__channel__,
+                 action="findvid",
+                 title=scrapedtitle,
+                 url=scrapedurl,
+                 fanart="http://wfiles.brothersoft.com/s/saint-seiya-wallpaper_153109-1280x720.jpg",
+                 thumbnail="http://www.toei-animation.com/files/visuels/Saint_Seiya.jpg"))
 
     return itemlist
 
@@ -162,7 +157,7 @@ def episodicanvas(item):
     itemlist = []
 
     # Downloads page
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extracts the entries
     patron = ">Saint Seiya: The Lost Canvas Sub Ita Streaming</span></b></i></span><br>(.*?)Saint Seiya: The Lost Canvas Sub Ita Download"
@@ -175,12 +170,12 @@ def episodicanvas(item):
         scrapedtitle = tit1 + tit2
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         itemlist.append(
-                Item(channel=__channel__,
-                     action="findvid",
-                     title=scrapedtitle,
-                     url=scrapedurl,
-                     fanart="http://wfiles.brothersoft.com/s/saint-seiya-wallpaper_153109-1280x720.jpg",
-                     thumbnail="http://media.comicsblog.it/N/New/News5890.jpg"))
+            Item(channel=__channel__,
+                 action="findvid",
+                 title=scrapedtitle,
+                 url=scrapedurl,
+                 fanart="http://wfiles.brothersoft.com/s/saint-seiya-wallpaper_153109-1280x720.jpg",
+                 thumbnail="http://media.comicsblog.it/N/New/News5890.jpg"))
 
     return itemlist
 
@@ -191,7 +186,7 @@ def episodisoul(item):
     itemlist = []
 
     # Downloads page
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extracts the entries
     patron = '>&lt;br&gt;(.*?)&lt;a href=&quot;(.*?)&quot; target=&quot;_blank&quot;&gt;'
@@ -200,12 +195,12 @@ def episodisoul(item):
     for scrapedtitle, scrapedurl in matches:
         scrapedtitle = scrapertools.decodeHtmlentities(scrapedtitle)
         itemlist.append(
-                Item(channel=__channel__,
-                     action="findvid",
-                     title=scrapedtitle,
-                     url=scrapedurl,
-                     fanart="http://ib3.huluim.com/show/22747?size=476x268&region=US",
-                     thumbnail="http://4.bp.blogspot.com/-3o0SH8YNW3k/VXNxuNfiXxI/AAAAAAAABYk/tjuOx7DdlxI/s1600/%255BHorribleSubs%255D%2BSaint%2BSeiya%2B-%2BSoul%2Bof%2BGold%2B-%2B05%2B%255B720p%255D.mkv_snapshot_17.26_%255B2015.06.06_23.09.44%255D.jpg"))
+            Item(channel=__channel__,
+                 action="findvid",
+                 title=scrapedtitle,
+                 url=scrapedurl,
+                 fanart="http://ib3.huluim.com/show/22747?size=476x268&region=US",
+                 thumbnail="http://4.bp.blogspot.com/-3o0SH8YNW3k/VXNxuNfiXxI/AAAAAAAABYk/tjuOx7DdlxI/s1600/%255BHorribleSubs%255D%2BSaint%2BSeiya%2B-%2BSoul%2Bof%2BGold%2B-%2B05%2B%255B720p%255D.mkv_snapshot_17.26_%255B2015.06.06_23.09.44%255D.jpg"))
 
     return itemlist
 

@@ -7,8 +7,7 @@
 import re
 import urlparse
 
-from core import config
-from core import httptools
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,18 +15,10 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "altadefinizione01"
-__category__ = "F,S"
-__type__ = "generic"
-__title__ = "AltaDefinizione01"
-__language__ = "IT"
 
 host = "http://www.altadefinizione01.onl"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
 
 DEBUG = config.get_setting("debug")
 
@@ -90,9 +81,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    # data = scrapertools.cache_page(item.url)
-
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<a\s+href="([^"]+)"\s+title="[^"]*">\s+<img\s+width="[^"]*"\s+height="[^"]*"\s+src="([^"]+)"\s+class="[^"]*"\s+alt="([^"]+)"'
@@ -148,7 +137,7 @@ def categorias(item):
     itemlist = []
 
     # data = scrapertools.cache_page(item.url)
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Narrow search by selecting only the combo
     bloque = scrapertools.get_match(data, '<ul class="kategori_list">(.*?)</ul>')
@@ -192,7 +181,7 @@ def findvideos(item):
     logger.info("[altadefinizione01.py] findvideos")
 
     # Descarga la página
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     itemlist = servertools.find_video_items(data=data)
 

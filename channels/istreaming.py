@@ -7,17 +7,13 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "istreaming"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "istreaming (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
@@ -71,11 +67,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<label class="screen-reader-text" for="cat">(.*?)</select>')
 
     # Extrae las entradas (carpetas)
@@ -123,7 +120,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="post-thumbnail">\s*<a href="([^"]+)" title="(.*?)">\s*<img[^s]+src="([^"]+)"[^>]+>'

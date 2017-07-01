@@ -6,7 +6,7 @@
 # ------------------------------------------------------------
 import re
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -14,11 +14,6 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "filmsenzalimiti"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "Film Senza Limiti (IT)"
-__language__ = "IT"
-__creationdate__ = "20120605"
 
 DEBUG = config.get_setting("debug")
 
@@ -91,12 +86,13 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     logger.info("[filmsenzalimiti.py] novedades")
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     data = scrapertools.get_match(data, '<li><a href\="\#">Dvdrip per Genere</a>(.*?)</ul>')
     patron = '<li><a href="([^"]+)">([^<]+)</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -140,14 +136,14 @@ def novedades(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patronvideos = '<div class="post-item-side"[^<]+'
     patronvideos += '<a href="([^"]+)"[^<]+<img src="([^"]+)"'
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedthumbnail in matches:
-        html = scrapertools.cache_page(scrapedurl)
+        html = httptools.downloadpage(scrapedurl).data
         start = html.find("</b></center></div>")
         end = html.find("</p>", start)
         scrapedplot = html[start:end]
@@ -191,14 +187,14 @@ def novedades_tv(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patronvideos = '<div class="post-item-side"[^<]+'
     patronvideos += '<a href="([^"]+)"[^<]+<img src="([^"]+)"'
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for scrapedurl, scrapedthumbnail in matches:
-        html = scrapertools.cache_page(scrapedurl)
+        html = httptools.downloadpage(scrapedurl).data
         start = html.find("</b></center></div>")
         end = html.find("</p>", start)
         scrapedplot = html[start:end]
@@ -262,7 +258,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
     data = scrapertools.decodeHtmlentities(data)
 
     lang_titles = []
@@ -305,7 +301,7 @@ def findvideos(item):
     logger.info("[filmsenzalimiti.py] findvideos")
 
     # Descarga la página
-    data = item.url if item.extra == 'serie' else scrapertools.cache_page(item.url)
+    data = item.url if item.extra == 'serie' else httptools.downloadpage(item.url).data
 
     itemlist = servertools.find_video_items(data=data)
 

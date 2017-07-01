@@ -7,16 +7,12 @@
 # ------------------------------------------------------------
 import re
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "animevision"
-__category__ = "A"
-__type__ = "generic"
-__title__ = "Animevision"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
@@ -46,7 +42,7 @@ def lista_anime(item):
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = "<div class='epContainer' >[^=]+='imgEp'[^<]+<a href='(.*?)'>[^>]+><img src='(.*?)'[^<]+<[^>]+>(.*?)</div>"
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -75,7 +71,7 @@ def episodi(item):
     logger.info("streamondemand.animevision episodi")
     itemlist=[]
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron="epContainer'>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+>[^>]+><[^<]+<[^>]+>.*?href='(.*?)'[^>]+>(.*?)</a></div>"
     matches = re.compile(patron, re.DOTALL).findall(data)

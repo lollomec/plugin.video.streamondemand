@@ -11,32 +11,24 @@ import urlparse
 import xbmc
 import xbmcgui
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "leserietv"
-__category__ = "S"
-__type__ = "generic"
-__title__ = "leserie.tv"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = 'http://www.guardareserie.tv'
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host],
-    ['Cache-Control', 'max-age=0']
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
+
 
 # -----------------------------------------------------------------
 def mainlist(item):
@@ -87,7 +79,7 @@ def novita(item):
     logger.info("streamondemand.laserietv novità")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<div class="video-item-cover"[^<]+<a href="(.*?)">[^<]+<img src="(.*?)" alt="(.*?)">'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -103,7 +95,7 @@ def novita(item):
                  url=scrapedurl,
                  thumbnail=scrapedthumbnail,
                  fulltitle=scrapedtitle,
-                 show=scrapedtitle,viewmode="movie"), tipo='tv'))
+                 show=scrapedtitle, viewmode="movie"), tipo='tv'))
 
     # Paginazione
     # ===========================================================
@@ -121,8 +113,11 @@ def novita(item):
                  thumbnail="http://2.bp.blogspot.com/-fE9tzwmjaeQ/UcM2apxDtjI/AAAAAAAAeeg/WKSGM2TADLM/s1600/pager+old.png",
                  folder=True))
         itemlist.append(
-            Item(channel=__channel__, action="HomePage", title="[COLOR yellow]Torna Home[/COLOR]",thumbnail=ThumbnailHome, folder=True))
+            Item(channel=__channel__, action="HomePage", title="[COLOR yellow]Torna Home[/COLOR]",
+                 thumbnail=ThumbnailHome, folder=True))
     return itemlist
+
+
 # =================================================================
 
 # -----------------------------------------------------------------
@@ -132,7 +127,7 @@ def lista_serie(item):
 
     post = "dlenewssortby=title&dledirection=asc&set_new_sort=dle_sort_cat&set_direction_sort=dle_direction_cat"
 
-    data = scrapertools.cache_page(item.url, post=post, headers=headers)
+    data = httptools.downloadpage(item.url, post=post, headers=headers).data
 
     patron = '<div class="video-item-cover"[^<]+<a href="(.*?)">[^<]+<img src="(.*?)" alt="(.*?)">'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -148,7 +143,7 @@ def lista_serie(item):
                  url=scrapedurl,
                  thumbnail=scrapedthumbnail,
                  fulltitle=scrapedtitle,
-                 show=scrapedtitle,viewmode="movie"), tipo='tv'))
+                 show=scrapedtitle, viewmode="movie"), tipo='tv'))
 
     # Paginazione
     # ===========================================================
@@ -166,8 +161,11 @@ def lista_serie(item):
                  thumbnail="http://2.bp.blogspot.com/-fE9tzwmjaeQ/UcM2apxDtjI/AAAAAAAAeeg/WKSGM2TADLM/s1600/pager+old.png",
                  folder=True))
         itemlist.append(
-            Item(channel=__channel__, action="HomePage", title="[COLOR yellow]Torna Home[/COLOR]",thumbnail=ThumbnailHome, folder=True))
+            Item(channel=__channel__, action="HomePage", title="[COLOR yellow]Torna Home[/COLOR]",
+                 thumbnail=ThumbnailHome, folder=True))
     return itemlist
+
+
 # =================================================================
 
 # -----------------------------------------------------------------
@@ -175,7 +173,7 @@ def categorias(item):
     logger.info("streamondemand.laserietv categorias")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Narrow search by selecting only the combo
     bloque = scrapertools.get_match(data, '<ul class="dropdown-menu cat-menu">(.*?)</ul>')
@@ -199,6 +197,8 @@ def categorias(item):
                  plot=scrapedplot))
 
     return itemlist
+
+
 # =================================================================
 
 # -----------------------------------------------------------------
@@ -208,7 +208,7 @@ def search(item, texto):
     itemlist = []
 
     post = "do=search&subaction=search&story=" + texto
-    data = scrapertools.cache_page("http://www.guardareserie.tv", post=post, headers=headers)
+    data = httptools.downloadpage("http://www.guardareserie.tv", post=post, headers=headers).data
 
     patron = '<div class="video-item-cover"[^<]+<a href="(.*?)">[^<]+<img src="(.*?)" alt="(.*?)">'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -227,6 +227,8 @@ def search(item, texto):
                  show=scrapedtitle), tipo='tv'))
 
     return itemlist
+
+
 # =================================================================
 
 # -----------------------------------------------------------------
@@ -234,7 +236,7 @@ def top50(item):
     logger.info("[laserietv.py] top50")
     itemlist = []
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = 'class="top50item">\s*<[^>]+>\s*<.*?="([^"]+)">([^<]+)</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
@@ -250,9 +252,11 @@ def top50(item):
                  url=scrapedurl,
                  thumbnail=scrapedthumbnail,
                  fulltitle=scrapedtitle,
-                 show=scrapedtitle,viewmode="movie"), tipo='tv'))
+                 show=scrapedtitle, viewmode="movie"), tipo='tv'))
 
     return itemlist
+
+
 # =================================================================
 
 # -----------------------------------------------------------------
@@ -260,16 +264,16 @@ def episodios(item):
     logger.info("[leserietv.py] episodios")
     itemlist = []
     elenco = []
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<li id[^<]+<[^<]+<.*?class="serie-title">(.*?)</span>[^>]+>[^<]+<.*?megadrive-(.*?)".*?data-link="([^"]+)">Megadrive</a>'
     matches = re.compile(patron, re.DOTALL).findall(data)
     scrapertools.printMatches(matches)
 
-    for scrapedlongtitle,scrapedtitle, scrapedurl in matches:
-        scrapedtitle = scrapedtitle.split('_')[0]+"x"+scrapedtitle.split('_')[1].zfill(2)
+    for scrapedlongtitle, scrapedtitle, scrapedurl in matches:
+        scrapedtitle = scrapedtitle.split('_')[0] + "x" + scrapedtitle.split('_')[1].zfill(2)
 
-        elenco.append([scrapedtitle,scrapedlongtitle,scrapedurl])
+        elenco.append([scrapedtitle, scrapedlongtitle, scrapedurl])
 
         scrapedtitle = scrapedtitle + " [COLOR orange]" + scrapedlongtitle + "[/COLOR]"
         itemlist.append(Item(channel=__channel__,
@@ -292,15 +296,17 @@ def episodios(item):
                  show=item.show))
 
     return itemlist
+
+
 # =================================================================
 
-#------------------------------------------------------------------
+# ------------------------------------------------------------------
 def findvideos(item):
-    itemlist=[]
+    itemlist = []
 
-    item.url=item.url.replace(".tv", ".co")
+    item.url = item.url.replace(".tv", ".co")
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     elemento = scrapertools.find_single_match(data, 'file: "(.*?)",')
 
@@ -313,6 +319,8 @@ def findvideos(item):
                          fulltitle=item.fulltitle,
                          show=item.fulltitle))
     return itemlist
+
+
 # =================================================================
 
 # -----------------------------------------------------------------
@@ -320,18 +328,22 @@ def info(item):
     itemlist = []
 
     dialog = xbmcgui.Dialog()
-    linea1='[COLOR yellow]Servizi ripristinati:[/COLOR]'
-    linea2='Link non funzionanti'
-    linea3='\n[COLOR orange]www.mimediacenter.info[/COLOR] - [I]pelisalacarta (For Italian users)[/I]'
+    linea1 = '[COLOR yellow]Servizi ripristinati:[/COLOR]'
+    linea2 = 'Link non funzionanti'
+    linea3 = '\n[COLOR orange]www.mimediacenter.info[/COLOR] - [I]pelisalacarta (For Italian users)[/I]'
 
-    result=dialog.ok('Le serie TV Info',linea1,linea2,linea3)
+    result = dialog.ok('Le serie TV Info', linea1, linea2, linea3)
 
     return mainlist(itemlist)
+
+
 # =================================================================
 # -----------------------------------------------------------------
 def HomePage(item):
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
+
+
 # =================================================================
 
-FilmFanart="https://superrepo.org/static/images/fanart/original/script.artwork.downloader.jpg"
-ThumbnailHome="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Dynamic-blue-up.svg/580px-Dynamic-blue-up.svg.png"
+FilmFanart = "https://superrepo.org/static/images/fanart/original/script.artwork.downloader.jpg"
+ThumbnailHome = "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Dynamic-blue-up.svg/580px-Dynamic-blue-up.svg.png"

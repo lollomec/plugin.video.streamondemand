@@ -9,27 +9,20 @@
 import re
 import urllib
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "umsfunsub"
-__category__ = "A"
-__type__ = "generic"
-__title__ = "UMSFunSub"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://trackerums.altervista.org"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 10.0; rv:51.0) Gecko/20100101 Firefox/51.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
@@ -57,6 +50,7 @@ def mainlist(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -64,7 +58,7 @@ def progetti(item):
     logger.info("[UMSFunSub.py]==> progetti")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     blocco = scrapertools.get_match(data, '<div id="pf_imageMenu1" class="imageMenu">(.*?)</div>')
     patron = '<a href="[^=]+=([\w]+)">([^<]+)</a>'
     matches = re.compile(patron, re.DOTALL).findall(blocco)
@@ -82,6 +76,7 @@ def progetti(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -97,6 +92,7 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -104,7 +100,7 @@ def lista_anime(item):
     logger.info("[UMSFunSub.py]==> lista_anime")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<img src="([^"]+)"[^<]+<[^<]+<[^<]+>[^>]+<[^<]+<[^<]+<[^<]+<[^>]+>([^<]+)<[^<]+<[^<]+<[^<]+<a href="([^&]+)&amp;titolo=([^"]+)">'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -114,7 +110,8 @@ def lista_anime(item):
         itemlist.append(infoSod(
             Item(channel=__channel__,
                  action="episodi",
-                 title="%s %s %s" % (color(scrapedtitle, "azure"), color(" | ", "red"), color(scrapeddetails, "deepskyblue")),
+                 title="%s %s %s" % (
+                 color(scrapedtitle, "azure"), color(" | ", "red"), color(scrapeddetails, "deepskyblue")),
                  fulltitle=scrapedtitle,
                  show=scrapedtitle,
                  url=scrapedurl,
@@ -123,6 +120,7 @@ def lista_anime(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -130,9 +128,10 @@ def episodi(item):
     logger.info("[UMSFunSub.py]==> episodi")
     itemlist = []
 
-    item.url = item.url.replace("dettagli_sub.php", "lista-ep-streaming.php") + "&titolo=" + urllib.quote(item.fulltitle)
+    item.url = item.url.replace("dettagli_sub.php", "lista-ep-streaming.php") + "&titolo=" + urllib.quote(
+        item.fulltitle)
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patron = '<div id="listaepvera">([\d+|\w+]+)\.?([^<]+)\s+?[^<]+<[^<]+<a href="[^\d]+(\d+)&'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
@@ -142,7 +141,8 @@ def episodi(item):
         itemlist.append(
             Item(channel=__channel__,
                  action="findvideos",
-                 title="%s | %s - %s" % (color(scrapednumber, "gold"), color(animetitle, "azure"), color(scrapedtitle, "deepskyblue")),
+                 title="%s | %s - %s" % (
+                 color(scrapednumber, "gold"), color(animetitle, "azure"), color(scrapedtitle, "deepskyblue")),
                  fulltitle="%s | %s" % (color(animetitle, "red"), color(scrapedtitle, "deepskyblue")),
                  show=item.show,
                  url=makeurl("dettagli-stream.php?id=" + scrapedid, item.title),
@@ -151,6 +151,7 @@ def episodi(item):
 
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
@@ -158,7 +159,7 @@ def findvideos(item):
     logger.info("[UMSFunSub.py]==> findvideos")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     patronvideo = 'flashvars="file=([^&]+)&'
     urlvideo = scrapertools.get_match(data, patronvideo)
 
@@ -166,18 +167,20 @@ def findvideos(item):
 
     itemlist.append(Item(channel=__channel__,
                          action="play",
-                         title="[%s] %s" % (color("."+estensionevideo, "orange"), item.title),
+                         title="[%s] %s" % (color("." + estensionevideo, "orange"), item.title),
                          fulltitle=item.fulltitle,
                          show=item.show,
                          url=urlvideo,
                          thumbnail=item.thumbnail))
     return itemlist
 
+
 # ================================================================================================================
 
 # ----------------------------------------------------------------------------------------------------------------
 def color(text, color):
-    return "[COLOR "+color+"]"+text+"[/COLOR]"
+    return "[COLOR " + color + "]" + text + "[/COLOR]"
+
 
 def makeurl(text, title=""):
     if title == "":

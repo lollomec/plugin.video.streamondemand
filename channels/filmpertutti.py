@@ -5,10 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36&sid=2e761b3d716d9f7dc625f6edc0a40f86
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -25,12 +24,6 @@ DEBUG = config.get_setting("debug")
 
 host = "http://www.filmpertutti.black"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Cache-Control', 'max-age=0']
-]
 
 def isGeneric():
     return True
@@ -92,13 +85,13 @@ def newest(categoria):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.filmpertutti peliculas")
     itemlist = []
 
-
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<li><a href="([^"]+)" data-thumbnail="([^"]+)"><div>\s*<div class="title">(.*?)<'
@@ -149,7 +142,7 @@ def peliculas_tv(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url)
 
     # Extrae las entradas (carpetas)
     patron = '<li><a href="([^"]+)" data-thumbnail="([^"]+)"><div>\s*<div class="title">(.*?)<'
@@ -195,7 +188,6 @@ def peliculas_tv(item):
     return itemlist
 
 
-
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
@@ -205,7 +197,7 @@ def categorias(item):
     logger.info("streamondemand.filmpertutti categorias")
     itemlist = []
 
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url)
 
     # Narrow search by selecting only the combo
     patron = '<option>Scegli per Genere</option>(.*?)</select'
@@ -275,7 +267,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url)
     data = scrapertools.decodeHtmlentities(data)
 
     lang_titles = []
@@ -318,7 +310,7 @@ def findvideos(item):
     logger.info("streamondemand.filmpertutti findvideos")
 
     # Descarga la página
-    data = item.url if item.extra == 'serie' else scrapertools.cache_page(item.url)
+    data = item.url if item.extra == 'serie' else httptools.downloadpage(item.url)
 
     itemlist = servertools.find_video_items(data=data)
 

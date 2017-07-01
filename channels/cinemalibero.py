@@ -5,10 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,22 +15,12 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "cinemalibero"
-__category__ = "F,S,A"
-__type__ = "generic"
-__title__ = "Cinemalibero (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://www.cinemalibero.tv"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'],
-    ['Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host],
-    ['Cache-Control', 'max-age=0']
-]
+headers = [['Referer', host]]
 
 
 def isGeneric():
@@ -106,7 +95,7 @@ def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<li><small>[^>]+><a href="(.*?)">(.*?)</a></li>'
@@ -149,7 +138,7 @@ def peliculas(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, timeout=35, headers=headers)
+    data = httptools.downloadpage(item.url, timeout=35, headers=headers).data
     data = scrapertools.find_single_match(data, '<nav class="navigation pagination" role="navigation">[^*]*</section>')
 
     # Extrae las entradas (carpetas)
@@ -203,7 +192,7 @@ def peliculas_tv(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, timeout=35, headers=headers)
+    data = httptools.downloadpage(item.url, timeout=35, headers=headers).data
     data = scrapertools.find_single_match(data, '<nav class="navigation pagination" role="navigation">[^*]*</section>')
 
     # Extrae las entradas (carpetas)
@@ -278,7 +267,7 @@ def episodios(item):
     itemlist = []
 
     # Download pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     data = scrapertools.decodeHtmlentities(data)
     data = scrapertools.get_match(data, '<section id="content">(.*?)<div class="wprc-form">')
 
@@ -321,7 +310,7 @@ def episodios(item):
 def findvideos(item):
     logger.info("streamondemand.cinemalibero findvideos")
 
-    data = item.url if item.extra == "serie" else scrapertools.cache_page(item.url, headers=headers)
+    data = item.url if item.extra == "serie" else httptools.downloadpage(item.url, headers=headers).data
 
     itemlist = servertools.find_video_items(data=data)
     for videoitem in itemlist:

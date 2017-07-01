@@ -5,10 +5,9 @@
 # http://www.mimediacenter.info/foro/viewforum.php?f=36
 # ------------------------------------------------------------
 import re
-
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -16,10 +15,6 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "eurostreaming"
-__category__ = "F,S,A"
-__type__ = "generic"
-__title__ = "eurostreaming"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
@@ -52,12 +47,13 @@ def mainlist(item):
 
     return itemlist
 
+
 def serietv(item):
     logger.info("streamondemand.eurostreaming peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="post-thumb">\s*<a href="([^"]+)" title="([^"]+)">\s*<img src="([^"]+)"'
@@ -150,18 +146,18 @@ def episodios(item):
     itemlist = []
 
     ## Descarga la página
-    data = scrapertools.cache_page(item.url)
+    data = httptools.downloadpage(item.url).data
 
     patron = r"onclick=\"top.location=atob\('([^']+)'\)\""
     b64_link = scrapertools.find_single_match(data, patron)
     if b64_link != '':
         import base64
-        data = scrapertools.cache_page(base64.b64decode(b64_link))
+        data = httptools.downloadpage(base64.b64decode(b64_link)).data
 
     patron = r'<a href="(%s/\?p=\d+)">' % host
     link = scrapertools.find_single_match(data, patron)
     if link != '':
-        data = scrapertools.cache_page(link)
+        data = httptools.downloadpage(link).data
 
     data = scrapertools.decodeHtmlentities(data)
 
@@ -193,7 +189,7 @@ def findvideos(item):
     logger.info("[eurostreaming.py] findvideos")
 
     ## Descarga la página
-    data = item.url if item.extra == 'serie' else scrapertools.cache_page(item.url)
+    data = item.url if item.extra == 'serie' else httptools.downloadpage(item.url).data
 
     itemlist = servertools.find_video_items(data=data)
     for videoitem in itemlist:
@@ -205,4 +201,3 @@ def findvideos(item):
         videoitem.channel = __channel__
 
     return itemlist
-

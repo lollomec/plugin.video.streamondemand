@@ -7,27 +7,17 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
 from core.item import Item
-from core.tmdb import infoSod
 
 __channel__ = "documentaristreamingdb"
-__category__ = "D"
-__type__ = "generic"
-__title__ = "documentaristreamingdb (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "http://www.documentari-streaming-db.com"
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:53.0) Gecko/20100101 Firefox/53.0'],
-    ['Accept-Encoding', 'gzip, deflate']
-]
 
 
 def isGeneric():
@@ -76,11 +66,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
     bloque = scrapertools.get_match(data, '<ul role="menu" class="collapse collapse-1156 ">(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -96,9 +87,7 @@ def categorias(item):
 
         strip = scrapedtitle
         strip = strip.replace(" ", "")
-        from unidecode import unidecode
-        strip = unidecode(strip)
-        url = host + "/?searchtype=movie&post_type=movie&sl=lasts&cat=" +  strip.encode("ascii").lower() + "&s="
+        url = host + "/?searchtype=movie&post_type=movie&sl=lasts&cat=" + strip.encode("ascii").lower() + "&s="
 
         itemlist.append(
             Item(channel=__channel__,
@@ -123,24 +112,25 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 def peliculas(item):
     logger.info("streamondemand.documentaristreamingdb peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<div class="movie-poster">\s*<img[^=]+=[^=]+=[^=]+="([^"]+)"[^>]+>\s*<a[^=]+=[^=]+="([^"]+)">'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
     for scrapedthumbnail, scrapedurl in matches:
-        #html = scrapertools.cache_page(scrapedurl)
-        #start = html.find("</div><h2>")
-        #end = html.find("<p><strong>", start)
-        #scrapedplot = html[start:end]
-        #scrapedplot = re.sub(r'<[^>]*>', '', scrapedplot)
-        #scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
+        # html = httptools.downloadpage(scrapedurl)
+        # start = html.find("</div><h2>")
+        # end = html.find("<p><strong>", start)
+        # scrapedplot = html[start:end]
+        # scrapedplot = re.sub(r'<[^>]*>', '', scrapedplot)
+        # scrapedplot = scrapertools.decodeHtmlentities(scrapedplot)
         scrapedplot = ""
         scrapedtitle = scrapedurl
         scrapedtitle = scrapedtitle.replace(host, "")
@@ -184,36 +174,38 @@ def peliculas(item):
 
     return itemlist
 
+
 def findvideos(item):
     logger.info("streamondemand.documentaristreamingdb findvideos")
 
-    data = scrapertools.cache_page(item.url, headers=headers)
-    
+    data = httptools.downloadpage(item.url).data
+
     links = []
     begin = data.find('<div class="moview-details-text">')
     if begin != -1:
         end = data.find('<!-- //movie-details -->', begin)
         mdiv = data[begin:end]
-        
+
         items = [[m.end(), m.group(1)] for m in re.finditer('<b style="color:#333333;">(.*?)<\/b>', mdiv)]
         if items:
             for idx, val in enumerate(items):
-                if idx == len(items)-1:
+                if idx == len(items) - 1:
                     _data = mdiv[val[0]:-1]
                 else:
-                    _data = mdiv[val[0]:items[idx+1][0]]
-                
+                    _data = mdiv[val[0]:items[idx + 1][0]]
+
                 for link in re.findall('<a.*?href="([^"]+)"[^>]+>.*?<b>(.*?)<\/b><\/a>+', _data):
-                    if not link[0].strip() in [l[1] for l in links]: links.append([val[1], link[0].strip(), link[1].strip()])
-                    
+                    if not link[0].strip() in [l[1] for l in links]: links.append(
+                        [val[1], link[0].strip(), link[1].strip()])
+
         items = [[m.end(), m.group(1)] for m in re.finditer('<p><strong>(.*?)<\/strong><\/p>', mdiv)]
         if items:
             _title = ''
             for idx, val in enumerate(items):
-                if idx == len(items)-1:
+                if idx == len(items) - 1:
                     _data = mdiv[val[0]:-1]
                 else:
-                    _data = mdiv[val[0]:items[idx+1][0]]
+                    _data = mdiv[val[0]:items[idx + 1][0]]
 
                 for link in re.findall('<a\s.*?href="([^"]+)".*?>(?:<span[^>]+>)*(?:<strong>)*([^<]+)', _data):
                     if not link[0].strip() in [l[1] for l in links]:
@@ -223,26 +215,29 @@ def findvideos(item):
         items = [[m.start(), m.group(1)] for m in re.finditer('<li><strong>([^<]+)<', mdiv)]
         if items:
             for idx, val in enumerate(items):
-                if idx == len(items)-1:
+                if idx == len(items) - 1:
                     _data = mdiv[val[0]:-1]
                 else:
-                    _data = mdiv[val[0]:items[idx+1][0]]
+                    _data = mdiv[val[0]:items[idx + 1][0]]
 
                 for link in re.findall('<a\s.*?href="([^"]+)".*?>(?:<span[^>]+>)*(?:<strong>)*([^<]+)', _data):
-                    if not link[0].strip() in [l[1] for l in links]: links.append([val[1], link[0].strip(), link[1].strip()])
-                    
+                    if not link[0].strip() in [l[1] for l in links]: links.append(
+                        [val[1], link[0].strip(), link[1].strip()])
+
     itemlist = []
     if links:
         for l in links:
             title = unicode(l[0], 'utf8', 'ignore')
-            title = title.replace(u'\xa0',' ').replace('Documentario ', '').replace(' doc ', ' ').replace(' streaming','').replace(' Streaming','')
+            title = title.replace(u'\xa0', ' ').replace('Documentario ', '').replace(' doc ', ' ').replace(' streaming',
+                                                                                                           '').replace(
+                ' Streaming', '')
             url = l[1]
             action = "play"
             server = "unknown"
             folder = False
-            
+
             if url == '#' or not title: continue
-            
+
             logger.info('server: %s' % l[2])
             if l[2] != 'unknown':
                 server = unicode(l[2], 'utf8', 'ignore')
@@ -251,26 +246,26 @@ def findvideos(item):
                 match = re.search('https?:\/\/(?:www\.)*([^\.]+)\.', url)
                 if match:
                     server = match.group(1)
-                    
+
                     if server == "documentari-streaming-db":
                         action = "findvideos"
                         folder = True
             logger.info('server: %s, action: %s' % (server, action))
-            
+
             logger.info(title + ' - [COLOR blue]' + server + '[/COLOR]')
-            
-            itemlist.append( Item(
-                channel=item.channel, 
+
+            itemlist.append(Item(
+                channel=item.channel,
                 title=title + ' - [COLOR blue]' + server + '[/COLOR]',
-                action=action, 
-                server=server, #servertools.get_server_from_url(url), 
-                url=url, 
-                thumbnail=item.thumbnail, 
-                fulltitle=title, 
-                show=item.show, 
-                plot=item.plot, 
-                parentContent=item, 
-                folder=folder) 
+                action=action,
+                server=server,  # servertools.get_server_from_url(url),
+                url=url,
+                thumbnail=item.thumbnail,
+                fulltitle=title,
+                show=item.show,
+                plot=item.plot,
+                parentContent=item,
+                folder=folder)
             )
     else:
         itemlist = servertools.find_video_items(data=data)
@@ -281,8 +276,9 @@ def findvideos(item):
             videoitem.show = item.show
             videoitem.thumbnail = item.thumbnail
             videoitem.channel = __channel__
-        
+
     return itemlist
+
 
 def HomePage(item):
     import xbmc

@@ -6,20 +6,16 @@
 #  By Costaplus
 # ------------------------------------------------------------
 import re
-
 import urlparse
+
 import xbmc
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core.item import Item
 
 __channel__ = "animestream"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "animestram.it"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
@@ -222,7 +218,7 @@ def episodios(item):
                      show=item.show,
                      fanart=urlparse.urljoin(host, scrapedthumbnail)))
 
-        data = scrapertools.cache_page(urlparse.urljoin(host, item.url))
+        data = httptools.downloadpage(urlparse.urljoin(host, item.url)).data
         matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
         if len(matches) > 0:
@@ -272,7 +268,7 @@ def findvideos(item):
 # -----------------------------------------------------------------
 def scrapedAll(url="", patron=""):
 
-    data = scrapertools.cache_page(url)
+    data = httptools.downloadpage(url).data
     if DEBUG: logger.info("data:" + data)
     MyPatron = patron
     matches = re.compile(MyPatron, re.DOTALL).findall(data)
@@ -285,7 +281,7 @@ def scrapedAll(url="", patron=""):
 
 # -----------------------------------------------------------------
 def scrapedSingle(url="", single="", patron=""):
-    data = scrapertools.cache_page(url)
+    data = httptools.downloadpage(url).data
     paginazione = scrapertools.find_single_match(data, single)
     matches = re.compile(patron, re.DOTALL).findall(paginazione)
     scrapertools.printMatches(matches)

@@ -7,7 +7,7 @@
 import re
 import urlparse
 
-from core import config
+from core import config, httptools
 from core import logger
 from core import scrapertools
 from core import servertools
@@ -15,23 +15,17 @@ from core.item import Item
 from core.tmdb import infoSod
 
 __channel__ = "cinemasubito"
-__category__ = "F,S"
-__type__ = "generic"
-__title__ = "cinemasubito (IT)"
-__language__ = "IT"
 
 DEBUG = config.get_setting("debug")
 
 host = "https://www.cinemasubito.link"
 
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
-    ['Accept-Encoding', 'gzip, deflate'],
-    ['Referer', host]
-]
+headers = [['Referer', host]]
+
 
 def isGeneric():
     return True
+
 
 def mainlist(item):
     logger.info("streamondemand.cinemasubito mainlist")
@@ -94,11 +88,12 @@ def newest(categoria):
 
     return itemlist
 
+
 def categorias(item):
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     bloque = scrapertools.get_match(data, '<ul id=\'ul_categories\'>(.*?)</ul>')
 
     # Extrae las entradas (carpetas)
@@ -133,12 +128,13 @@ def search(item, texto):
             logger.error("%s" % line)
         return []
 
+
 def peliculas_movie_src(item):
     logger.info("streamondemand.cinemasubito peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<h3 dir="ltr"><a href="([^"]+)" class=[^=]+="([^"]+)">'
@@ -184,12 +180,13 @@ def peliculas_movie_src(item):
 
     return itemlist
 
+
 def peliculas(item):
     logger.info("streamondemand.cinemasubito peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<h3 dir="ltr"><a href="([^"]+)" class=[^=]+="([^"]+)">'
@@ -235,12 +232,13 @@ def peliculas(item):
 
     return itemlist
 
+
 def peliculas_tv_src(item):
     logger.info("streamondemand.cinemasubito peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<h3 dir="ltr"><a href="([^"]+)" class=[^=]+="([^"]+)">'
@@ -285,12 +283,13 @@ def peliculas_tv_src(item):
 
     return itemlist
 
+
 def peliculas_tv(item):
     logger.info("streamondemand.cinemasubito peliculas")
     itemlist = []
 
     # Descarga la pagina
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     # Extrae las entradas (carpetas)
     patron = '<h3 dir="ltr"><a href="([^"]+)" class=[^=]+="([^"]+)">'
@@ -335,17 +334,18 @@ def peliculas_tv(item):
 
     return itemlist
 
+
 def seasons(item):
     logger.info("streamondemand.channels.cinemasubito episodios")
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     patron = '<h3 dir="ltr"><a style=[^h]+href="([^"]+)" class=[^=]+="([^"]+)">(.*?)</a></h3>'
     matches = re.compile(patron, re.DOTALL).findall(data)
 
-    for scrapedurl, scrapedtitle, scrapedseason  in matches:
+    for scrapedurl, scrapedtitle, scrapedseason in matches:
         scrapedplot = ""
         scrapedthumbnail = ""
         scrapedtitle = scrapedtitle + scrapedseason
@@ -363,18 +363,19 @@ def seasons(item):
 
     return itemlist
 
+
 def episodios(item):
     logger.info("streamondemand.channels.cinemasubito episodios")
 
     itemlist = []
 
-    data = scrapertools.cache_page(item.url, headers=headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
     bloque = scrapertools.get_match(data, 'Lista Episodi(.*?)</ul>')
 
     patron = '<li>\s*<a href="(.*?)">\s*(.*?)\s*<\/a>\s*<\/li>'
     matches = re.compile(patron, re.DOTALL).findall(bloque)
 
-    for scrapedurl, scrapedtitle  in matches:
+    for scrapedurl, scrapedtitle in matches:
         scrapedplot = ""
         scrapedthumbnail = ""
 
@@ -391,10 +392,11 @@ def episodios(item):
 
     return itemlist
 
+
 def findvideos(item):
     logger.info("streamondemand.cinemasubito findvideos_tv")
 
-    data = scrapertools.anti_cloudflare(item.url, headers)
+    data = httptools.downloadpage(item.url, headers=headers).data
 
     itemlist = servertools.find_video_items(data=data)
     for videoitem in itemlist:
@@ -407,7 +409,7 @@ def findvideos(item):
 
     return itemlist
 
+
 def HomePage(item):
     import xbmc
     xbmc.executebuiltin("ReplaceWindow(10024,plugin://plugin.video.streamondemand)")
-
