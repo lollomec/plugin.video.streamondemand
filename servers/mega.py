@@ -13,15 +13,15 @@ from platformcode import platformtools
 
 
 def test_video_exists(page_url):
-    logger.info("[mega.py] test_video_exists(page_url='%s')" % page_url)
+    logger.info("(page_url='%s')" % page_url)
 
     return True, ""
 
 
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
-    logger.info("[mega.py] get_video_url(page_url='%s')" % page_url)
+    logger.info("(page_url='%s')" % page_url)
     video_urls = []
-    from lib.megaserver import Client
+    from megaserver import Client
 
     c = Client(url=page_url, is_playing_fnc=platformtools.is_playing)
 
@@ -45,7 +45,7 @@ def find_videos(data):
     devuelve = []
 
     patronvideos = '(mega.co.nz/\#\![A-Za-z0-9\-\_]+\![A-Za-z0-9\-\_]+)'
-    logger.info("[mega.py] find_videos #" + patronvideos + "#")
+    logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for match in matches:
@@ -59,7 +59,7 @@ def find_videos(data):
             logger.info("  url duplicada=" + url)
 
     patronvideos = '(mega.co.nz/\#F\![A-Za-z0-9\-\_]+\![A-Za-z0-9\-\_]+)'
-    logger.info("[mega.py] find_videos #" + patronvideos + "#")
+    logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for match in matches:
@@ -73,7 +73,7 @@ def find_videos(data):
             logger.info("  url duplicada=" + url)
 
     patronvideos = '(mega.nz/\#\![A-Za-z0-9\-\_]+\![A-Za-z0-9\-\_]+)'
-    logger.info("[mega.py] find_videos #" + patronvideos + "#")
+    logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for match in matches:
@@ -87,7 +87,7 @@ def find_videos(data):
             logger.info("  url duplicada=" + url)
 
     patronvideos = '(mega.nz/\#F\![A-Za-z0-9\-\_]+\![A-Za-z0-9\-\_]+)'
-    logger.info("[mega.py] find_videos #" + patronvideos + "#")
+    logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for match in matches:

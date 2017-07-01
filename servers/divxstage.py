@@ -13,9 +13,10 @@ from core import scrapertools
 
 host = "http://www.cloudtime.to"
 
-def test_video_exists( page_url ):
-    logger.info("[divxstage.py] test_video_exists(page_url='%s')" % page_url)
-    
+
+def test_video_exists(page_url):
+    logger.info("(page_url='%s')" % page_url)
+
     data = httptools.downloadpage(page_url.replace('/embed/?v=', '/video/')).data
 
     if "This file no longer exists" in data:
@@ -23,8 +24,9 @@ def test_video_exists( page_url ):
 
     return True, ""
 
-def get_video_url(page_url, premium = False, user="", password="", video_password=""):
-    logger.info("[divxstage.py] get_video_url(page_url='%s')" % page_url)
+
+def get_video_url(page_url, premium=False, user="", password="", video_password=""):
+    logger.info("(page_url='%s')" % page_url)
 
     if "divxstage.net" in page_url:
         page_url = page_url.replace("divxstage.net", "cloudtime.to")
@@ -48,6 +50,7 @@ def get_video_url(page_url, premium = False, user="", password="", video_passwor
 
     return video_urls
 
+
 # Encuentra vídeos del servidor en el texto pasado
 def find_videos(data):
     encontrados = set()
@@ -67,7 +70,7 @@ def find_videos(data):
             encontrados.add(url)
         else:
             logger.info("url duplicada=" + url)
-            
+
     # divxstage http://www.cloudtime.to/video/of7ww1tdv62gf"
     patronvideos = 'cloudtime[^/]+/(?:video/|embed/\?v=)([A-z0-9]+)'
     logger.info("#" + patronvideos + "#")
@@ -82,6 +85,6 @@ def find_videos(data):
             encontrados.add(url)
         else:
             logger.info("url duplicada=" + url)
-            
+
     return devuelve
 

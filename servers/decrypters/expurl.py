@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 #------------------------------------------------------------
-# streamondemand - XBMC Plugin
+# pelisalacarta - XBMC Plugin
 # Conector para longurl (acortador de url)
-# http://www.mimediacenter.info/foro/viewforum.php?f=36
+# http://blog.tvalacarta.info/plugin-xbmc/pelisalacarta/
 #------------------------------------------------------------
 
 

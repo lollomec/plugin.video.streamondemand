@@ -13,7 +13,7 @@ from core import logger
 from core import scrapertools
 from lib import jsunpack
 
-    
+
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
     logger.info("(page_url='%s')" % page_url)
 
@@ -45,8 +45,9 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
 
     for video_url in video_urls:
         logger.info("%s - %s" % (video_url[0], video_url[1]))
-    
+
     return video_urls
+
 
 # Encuentra vídeos del servidor en el texto pasado
 def find_videos(data):

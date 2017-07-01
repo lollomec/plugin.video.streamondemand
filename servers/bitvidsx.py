@@ -26,7 +26,7 @@ def test_video_exists(page_url):
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
     logger.info("(page_url='%s')" % page_url)
     data = httptools.downloadpage(page_url).data
-    
+
     video_urls = []
     videourls = scrapertools.find_multiple_matches(data, 'src\s*:\s*[\'"]([^\'"]+)[\'"]')
     if not videourls:
@@ -41,15 +41,16 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
         videourl = videourl.replace("%3F", "?") + \
                    "|User-Agent=Mozilla/5.0 (Windows NT 10.0; WOW64; rv:51.0) Gecko/20100101 Firefox/51.0"
         video_urls.append([ext + " [bitvid]", videourl])
-    
+
     return video_urls
 
-# Encuentra v�deos del servidor en el texto pasado
+
+# Encuentra vídeos del servidor en el texto pasado
 def find_videos(data):
     encontrados = set()
-    devuelve = []    
+    devuelve = []
     data = data.replace('videoweed.es', 'bitvid.sx')
-    
+
     patronvideos = '(?:embed.|)bitvid.sx/(?:file/|embed/\?v=)([A-z0-9]{13})'
     logger.info("#" + patronvideos + "#")
     matches = re.compile(patronvideos, re.DOTALL).findall(data)
@@ -64,17 +65,17 @@ def find_videos(data):
             encontrados.add(url)
         else:
             logger.info("  url duplicada=" + url)
-           
-    #rep="/rep2.php?vw=wuogenrzatq40&t=18&c=13"
+
+    # rep="/rep2.php?vw=wuogenrzatq40&t=18&c=13"
     patronvideos = 'src="" rep="([^"]+)" width="([^"]+)" height="([^"]+)"'
     logger.info("#" + patronvideos + "#")
-    matches = re.compile(patronvideos,re.DOTALL).findall(data)
+    matches = re.compile(patronvideos, re.DOTALL).findall(data)
 
     for match in matches:
         titulo = "[bitvidsx]"
         url = match[0]
         url = url.replace("/rep2.php?vw=", "http://www.bitvid.sx/embed/?v=")
-        
+
         if url not in encontrados:
             logger.info("  url=" + url)
             devuelve.append([titulo, url, 'bitvidsx'])
