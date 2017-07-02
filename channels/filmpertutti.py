@@ -134,7 +134,7 @@ def peliculas_tv(item):
     itemlist = []
 
     # Descarga la pagina
-    data = httptools.downloadpage(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Extrae las entradas (carpetas)
     patron = '<li><a href="([^"]+)" data-thumbnail="([^"]+)"><div>\s*<div class="title">(.*?)<'
@@ -187,7 +187,7 @@ def categorias(item):
     logger.info("streamondemand.filmpertutti categorias")
     itemlist = []
 
-    data = httptools.downloadpage(item.url)
+    data = httptools.downloadpage(item.url).data
 
     # Narrow search by selecting only the combo
     patron = '<option>Scegli per Genere</option>(.*?)</select'
@@ -231,7 +231,7 @@ def search(item, texto):
 
 def episodios(item):
     def load_episodios(html, item, itemlist, lang_title):
-        patron = '((?:.*?<a href="[^"]+" target="_blank" rel="nofollow">[^<]+</a>)+)'
+        patron = '((?:.*?<a href="[^"]+" target="_blank"[^>]+>[^<]+<\/a>)+)'
         matches = re.compile(patron).findall(html)
         for data in matches:
             # Extrae las entradas
