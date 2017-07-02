@@ -89,7 +89,7 @@ def peliculas(item):
     # Extrae las entradas (carpetas)
     patronvideos = '<div class="span4".*?<a.*?<p><img src="([^"]+)".*?'
     patronvideos += '<div class="span8">.*?<a href="([^"]+)"> <h1>([^"]+)</h1></a>.*?'
-    patronvideos += '<strong>([^<]*)</strong>.*?<br />([^<+]+)'
+    patronvideos += '<strong>([^<]*)[<br />,</strong>].*?<br />([^<+]+)'
     matches = re.compile(patronvideos, re.DOTALL).finditer(data)
 
     for match in matches:
