@@ -12,8 +12,8 @@
 		<ignore_urls>
 		</ignore_urls>
 		<patterns>
-			<pattern>(?://|\.)(?:rapidvideo|raptu)\.com/(?:embed/|e/|\?v=)?([0-9A-Za-z]+)</pattern>
-			<url>https://www.rapidvideo.com/embed/\1</url>
+			<pattern>rapidvideo\.com/(?:\?v=|e/|embed/)([A-z0-9]+)</pattern>
+			<url>https://www.rapidvideo.com/e/\1</url>
 		</patterns>
 	</find_videos>
 	<free>true</free>
