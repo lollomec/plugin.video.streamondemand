@@ -17,7 +17,7 @@
 		<ignore_urls>
 		</ignore_urls>
 		<patterns>
-			<pattern>flashx.(?:tv|pw)/(?:embed.php\?c=|embed-|playvid-|)([A-z0-9]+)</pattern>
+			<pattern>flashx.(?:tv|pw|to)/(?:embed.php\?c=|embed-|playvid-|)([A-z0-9]+)</pattern>
 			<url>https://www.flashx.tv/playvid-\1.html</url>
 		</patterns>
 	</find_videos>
@@ -50,5 +50,6 @@
 	</settings>
 	<thumbnail>http://media.tvalacarta.info/servers/server_flashx.png</thumbnail>
 	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/servers/</update_url>
-	<version>4</version>
+	<version>5</version>
 </server>
+
