@@ -562,7 +562,7 @@ def download_from_best_server(item):
 
     channel = __import__('channels.%s' % item.contentChannel, None, None, ["channels.%s" % item.contentChannel])
     
-    progreso.update(50, "Lista dei server disponibili.", "Connettendo con %s..." % item.contentChannel)
+    progreso.update(50, "Lista dei server disponibili.", "Connessione a %s..." % item.contentChannel)
     if hasattr(channel, item.contentAction):
         play_items = getattr(channel, item.contentAction)(item.clone(action = item.contentAction, channel = item.contentChannel))
     else:
@@ -570,7 +570,7 @@ def download_from_best_server(item):
    
     play_items = filter(lambda x: x.action == "play" and not "trailer" in x.title.lower(), play_items)
 
-    progreso.update(100, "Lista dei server disponibili.", "Server disponibili: %s" % len(play_items), "Identificando servidores...")
+    progreso.update(100, "Lista dei server disponibili.", "Server disponibili: %s" % len(play_items), "Sto identificando i server...")
     
     if config.get_setting("server_reorder", "descargas") == 1:
         play_items.sort(key=sort_method)
@@ -603,7 +603,7 @@ def select_server(item):
 
     progreso = platformtools.dialog_progress("Download", "Ottengo la lista dei server disponibili ...")
     channel = __import__('channels.%s' % item.contentChannel, None, None, ["channels.%s" % item.contentChannel])
-    progreso.update(50, "Obteniendo lista de servidores disponibles:", "Conectando con %s..." % item.contentChannel)
+    progreso.update(50, "Lista dei server disponibili:", "Connessione a %s..." % item.contentChannel)
     
     if hasattr(channel, item.contentAction):
         play_items = getattr(channel, item.contentAction)(item.clone(action = item.contentAction, channel = item.contentChannel))
@@ -612,13 +612,13 @@ def select_server(item):
    
     play_items = filter(lambda x: x.action == "play" and not "trailer" in x.title.lower(), play_items)
     
-    progreso.update(100, "Ottengo la lista dei server disponibili", "Server disponibili: %s" % len(play_items), "Identificando servidores...")
+    progreso.update(100, "Ottengo la lista dei server disponibili", "Server disponibili: %s" % len(play_items), "Sto identificando i server...")
     
     for x, i in enumerate(play_items):
       if not i.server and hasattr(channel, "play"):
         play_items[x] = getattr(channel,"play")(i)
         
-    seleccion = platformtools.dialog_select("Selecciona el servidor", ["Auto"] + [s.title for s in play_items])
+    seleccion = platformtools.dialog_select("Selezionare il server", ["Auto"] + [s.title for s in play_items])
     if seleccion > 1:
         update_json(item.path, {"downloadServer": {"url": play_items[seleccion -1].url, "server": play_items[seleccion -1].server}})
     elif seleccion == 0:
