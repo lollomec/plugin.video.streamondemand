@@ -8,18 +8,14 @@
 
 import re
 
-from core import logger
+from core import logger, httptools
 from core import scrapertools
-
-headers = [
-    ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:38.0) Gecko/20100101 Firefox/38.0'],
-    ['Accept-Encoding', 'gzip, deflate, lzma']]
 
 
 def test_video_exists(page_url):
     logger.info("[exashare.py] test_video_exists(page_url='%s')" % page_url)
 
-    data = scrapertools.cache_page(page_url, headers=headers)
+    data = httptools.downloadpage(page_url).data
 
     if re.search("""File Not Found""", data):
         return False, 'Video non trovato'
@@ -31,14 +27,14 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     logger.info("[exashare.py] url=" + page_url)
     video_urls = []
 
-    data = scrapertools.cache_page(page_url, headers=headers)
+    data = httptools.downloadpage(page_url).data
 
     try:
         page_url = re.search('src="([^"]+)', data).group(1)
     except:
         return video_urls
 
-    data = scrapertools.cache_page(page_url, headers=headers)
+    data = httptools.downloadpage(page_url).data
 
     # URL del vídeo
     url = re.search('file\s*:\s*"(http.+?)"', data)

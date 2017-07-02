@@ -9,7 +9,7 @@
 import re
 import urllib
 
-from core import logger
+from core import logger, httptools
 from core import scrapertools
 
 headers = [
@@ -23,14 +23,14 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     logger.info("[abysstream.py] url=" + page_url)
     video_urls = []
 
-    data = scrapertools.cache_page(page_url, headers=headers)
+    data = httptools.downloadpage(page_url, headers=headers).data
 
     stream_link = scrapertools.find_single_match(data, '<input type="hidden" name="streamLink" value="([^"]+)">')
     temp_link = scrapertools.find_single_match(data, '<input type="hidden" name="templink" value="([^"]+)">')
 
     headers.append(['Referer', page_url])
     post_data = 'streamLink=%s&templink=%s' % (stream_link, temp_link)
-    data = scrapertools.cache_page('http://abysstream.com/viewvideo.php', post=post_data, headers=headers)
+    data = httptools.downloadpage('http://abysstream.com/viewvideo.php', post=post_data, headers=headers).data
 
     # URL
     media_url = scrapertools.find_single_match(data, '<source src="([^"]+)" type="video/mp4"')
@@ -38,7 +38,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
 
     # URL del vídeo
     video_urls.append(
-            [scrapertools.get_filename_from_url(media_url)[-4:] + " [Abysstream]", media_url + '|' + _headers])
+        [scrapertools.get_filename_from_url(media_url)[-4:] + " [Abysstream]", media_url + '|' + _headers])
 
     for video_url in video_urls:
         logger.info("[abysstream.py] %s - %s" % (video_url[0], video_url[1]))

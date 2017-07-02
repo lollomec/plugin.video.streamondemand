@@ -11,7 +11,7 @@ import urllib
 
 import xbmc
 
-from core import logger
+from core import logger, httptools
 from core import scrapertools
 
 
@@ -20,18 +20,15 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
 
     video_urls = []
 
-    headers = [["User-Agent", "Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0"],
-               ["Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"],
-               ["Accept-Language", "en-US,en;q=0.5"],
-               ["Accept-Encoding", "gzip, deflate"]]
+    headers = [["User-Agent", "Mozilla/5.0 (Windows NT 6.1; rv:54.0) Gecko/20100101 Firefox/54.0"]]
 
     # First access
-    scrapertools.cache_page("http://backin.net/s/%s" % page_url, headers=headers)
+    httptools.downloadpage("http://backin.net/s/%s" % page_url, headers=headers)
 
     xbmc.sleep(10000)
     headers.append(["Referer", "http://backin.net/s/%s" % page_url])
 
-    data = scrapertools.cache_page("http://backin.net/stream-%s-500x400.html" % page_url, headers=headers)
+    data = httptools.downloadpage("http://backin.net/stream-%s-500x400.html" % page_url, headers=headers).data
 
     data_pack = scrapertools.find_single_match(data, "(eval.function.p,a,c,k,e,.*?)\s*</script>")
     if data_pack:

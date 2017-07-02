@@ -179,9 +179,9 @@ def findvideos(data, skip=False):
             break
 
     if not devuelve and is_filter_servers:
-        platformtools.dialog_ok("Filtrar servidores (Lista Negra)",
-                                "No hay enlaces disponibles que cumplan los requisitos de su Lista Negra.",
-                                "Pruebe de nuevo modificando el fíltro en 'Configuracíon Servidores")
+        platformtools.dialog_ok("Filtra server (Blacklist)",
+                                "Non ci sono i link che soddisfano i requisiti della vostra blacklist.",
+                                "Riprovare cambiando il filtro 'Impostazioni Server'")
 
     return devuelve
 

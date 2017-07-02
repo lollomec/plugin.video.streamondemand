@@ -8,8 +8,7 @@
 import re
 import urllib
 
-from lib import jsunpack
-from core import logger
+from core import logger, httptools
 from core import scrapertools
 
 
@@ -21,7 +20,7 @@ def test_video_exists(page_url):
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
     logger.info("bleachanimemanga get_video_url(page_url='%s')" % page_url)
     patron_new_url = '<source\s+src\s*=\s*"([^"]+)'
-    data = scrapertools.cache_page(page_url)
+    data = httptools.downloadpage(page_url).data
     logger.info("data="+data)
 
     video_urls = []

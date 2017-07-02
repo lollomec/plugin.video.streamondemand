@@ -119,9 +119,9 @@ class Downloader:
 
         
     #Funciones
-    def start_dialog(self, title="Descargando..."):
+    def start_dialog(self, title="Download in corso..."):
         from platformcode import platformtools
-        progreso = platformtools.dialog_progress(title, "Iniciando descarga...")
+        progreso = platformtools.dialog_progress(title, "Avvio download...")
         self.start()
         while self.state == self.states.downloading and not progreso.iscanceled():
             time.sleep(0.1)
@@ -129,7 +129,7 @@ class Downloader:
             line2 = "%.2f%% - %.2f %s de %.2f %s a %.2f %s/s (%d/%d)" % (
             self.progress, self.downloaded[1], self.downloaded[2], self.size[1], self.size[2], 
             self.speed[1], self.speed[2], self.connections[0], self.connections[1])
-            line3 = "Tiempo restante: %s" % (self.remaining_time)
+            line3 = "Tempo restante: %s" % (self.remaining_time)
           
             progreso.update(int(self.progress), line1, line2, line3)
         if self.state == self.states.downloading:

@@ -8,15 +8,14 @@
 
 import re
 
-from core import logger
-from core import scrapertools
+from core import logger, httptools
 
 
 def get_video_url(page_url, premium=False, user="", password="", video_password=""):
     logger.info("[publicvideohost.py] url=" + page_url)
     video_urls = []
 
-    data = scrapertools.cache_page(page_url)
+    data = httptools.downloadpage(page_url).data
 
     # URL del vídeo
     for url in re.findall(r'playlist: \[\{\s*file: "([^"]+)",', data, re.DOTALL):

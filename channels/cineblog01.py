@@ -89,7 +89,7 @@ def peliculas(item):
     # Extrae las entradas (carpetas)
     patronvideos = '<div class="span4".*?<a.*?<p><img src="([^"]+)".*?'
     patronvideos += '<div class="span8">.*?<a href="([^"]+)"> <h1>([^"]+)</h1></a>.*?'
-    patronvideos += '<strong>([^<]*)</strong>.*?<br />([^<+]+)'
+    patronvideos += '<strong>([^<]*)[<br />,</strong>].*?<br />([^<+]+)'
     matches = re.compile(patronvideos, re.DOTALL).finditer(data)
 
     for match in matches:
@@ -611,8 +611,7 @@ def play(item):
                 data = scrapertools.get_match(data, r'<a href="([^"]+)".*?class="btn-wrapper">.*?licca.*?</a>')
             except IndexError:
                 data = httptools.downloadpage(item.url, only_headers=True, follow_redirects=False).headers.get("location")
-        if data.find('vcrypt') > 0:
-            data = data.replace('https:', 'http:')  ### Temp workaround to avoid https negotiation issues
+        while 'vcrypt' in data:
             data = httptools.downloadpage(data, only_headers=True, follow_redirects=False).headers.get("location")
         logger.debug("##### play go.php data ##\n%s\n##" % data)
     elif "/link/" in item.url:
@@ -627,8 +626,7 @@ def play(item):
             logger.debug("##### The content is yet unpacked ##\n%s\n##" % data)
 
         data = scrapertools.find_single_match(data, 'var link(?:\s)?=(?:\s)?"([^"]+)";')
-        if data.find('vcrypt') > 0:
-            data = data.replace('https:', 'http:')  ### Temp workaround to avoid https negotiation issues
+        while 'vcrypt' in data:
             data = httptools.downloadpage(data, only_headers=True, follow_redirects=False).headers.get("location")
         logger.debug("##### play /link/ data ##\n%s\n##" % data)
     else:

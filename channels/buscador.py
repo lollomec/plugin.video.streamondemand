@@ -235,13 +235,10 @@ def do_search(item):
 
         # No busca si es un canal excluido de la busqueda global
         include_in_global_search = channel_parameters["include_in_global_search"]
-        if include_in_global_search in ["", True]:
+        if include_in_global_search == True:
             # Buscar en la configuracion del canal
-            include_in_global_search = str(config.get_setting("include_in_global_search", basename_without_extension))
-            # Si no hay valor en la configuración del canal se incluye ya que así estaba por defecto
-            '''if include_in_global_search == "":
-                include_in_global_search = True'''
-        if include_in_global_search.lower() != True:
+            include_in_global_search = config.get_setting("include_in_global_search", basename_without_extension)
+        if include_in_global_search == False:
             continue
 
         t = Thread(target=channel_search, args=[search_results, channel_parameters, category, tecleado])
