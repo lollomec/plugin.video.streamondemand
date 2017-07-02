@@ -255,7 +255,7 @@ def episodios(item):
     itemlist = []
 
     # Descarga la página
-    data = httptools.downloadpage(item.url)
+    data = httptools.downloadpage(item.url).data
     data = scrapertools.decodeHtmlentities(data)
 
     lang_titles = []
@@ -298,7 +298,7 @@ def findvideos(item):
     logger.info("streamondemand.filmpertutti findvideos")
 
     # Descarga la página
-    data = item.url if item.extra == 'serie' else httptools.downloadpage(item.url)
+    data = item.url if item.extra == 'serie' else httptools.downloadpage(item.url).data
 
     itemlist = servertools.find_video_items(data=data)
 
