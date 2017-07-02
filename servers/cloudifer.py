@@ -9,8 +9,7 @@
 import re
 import urllib
 
-from core import logger
-from core import scrapertools
+from core import logger, httptools
 
 
 # Prendo l'url del video dal sito
@@ -18,9 +17,9 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     logger.info("[cloudifer.py] url=" + page_url)
     video_urls = []
 
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:53.0) Gecko/20100101 Firefox/53.0'}
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:54.0) Gecko/20100101 Firefox/54.0'}
 
-    html = scrapertools.cache_page(page_url, headers=headers)
+    html = httptools.downloadpage(page_url, headers=headers).data
     match = re.search(r'file: "([^"]+)",', html, re.DOTALL)
     video_urls.append(["Cloudifer", match.group(1) + "|" + urllib.urlencode(headers)])
 

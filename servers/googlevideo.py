@@ -11,7 +11,7 @@ import re
 import urllib
 import urllib2
 
-from core import logger
+from core import logger, httptools
 from core import scrapertools
 from core import servertools
 
@@ -33,9 +33,9 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
 
     data, video_urls = _parse_google(page_url)
 
-    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:46.0) Gecko/20100101 Firefox/46.0'}
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:54.0) Gecko/20100101 Firefox/54.0'}
     if data is not None:
-        res_headers = dict(scrapertools.get_headers_from_response(page_url))
+        res_headers = httptools.downloadpage(page_url, only_headers=True, follow_redirects=False).headers
         if 'set-cookie' in res_headers:
             headers['Cookie'] = res_headers['set-cookie']
     headers = urllib.urlencode(headers)
@@ -132,13 +132,13 @@ def _parse_google(link):
     if re.match('https?://get[.]', link):
         if link.endswith('/'): link = link[:-1]
         vid_id = link.split('/')[-1]
-        response = scrapertools.cache_page(link)
+        response = httptools.downloadpage(link).data
         sources = _parse_gget(vid_id, response)
     elif re.match('https?://plus[.]', link):
-        response = scrapertools.cache_page(link)
+        response = httptools.downloadpage(link).data
         sources = _parse_gplus(response)
     elif 'drive.google' in link or 'docs.google' in link:
-        response = scrapertools.cache_page(link)
+        response = httptools.downloadpage(link).data
         sources = _parse_gdocs(response)
     return response, sources
 

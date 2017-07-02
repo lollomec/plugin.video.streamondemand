@@ -9,7 +9,7 @@
 import re
 import urllib
 
-from core import logger
+from core import logger, httptools
 from core import scrapertools
 
 headers = [
@@ -22,13 +22,13 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     logger.info("[akstream.py] url=" + page_url)
     video_urls = []
 
-    data = scrapertools.cache_page(page_url, headers=headers)
+    data = httptools.downloadpage(page_url, headers=headers).data
 
     vid = scrapertools.find_single_match(data, '<input type="hidden" name="streamLink" value="([^"]+)">')
 
     headers.append(['Referer', page_url])
     post_data = 'streamLink=%s' % vid
-    data = scrapertools.cache_page('http://akstream.video/viewvideo.php', post=post_data, headers=headers)
+    data = httptools.downloadpage('http://akstream.video/viewvideo.php', post=post_data, headers=headers).data
 
     # URL
     media_url = scrapertools.find_single_match(data, '<source src="([^"]+)" type="video/mp4"')

@@ -8,8 +8,7 @@ import random
 import re
 import urllib
 
-from core import logger
-from core import scrapertools
+from core import logger, httptools
 from lib.aadecode import decode as aadecode
 
 
@@ -18,12 +17,11 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     video_urls = []
 
     headers = [
-        ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0'],
-        ['Accept-Encoding', 'gzip, deflate'],
+        ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:54.0) Gecko/20100101 Firefox/54.0'],
         ['Referer', page_url]
     ]
 
-    html = scrapertools.cache_page(page_url, headers=headers)
+    html = httptools.downloadpage(page_url, headers=headers).data
 
     data = get_hidden(html)
     data['confirm.y'] = random.randint(0, 120)
@@ -31,7 +29,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
 
     post_url = page_url + '#'
 
-    html = scrapertools.cache_page(post_url, post=urllib.urlencode(data), headers=headers)
+    html = httptools.downloadpage(post_url, post=urllib.urlencode(data), headers=headers).data
 
     match = re.search('(....ωﾟ.*?);</script>', html, re.DOTALL)
     if match:

@@ -8,7 +8,7 @@
 
 import re
 
-from core import logger
+from core import logger, httptools
 from core import scrapertools
 
 
@@ -17,7 +17,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     logger.info("[megadrive.py] get_video_url(page_url='%s')" % page_url)
     video_urls = []
 
-    data = scrapertools.cache_page(page_url)
+    data = httptools.downloadpage(page_url).data
 
     data_pack = scrapertools.find_single_match(data, "(eval.function.p,a,c,k,e,.*?)\s*</script>")
     if data_pack != "":
