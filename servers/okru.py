@@ -11,7 +11,6 @@ import urllib
 
 from core import httptools
 from core import logger
-from core import scrapertools
 
 headers = [
     ['User-Agent',
@@ -39,7 +38,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     headers.append(['Referer', page_url[1]])
 
     page_url[0] = page_url[0].split('?')
-    data = scrapertools.cache_page(page_url[0][0], post=page_url[0][1], headers=headers)
+    data = httptools.downloadpage(page_url[0][0], post=page_url[0][1], headers=headers).data
 
     _headers = urllib.urlencode(dict(headers))
 

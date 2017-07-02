@@ -419,32 +419,6 @@ def set_context_commands(item, parent_item):
                                          (sys.argv[0], item.clone(action="add_pelicula_to_library",
                                                                   from_action=item.action).tourl())))
 
-        if item.channel != "descargas":
-            # Descargar pelicula
-            if item.contentType == "movie" and item.contentTitle:
-                context_commands.append(("Scarica film", "XBMC.RunPlugin(%s?%s)" %
-                                         (sys.argv[0], item.clone(channel="descargas", action="save_download",
-                                                            from_channel=item.channel, from_action=item.action).tourl())))
-
-            elif item.contentSerieName:
-                # Descargar serie
-                if item.contentType == "tvshow":
-                    context_commands.append(("Scarica serie", "XBMC.RunPlugin(%s?%s)" %
-                                             (sys.argv[0], item.clone(channel="descargas", action="save_download",
-                                                                from_channel=item.channel, from_action=item.action).tourl())))
-
-                # Descargar episodio
-                if item.contentType == "episode":
-                    context_commands.append(("Scarica episodio", "XBMC.RunPlugin(%s?%s)" %
-                                             (sys.argv[0], item.clone(channel="descargas", action="save_download",
-                                                                 from_channel=item.channel, from_action=item.action).tourl())))
-
-                # Descargar temporada
-                if item.contentType == "season":
-                    context_commands.append(("Scarica stagione", "XBMC.RunPlugin(%s?%s)" %
-                                             (sys.argv[0], item.clone(channel="descargas", action="save_download",
-                                                                from_channel=item.channel, from_action=item.action).tourl())))
-
         # Abrir configuración
         if parent_item.channel not in ["configuracion", "novedades", "buscador"]:
             context_commands.append(("Configurazione", "XBMC.Container.Update(%s?%s)" %

@@ -246,7 +246,7 @@ def servers_blacklist(item):
 
 def cb_servers_blacklist(item, dict_values):
     f = False
-    progreso = platformtools.dialog_progress("Guardando configuración...", "Espere un momento por favor.")
+    progreso = platformtools.dialog_progress("Salvataggio impostazioni...", "Aspetta un attimo per favore.")
     n = len(dict_values)
     i = 1
     for k,v in dict_values.items():
@@ -257,7 +257,7 @@ def cb_servers_blacklist(item, dict_values):
             if v: # Si el servidor esta en la lista negra no puede estar en la de favoritos
                 config.set_setting("favorites_servers_list", 100, server=k)
                 f = True
-                progreso.update((i * 100) / n, "Guardando configuración...%s" % k)
+                progreso.update((i * 100) / n, "Salvataggio impostazioni...%s" % k)
         i += 1
 
     if not f: # Si no hay ningun servidor en la lista, desactivarla
@@ -310,7 +310,7 @@ def servers_favorites(item):
 
 def cb_servers_favorites(server_names, dict_values):
     dict_name = {}
-    progreso = platformtools.dialog_progress("Guardando configuración...", "Espere un momento por favor.")
+    progreso = platformtools.dialog_progress("Salvataggio impostazioni...", "Aspetta un attimo per favore.")
 
     for i, v in dict_values.items():
         if i == "favorites_servers":
@@ -326,7 +326,7 @@ def cb_servers_favorites(server_names, dict_values):
             config.set_setting("favorites_servers_list", dict_name[server_parameters['name']], server=server)
         else:
             config.set_setting("favorites_servers_list", 100, server=server)
-        progreso.update((i * 100) / n, "Guardando configuración...%s" % server_parameters['name'])
+        progreso.update((i * 100) / n, "Salvataggio impostazioni...%s" % server_parameters['name'])
         i += 1
 
     if not dict_name: #Si no hay ningun servidor en lalista desactivarla
@@ -883,7 +883,7 @@ def channel_status(item, dict_values):
     except:
         import traceback
         logger.error("Detalle del error: %s" % traceback.format_exc())
-        platformtools.dialog_notification("Error", "Se ha producido un error al guardar")
+        platformtools.dialog_notification("Errore", "Si è verificato un errore durante il salvataggio")
 
 
 def overwrite_tools(item):

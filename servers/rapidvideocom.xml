@@ -12,8 +12,8 @@
 		<ignore_urls>
 		</ignore_urls>
 		<patterns>
-			<pattern>(?://|\.)(?:rapidvideo|raptu)\.com/(?:embed/|e/|\?v=)?([0-9A-Za-z]+)</pattern>
-			<url>https://www.rapidvideo.com/embed/\1</url>
+			<pattern>rapidvideo\.com/(?:\?v=|e/|embed/)([A-z0-9]+)</pattern>
+			<url>https://www.rapidvideo.com/e/\1</url>
 		</patterns>
 	</find_videos>
 	<free>true</free>
@@ -46,5 +46,5 @@
 	</settings>
 	<thumbnail>http://media.tvalacarta.info/servers/server_rapidvideocom.png</thumbnail>
 	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/servers/</update_url>
-	<version>5</version>
+	<version>6</version>
 </server>

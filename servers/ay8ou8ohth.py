@@ -8,9 +8,9 @@
 import re
 import urllib
 
-from lib import jsunpack
-from core import logger
+from core import logger, httptools
 from core import scrapertools
+from lib import jsunpack
 
 
 def test_video_exists(page_url):
@@ -26,11 +26,10 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
 
     while page_url != "":
         headers = [
-            ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:39.0) Gecko/20100101 Firefox/39.0'],
-            ['Accept-Encoding', 'gzip, deflate'],
+            ['User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:54.0) Gecko/20100101 Firefox/54.0'],
             ['Referer', page_url]
         ]
-        data = scrapertools.cache_page(page_url, headers=headers)
+        data = httptools.downloadpage(page_url, headers=headers).data
         page_url = scrapertools.find_single_match(data, patron_new_url)
         page_url = re.sub("\n|\r|\t", "", page_url)
 
