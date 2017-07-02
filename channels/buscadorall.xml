@@ -12,7 +12,7 @@
 	<bannermenu></bannermenu>
 
 	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/channels/</update_url>
-	<version>7</version>
+	<version>8</version>
 	<date>10/07/2016</date>
 	<changes>update</changes>
 
@@ -20,5 +20,4 @@
 		<category></category>
 	</categories>
 
-	<include_in_global_search>disabled</include_in_global_search>
 </channel>

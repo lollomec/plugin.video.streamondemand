@@ -31,10 +31,6 @@ from core import logger
 from core.item import Item
 
 __channel__ = "buscadorall"
-__category__ = "F"
-__type__ = "generic"
-__title__ = "buscadorall"
-__language__ = "IT"
 
 host = "http://www.ibs.it"
 
@@ -656,7 +652,8 @@ def do_channels_search(item):
         if include_in_global_search == "":
             # Buscar en la configuracion del canal
             include_in_global_search = str(config.get_setting("include_in_global_search", basename_without_extension))
-        if include_in_global_search.lower() != True:
+        #FIX need to fix next commented line 
+        #if include_in_global_search.lower() != True:
             continue
 
         t = Thread(target=channel_search, args=[search_results, channel_parameters, category, title_year, tecleado])
