@@ -28,7 +28,7 @@
 		</ignore_urls>
 		<patterns>
 			<pattern>//(?:www.)?ok.../(?:videoembed|video)/(\d+)</pattern>
-			<url>http://ok.ru/videoembed/\1</url>
+			<url>http://ok.ru/dk?cmd=videoPlayerMetadata&amp;mid=\1|http://ok.ru/videoembed/\1</url>
 		</patterns>
 	</find_videos>
 	<free>true</free>
@@ -60,5 +60,5 @@
 	</settings>
 	<thumbnail>http://media.tvalacarta.info/servers/server_okru.png</thumbnail>
 	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/servers/</update_url>
-	<version>6</version>
+	<version>7</version>
 </server>
