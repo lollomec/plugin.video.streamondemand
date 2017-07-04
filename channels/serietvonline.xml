@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<channel>
+	<id>serietvonline</id>
+	<name>Serietvonline</name>
+
+	<active>true</active>
+	<adult>false</adult>
+	<language>it</language>
+
+	<fanart></fanart>
+	<thumbnail>http://www.geekoo.it/wp-content/uploads/2016/06/getvideostream-icon-184x184.png</thumbnail>
+	<bannermenu>http://www.geekoo.it/wp-content/uploads/2016/06/getvideostream-icon-184x184.png</bannermenu>
+
+	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/channels/</update_url>
+	<version>1</version>
+	<date>02/07/2017</date>
+	<changes>New</changes>
+
+	<categories>
+        	<category>serie</category>
+	</categories>
+
+	<settings>
+		<id>include_in_newest_series</id>
+		<type>bool</type>
+		<default>true</default>
+		<enabled>true</enabled>
+		<visible>true</visible>
+	</settings>
+</channel>
