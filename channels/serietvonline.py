@@ -73,7 +73,7 @@ def search(item, texto):
 
     itemlist = []
 
-    url = "https://serietvonline.com/?s="+texto
+    url = host + "/?s= " + texto
 
     data = httptools.downloadpage(url, headers=headers).data
 
@@ -205,13 +205,10 @@ def episodios_all(item):
 def findvideos(item):
     itemlist=[]
 
-    if 'vcrypt' in item.url:
+    data = item.url
+    while 'vcrypt' in item.url:
         item.url = httptools.downloadpage(item.url, only_headers=True, follow_redirects=False).headers.get("location")
         data = item.url
-
-    else:
-        data = item.url
-
 
     logger.debug(data)
 

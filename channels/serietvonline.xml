@@ -12,7 +12,7 @@
 	<bannermenu>https://serietvonline.com/wp-content/uploads/2016/08/logo2016-1.png</bannermenu>
 
 	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/channels/</update_url>
-	<version>2</version>
+	<version>3</version>
 	<date>03/07/2017</date>
 	<changes>New Channel</changes>
 
