@@ -12,8 +12,20 @@
 		<ignore_urls>
 		</ignore_urls>
 		<patterns>
-			<pattern>http://video.google.com/googleplayer.swf.*?docid=([0-9]+)</pattern>
+			<pattern>(https?://(?:redirector\.)?googlevideo.com/[^"']+)(?:",\s*"label":\s*([0-9]+),)?</pattern>
 			<url>\1</url>
+		</patterns>
+		<patterns>
+			<pattern>(https?://(?:lh.\.)?googleusercontent.com/[^=]+=m(\d+))</pattern>
+			<url>\1</url>
+		</patterns>
+		<patterns>
+			<pattern>.google.com/file/d/([a-zA-Z0-9_-]+)</pattern>
+			<url>https://drive.google.com/file/d/\1/view</url>
+		</patterns>
+		<patterns>
+			<pattern>.google.com/open\?\id=([a-zA-Z0-9_-]+)</pattern>
+			<url>https://drive.google.com/file/d/\1/view</url>
 		</patterns>
 	</find_videos>
 	<free>true</free>
@@ -45,5 +57,5 @@
 	</settings>
 	<thumbnail>http://media.tvalacarta.info/servers/server_googlevideo.png</thumbnail>
 	<update_url>https://raw.githubusercontent.com/streamondemand/plugin.video.streamondemand/master/servers/</update_url>
-	<version>3</version>
+	<version>4</version>
 </server>
