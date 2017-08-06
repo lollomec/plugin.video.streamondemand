@@ -9,8 +9,8 @@
 		</change>
 		<change>
 			<autor>divadres</autor>
-			<date>25/03/2016</date>
-			<description>Versión inicial</description>
+			<date>06/08/2017</date>
+			<description>Fix Host</description>
 		</change>
 	</changes>
 	<find_videos>
@@ -18,7 +18,7 @@
 		</ignore_urls>
 		<patterns>
 			<pattern>nowvideo.../(?:video/|embed.php\?.*v=)([A-z0-9]+)</pattern>
-			<url>http://www.nowvideo.sx/video/\1</url>
+			<url>http://www.nowvideo.li/video/\1</url>
 		</patterns>
 	</find_videos>
 	<free>true</free>
