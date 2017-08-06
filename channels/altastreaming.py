@@ -16,7 +16,7 @@ from core.tmdb import infoSod
 
 __channel__ = "altastreaming"
 
-host = "http://altastreaming.cool"
+host = "http://altastreaming.net"
 
 headers = [['Referer', host]]
 
