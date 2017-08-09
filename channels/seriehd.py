@@ -165,7 +165,10 @@ def episodios(item):
                  url=item.url,
                  action="add_serie_to_library",
                  extra="episodios",
+                 contentType="episode",
                  show=item.show))
+    itemlist.append(Item(channel=__channel__,title="Scarica tutti gli episodi della serie", url=item.url,action="download_all_episodes",extra="episodios",show=item.show))
+
 
     return itemlist
 
@@ -177,8 +180,8 @@ def findvideos(item):
 
     # Descarga la página
     data = httptools.downloadpage(item.url, headers=headers).data.replace('\n', '')
-
-    patron = r'<iframe id="iframeVid" width=".+?" height=".+?" src="([^"]+)" allowfullscreen="">'
+    
+    patron = r'<iframe id="iframeVid" width=".+?" height=".+?" src="([^"]+)" allowfullscreen'
     url = scrapertools.find_single_match(data, patron)
 
     if 'hdpass' in url:
