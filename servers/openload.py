@@ -59,6 +59,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
         var_r = scrapertools.find_single_match(text_decode, "window\.[A-z]+\s*=\s*['\"]([^'\"]+)['\"]")
         var_encodes = scrapertools.find_multiple_matches(data, 'id="%s[^"]*">([^<]+)<' % var_r)
         numeros = scrapertools.find_multiple_matches(data, '_[A-f0-9]+x[A-f0-9]+\s*(?:=|\^)\s*([0-9]{4,}|0x[A-f0-9]{4,})')
+        int8 = int(scrapertools.find_single_match(data, "parseInt\('([^']+)',8\)"), 8)
         op1, op2 = scrapertools.find_single_match(data, '\(0x(\d),0x(\d)\);')
 
         videourl = ""
@@ -90,6 +91,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
                             break
 
                     value4 = value2 ^ decode1[j % (mult/8)]
+                    value4 ^= int8
                     for n in numeros:
                         if not n.isdigit():
                             n = int(n, 16)
@@ -181,4 +183,3 @@ def get_link_api(page_url):
         return videourl, extension
 
     return "", ""
-
