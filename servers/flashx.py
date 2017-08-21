@@ -46,7 +46,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
         except:
             pass
 
-    matches = scrapertools.find_multiple_matches(data, "<script type='text/javascript'>(.*?)</script>")
+    matches = scrapertools.find_multiple_matches(data, '<script type="text/javascript">(.*?)</script>')
     for n, m in enumerate(matches):
         if m.startswith("eval"):
             try:
@@ -59,7 +59,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
             except:
                 m = ""
     match = m
-    if "sources:[{file:" not in match:
+    if "{src:" not in match:
         page_url = page_url.replace("playvid-", "")
 
         headers = {'Host': 'www.flashx.tv',
@@ -119,7 +119,7 @@ def get_video_url(page_url, premium=False, user="", password="", video_password=
     # Extrae la URL
     # {file:"http://f11-play.flashx.tv/luq4gfc7gxixexzw6v4lhz4xqslgqmqku7gxjf4bk43u4qvwzsadrjsozxoa/video1.mp4"}
     video_urls = []
-    media_urls = scrapertools.find_multiple_matches(match, '\{file\:"([^"]+)",label:"([^"]+)"')
+    media_urls = scrapertools.find_multiple_matches(match, r"src\s*:\\*'([^\\]+)\\*'\s*,\s*type\s*:\\*'[^\\']+\\*'\s*,\s*label\s*:\\*'([^\\]+)\\*'\s*,")
     subtitle = ""
     for media_url, label in media_urls:
         if media_url.endswith(".srt") and label == "Italian":
